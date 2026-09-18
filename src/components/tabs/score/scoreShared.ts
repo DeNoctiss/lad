@@ -103,7 +103,13 @@ export function eventDescription(event: TabEvent, index: number) {
         )
         .join("; ")
     : "пауза";
-  return `Событие ${index + 1}, длительность 1/${event.duration}${event.dotted ? " с точкой" : ""}${event.triplet ? ", триоль" : ""}. ${notes}`;
+  const strum =
+    event.strum === "down"
+      ? " Бой вниз."
+      : event.strum === "up"
+        ? " Бой вверх."
+        : "";
+  return `Событие ${index + 1}, длительность 1/${event.duration}${event.dotted ? " с точкой" : ""}${event.triplet ? ", триоль" : ""}.${strum} ${notes}`;
 }
 
 export function eventOnsets(events: TabEvent[]) {

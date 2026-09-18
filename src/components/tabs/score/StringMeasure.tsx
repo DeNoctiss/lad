@@ -216,6 +216,28 @@ export function StringMeasure({
                 </text>
               )}
             </g>
+            {event.strum && (
+              <g className="tab-score-strum">
+                <title>
+                  {event.strum === "down" ? "Бой вниз" : "Бой вверх"}
+                </title>
+                <line
+                  x1={x + 20}
+                  y1={TOP - 3}
+                  x2={x + 20}
+                  y2={TOP + (lanes.length - 1) * ROW + 3}
+                  aria-hidden="true"
+                />
+                <path
+                  d={
+                    event.strum === "down"
+                      ? `M ${x + 20} ${TOP + (lanes.length - 1) * ROW + 9} l -5 -9 h 10 z`
+                      : `M ${x + 20} ${TOP - 9} l -5 9 h 10 z`
+                  }
+                  aria-hidden="true"
+                />
+              </g>
+            )}
             {palmMuted && (
               <g className="tab-score-pm" aria-hidden="true">
                 {!pmContinues && (

@@ -109,12 +109,7 @@ export function ScoreBlock({
               ? "Предпросмотр последней применённой записи"
               : "Предпросмотр"}
           </span>
-          <TabScoreView
-            score={score}
-            tuning={tuning}
-            sound={sound}
-            bpm={bpm}
-          />
+          <TabScoreView score={score} tuning={tuning} sound={sound} bpm={bpm} />
         </>
       )}
     </>

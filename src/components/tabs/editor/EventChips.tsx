@@ -59,6 +59,7 @@ export function EventChips({
               · 1/{event.duration}
               {event.dotted ? " ·" : ""}
               {event.triplet ? " (3)" : ""}
+              {event.strum === "down" ? " ↓" : event.strum === "up" ? " ↑" : ""}
             </small>
           </button>
         ))}

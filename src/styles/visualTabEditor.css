@@ -243,6 +243,24 @@
   cursor: pointer;
 }
 
+.visual-tab-strum {
+  margin-top: 4px;
+}
+
+.visual-tab-strum button {
+  padding: 5px 10px;
+  border: 1px solid #cfc9bd;
+  border-radius: 7px;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.visual-tab-strum button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .visual-tab-editor input[type="checkbox"] {
   flex: 0 0 auto;
   width: 16px;

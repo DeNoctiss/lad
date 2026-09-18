@@ -8,6 +8,7 @@ export type NoteEffect =
   | "ghost"
   | "open";
 export type NoteLink = "h" | "p" | "/" | "\\" | "tie";
+export type StrumDirection = "down" | "up";
 export type TabNote = {
   lane: string;
   fret: number | "x";
@@ -19,6 +20,8 @@ export type TabEvent = {
   duration: 1 | 2 | 4 | 8 | 16;
   dotted: boolean;
   triplet: boolean;
+  /** Strum direction: notes of the event sound in sequence, low→high or high→low. */
+  strum?: StrumDirection;
   notes: TabNote[];
 };
 export type TabMeasure = { id: string; events: TabEvent[] };

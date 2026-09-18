@@ -1,21 +1,27 @@
-import type { TabMeasure } from "../../../lib/tabTypes";
+import type { StrumDirection, TabMeasure } from "../../../lib/tabTypes";
 import { durations } from "./editorShared";
 import type { Rhythm } from "./editorShared";
 
 export function DurationPanel({
   selectedEvent,
   currentRhythm,
+  strum,
+  stringed,
   drums,
   measure,
   onChangeRhythm,
+  onStrum,
   onAddEvent,
   onRemoveEvent,
 }: {
   selectedEvent: boolean;
   currentRhythm: Rhythm;
+  strum?: StrumDirection;
+  stringed: boolean;
   drums: boolean;
   measure?: TabMeasure;
   onChangeRhythm: (patch: Partial<Rhythm>) => void;
+  onStrum?: (direction: StrumDirection) => void;
   onAddEvent: (rest: boolean) => void;
   onRemoveEvent: () => void;
 }) {
@@ -71,6 +77,32 @@ export function DurationPanel({
           Триоль · ⅔
         </label>
       </div>
+      {stringed && (
+        <div
+          className="visual-tab-checks visual-tab-strum"
+          role="group"
+          aria-label="Бой для выбранного события"
+        >
+          <button
+            type="button"
+            aria-label="Бой вниз — струны звучат от толстой к тонкой"
+            aria-pressed={strum === "down"}
+            disabled={!selectedEvent || !onStrum}
+            onClick={() => onStrum?.("down")}
+          >
+            ↓ Бой вниз
+          </button>
+          <button
+            type="button"
+            aria-label="Бой вверх — струны звучат от тонкой к толстой"
+            aria-pressed={strum === "up"}
+            disabled={!selectedEvent || !onStrum}
+            onClick={() => onStrum?.("up")}
+          >
+            ↑ Бой вверх
+          </button>
+        </div>
+      )}
       <p className="visual-tab-help">
         Все ноты одного момента звучат одновременно и имеют общую длительность
         {drums ? "." : " — это аккорд."} Следующее событие добавляется с текущей

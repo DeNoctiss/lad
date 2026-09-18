@@ -236,6 +236,13 @@ export function scoreIssues(score: TabScore): TabIssue[] {
       };
       if (event.dotted && event.triplet)
         add("Точку и триоль нельзя совмещать.");
+      if (event.strum !== undefined) {
+        if (event.strum !== "down" && event.strum !== "up")
+          add("Бой должен быть down или up.");
+        else if (score.kind === "drums" || score.kind === "piano")
+          add("Бой поддерживается только гитарой и басом.");
+        else if (event.notes.length === 0) add("Бой нельзя ставить на паузу.");
+      }
       const seenLanes = new Set<string>();
       event.notes.forEach((note) => {
         if (!allowedLanes.has(note.lane))
@@ -375,10 +382,10 @@ function parseEvent(
   kind: TabKind,
 ): TabEvent {
   const context = `Такт ${m + 1}, событие ${e + 1}`;
-  const match = /^(.+)@(1|2|4|8|16)([.t]?)$/.exec(token);
+  const match = /^(.+)@(1|2|4|8|16)([.t]?)([du]?)$/.exec(token);
   if (!match)
     fail(
-      `${context}: неверное событие «${token}». Укажите ноту, аккорд или r и обязательную длительность @1, @2, @4, @8, @16 с необязательной точкой или t.`,
+      `${context}: неверное событие «${token}». Укажите ноту, аккорд или r и обязательную длительность @1, @2, @4, @8, @16 с необязательной точкой, t или боем d/u.`,
     );
   const body = match[1];
   let notes: TabNote[];
@@ -390,11 +397,13 @@ function parseEvent(
       fail(`${context}: допускается не более ${limit} нот в событии.`);
     notes = parts.map((part) => parseNote(part, context, kind));
   } else notes = [parseNote(body, context, kind)];
+  const strum = match[4] === "d" ? "down" : match[4] === "u" ? "up" : undefined;
   return {
     id: `tab-event-${m + 1}-${e + 1}`,
     duration: Number(match[2]) as TabEvent["duration"],
     dotted: match[3] === ".",
     triplet: match[3] === "t",
+    ...(strum ? { strum } : {}),
     notes,
   };
 }
@@ -441,7 +450,7 @@ export function serializeNotation(score: TabScore): string {
               : notes.length === 1
                 ? notes[0]
                 : `[${notes.join(",")}]`;
-          return `${body}@${event.duration}${event.dotted ? "." : event.triplet ? "t" : ""}`;
+          return `${body}@${event.duration}${event.dotted ? "." : event.triplet ? "t" : ""}${event.strum === "down" ? "d" : event.strum === "up" ? "u" : ""}`;
         })
         .join(" "),
     )

@@ -1,5 +1,5 @@
 import type { NoteEffect, TabKind, TabNote, TabScore } from "./tabTypes";
-import { durationTicks, measureTicks } from "./tablature";
+import { durationTicks, lanesFor, measureTicks } from "./tablature";
 import { pianoMidi } from "./piano";
 import { soundFile, soundFx } from "./partSounds";
 import type { DriveType } from "./partSounds";
@@ -187,6 +187,10 @@ export function buildTimeline(
   const notes: PlayedNote[] = [];
   const marks: EventMark[] = [];
   const capacity = measureTicks(score.meter);
+  const secPerTick = 60 / bpm / 480;
+  const laneIndex = new Map(
+    lanesFor(score.kind).map((lane, index) => [lane.id, index]),
+  );
 
   const nextEventNote = (m: number, e: number) => {
     const measure = score.measures[m];
@@ -212,6 +216,21 @@ export function buildTimeline(
       const dur = durationTicks(event);
       // Palm mute is moment-wide: one muted string marks the whole event.
       const palmMuted = event.notes.some((note) => note.effects.includes("pm"));
+      // Strum: notes of the event sound in sequence instead of one attack.
+      // ~45ms total spread — down strokes hit the low strings first.
+      let strumDelays: Map<string, number> | null = null;
+      if (event.strum && event.notes.length > 1) {
+        const laneCount = lanesFor(score.kind).length;
+        const step = 0.045 / (event.notes.length - 1) / secPerTick;
+        strumDelays = new Map(
+          event.notes.map((note) => {
+            const index = laneIndex.get(note.lane) ?? 0;
+            const order =
+              event.strum === "down" ? laneCount - 1 - index : index;
+            return [note.lane, order * step] as const;
+          }),
+        );
+      }
       for (const note of event.notes) {
         const key = eventKey(m, e, note.lane);
         if (consumed.has(key)) continue;
@@ -221,7 +240,7 @@ export function buildTimeline(
         const played: PlayedNote = {
           midi: midi === null ? null : midi + (muted ? 0 : Number(note.fret)),
           drum,
-          startTick: elapsed,
+          startTick: elapsed + (strumDelays?.get(note.lane) ?? 0),
           endTick: elapsed + dur,
           effects:
             palmMuted && !note.effects.includes("pm")
@@ -282,7 +301,6 @@ export function buildTimeline(
     });
   });
 
-  const secPerTick = 60 / bpm / 480;
   const totalTicks = score.measures.length * capacity;
   return {
     notes,

@@ -10,6 +10,7 @@ import { TabScoreView } from "./TabScoreView";
 import type {
   NoteEffect,
   NoteLink,
+  StrumDirection,
   TabEvent,
   TabMeasure,
   TabNote,
@@ -247,6 +248,16 @@ function VisualTabEditorBody({ score, onChange, sound, bpm }: Props) {
     changeSelectedNote((previous) => ({ ...previous, effects: next }));
   }
 
+  function toggleStrum(direction: StrumDirection) {
+    if (!selectedEvent) return;
+    updateEvent(eventIndex, (previous) => {
+      const next = { ...previous };
+      if (previous.strum === direction) delete next.strum;
+      else next.strum = direction;
+      return next;
+    });
+  }
+
   function changeLink(value: NoteLink | "") {
     setNoteLink(value);
     changeSelectedNote((previous) => {
@@ -440,9 +451,12 @@ function VisualTabEditorBody({ score, onChange, sound, bpm }: Props) {
         <DurationPanel
           selectedEvent={Boolean(selectedEvent)}
           currentRhythm={currentRhythm}
+          strum={selectedEvent?.strum}
+          stringed={!drums && !piano}
           drums={drums}
           measure={measure}
           onChangeRhythm={changeRhythm}
+          onStrum={toggleStrum}
           onAddEvent={addEvent}
           onRemoveEvent={removeEvent}
         />

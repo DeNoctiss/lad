@@ -477,6 +477,16 @@
   stroke-dasharray: 5 4;
 }
 
+.tab-score-strum line {
+  stroke: var(--tab-score-ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.tab-score-strum path {
+  fill: var(--tab-score-ink);
+}
+
 .tab-score-rest-symbol {
   font-family: "Segoe UI Symbol", "Noto Music", serif;
   font-size: 27px;
