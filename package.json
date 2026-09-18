@@ -1,0 +1,30 @@
+{
+  "name": "chordbook",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "format": "prettier --write src index.html vite.config.ts playwright.config.ts tsconfig.json package.json e2e"
+  },
+  "dependencies": {
+    "lucide-react": "0.577.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "smplr": "^1.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "5.1.2",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "4.1.11"
+  }
+}

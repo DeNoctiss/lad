@@ -1,0 +1,730 @@
+.chord-library {
+  color: #293b32;
+}
+
+.chord-page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.chord-page-heading h1,
+.chord-editor h2,
+.chord-empty h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+
+.chord-page-heading h1 {
+  margin: 8px 0 12px;
+  font-size: clamp(30px, 3.5vw, 44px);
+}
+
+.chord-page-description,
+.chord-editor-description {
+  color: #798079;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.chord-page-heading > .btn {
+  flex-shrink: 0;
+}
+
+.chord-toolbar {
+  background: #fcfcf9;
+  border: 1px solid #e1e4da;
+  border-radius: 14px;
+  padding: 22px 24px;
+}
+
+.chord-search {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  position: relative;
+  max-width: 460px;
+  min-height: 46px;
+  background: #f6f5f0;
+  border: 1px solid #e0e2d8;
+  border-radius: 8px;
+  padding: 0 13px;
+  color: #899087;
+}
+
+.chord-search:focus-within {
+  border-color: #42785a;
+  box-shadow: 0 0 0 3px #42785a16;
+}
+
+.chord-search input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  outline: none;
+  color: #293b32;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+}
+
+.chord-search input::placeholder {
+  color: #8b9188;
+}
+
+.chord-search > svg,
+.chord-search-clear {
+  flex-shrink: 0;
+}
+
+.chord-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 12px;
+  color: #7e867b;
+  font-size: 12px;
+}
+
+.chord-root-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.chord-root {
+  min-width: 43px;
+  min-height: 38px;
+  padding: 8px 13px;
+  border: 1px solid #e3e5dc;
+  border-radius: 7px;
+  color: #6b7468;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    background 150ms,
+    border-color 150ms;
+}
+
+.chord-root:hover {
+  border-color: #96b09b;
+  background: #eef2e9;
+}
+
+.chord-root-active,
+.chord-root-active:hover {
+  background: #42785a;
+  border-color: #42785a;
+  color: white;
+}
+
+.chord-root:focus-visible,
+.chord-card:focus-visible,
+.chord-editor button:focus-visible {
+  outline: 3px solid #6d997b;
+  outline-offset: 3px;
+}
+
+.chord-results-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 26px 0 16px;
+  color: #7a8277;
+  font-size: 12px;
+}
+
+.chord-results-bar p {
+  margin: 0;
+}
+
+.chord-results-bar > p:first-child {
+  color: #414d40;
+  font-weight: 500;
+}
+
+.chord-results-bar > p:first-child span {
+  margin-left: 8px;
+  color: #8b9286;
+  font-variant-numeric: tabular-nums;
+}
+
+.chord-legend {
+  display: flex;
+  gap: 18px;
+}
+
+.chord-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.chord-load-more {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.chord-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  padding: 20px 20px 0;
+  border: 1px solid #dfe3d7;
+  border-radius: 12px;
+  color: #2c4432;
+  background: #fffefa;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 330px;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms,
+    transform 150ms;
+}
+
+.chord-card:hover {
+  border-color: #95ae92;
+  box-shadow: 0 5px 18px #30463408;
+  transform: translateY(-2px);
+}
+
+.chord-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.chord-card-name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.chord-card-count {
+  font-size: 12px;
+  font-family: inherit;
+  color: #8a9580;
+  background: #eef1e8;
+  border-radius: 10px;
+  padding: 1px 8px;
+  margin-left: auto;
+}
+
+.chord-card-variant {
+  font-size: 14px;
+  font-family: inherit;
+  color: #8a9580;
+}
+
+.chord-card-arrow {
+  flex-shrink: 0;
+  color: #a5ae9d;
+  margin-top: 4px;
+}
+
+.chord-position {
+  color: #939987;
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 5px;
+}
+
+.chord-diagram {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  flex-shrink: 0;
+  margin: 12px auto 2px;
+  overflow: visible;
+}
+
+.chord-diagram-compact {
+  width: 240px;
+  max-width: 100%;
+  margin: 6px auto;
+}
+
+.chord-fret,
+.chord-string {
+  stroke: #bec6b7;
+}
+
+.chord-fret {
+  stroke-width: 1;
+}
+
+.chord-nut {
+  stroke: #53694c;
+  stroke-width: 4;
+}
+
+.chord-string-label,
+.chord-fret-label {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  fill: #89917f;
+}
+
+.chord-fret-label {
+  font-size: 10px;
+}
+
+.chord-mute,
+.chord-open {
+  stroke: #6a7c5e;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.chord-dot {
+  fill: #42785a;
+}
+
+.chord-barre {
+  fill: #42785a;
+  opacity: 0.85;
+}
+
+.chord-finger {
+  fill: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+}
+
+.chord-card-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+  border-top: 1px solid #eceee5;
+  padding: 13px 0;
+  color: #86907f;
+  font-size: 10px;
+}
+
+.chord-card-footer > span:first-child {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.035em;
+}
+
+.chord-card-footer > span:last-child {
+  color: #597650;
+}
+
+.chord-library-note {
+  text-align: center;
+  color: #8b9284;
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 26px 0 8px;
+}
+
+.chord-empty {
+  border: 1px dashed #ccd5c5;
+  border-radius: 14px;
+  padding: 50px 24px;
+  text-align: center;
+  color: #7c8774;
+}
+
+.chord-empty > svg {
+  margin: 0 auto 12px;
+}
+
+.chord-empty h2 {
+  font-size: 28px;
+  color: #344b35;
+}
+
+.chord-empty p {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.chord-empty .btn {
+  margin: 8px 4px 0;
+}
+
+.chord-editor {
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  width: min(730px, calc(100% - 32px));
+  max-width: 730px;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  margin: auto;
+  padding: 28px;
+  border: 1px solid #d9dfd2;
+  border-radius: 18px;
+  background: #fffefa;
+  color: #293b32;
+  box-shadow: 0 24px 100px #1e2e292e;
+}
+
+.chord-editor::backdrop {
+  background: #1b2a246b;
+  backdrop-filter: blur(3px);
+}
+
+.chord-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+.chord-editor h2 {
+  margin: 7px 0 0;
+  font-size: 30px;
+}
+
+.chord-editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 28px;
+  margin-top: 25px;
+}
+
+.chord-editor-fields > .field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 17px;
+  font-size: 13px;
+}
+
+.chord-editor .field input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid #dce1d4;
+  border-radius: 7px;
+  padding: 10px 12px;
+  background: #fff;
+  color: #293b32;
+  font: inherit;
+}
+
+.chord-editor .field input:focus {
+  outline: 2px solid #83a48a;
+  outline-offset: 1px;
+}
+
+.chord-editor .field input[aria-invalid="true"] {
+  border-color: #b56c58;
+}
+
+.chord-field-hint {
+  color: #7e8876;
+  font-size: 11px;
+  line-height: 1.7;
+  margin: -5px 0 19px;
+}
+
+.chord-fret-fieldset {
+  min-width: 0;
+  margin: 0 0 15px;
+  padding: 0;
+  border: 0;
+}
+
+.chord-fret-fieldset legend {
+  padding: 0;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.chord-fret-inputs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.chord-fret-inputs .field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.chord-fret-inputs small {
+  color: #959d8c;
+  font-size: 9px;
+  margin-left: 3px;
+}
+
+.chord-fret-inputs .field input {
+  padding: 8px 2px;
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.chord-fret-inputs input::-webkit-inner-spin-button,
+.chord-fret-inputs input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.chord-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: start;
+  min-width: 0;
+  padding: 22px 10px;
+  border: 1px solid #e2e5da;
+  border-radius: 12px;
+  background: #f6f5f0;
+  text-align: center;
+}
+
+.chord-preview .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+
+.chord-preview h3 {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  margin: 15px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: 28px;
+}
+
+.chord-preview-hint {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  color: #858a7d;
+  padding: 0 8px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.chord-errors {
+  border: 1px solid #e5c7b8;
+  border-radius: 8px;
+  padding: 9px 14px;
+  background: #fff4ed;
+  color: #98533c;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 8px 0 18px;
+}
+
+.chord-errors p {
+  margin: 5px 0;
+}
+
+.chord-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 21px;
+  border-top: 1px solid #e9ece1;
+}
+
+.chord-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 700px) {
+  .chord-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .chord-toolbar {
+    padding: 18px;
+  }
+
+  .chord-search {
+    max-width: none;
+  }
+
+  .chord-editor-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .chord-preview {
+    width: 190px;
+    max-width: 100%;
+    box-sizing: border-box;
+    justify-self: center;
+    margin-bottom: 22px;
+  }
+
+  .chord-editor {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 420px) {
+  .chord-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .chord-card {
+    padding: 14px 10px 0;
+  }
+
+  .chord-card-name {
+    font-size: 25px;
+  }
+
+  .chord-card-footer > span:last-child {
+    display: none;
+  }
+
+  .chord-root {
+    min-height: 42px;
+    padding-inline: 10px;
+  }
+
+  .chord-editor-actions {
+    flex-direction: column-reverse;
+  }
+
+  .chord-editor h2 {
+    font-size: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chord-card,
+  .chord-root {
+    transition: none;
+  }
+
+  .chord-card:hover {
+    transform: none;
+  }
+}
+
+/* CAGED system */
+.caged-intro {
+  max-width: 720px;
+  margin-bottom: 32px;
+  padding: 22px 26px;
+  background: #f3f5ee;
+  border-radius: 14px;
+  border: 1px solid #e2e6d8;
+}
+
+.caged-intro p {
+  margin: 0 0 12px;
+  line-height: 1.65;
+  color: #4a5a4f;
+}
+
+.caged-intro p:last-child {
+  margin-bottom: 0;
+}
+
+.caged-intro strong {
+  color: #293b32;
+}
+
+.caged-intro code {
+  background: #e2e6d8;
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-size: 0.9em;
+}
+
+.caged-section-title {
+  margin: 28px 0 16px;
+  font-size: 1.2rem;
+}
+
+.caged-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.caged-card {
+  background: #fff;
+  border: 1px solid #e2e6d8;
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.caged-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.caged-shape-name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.15rem;
+  color: #293b32;
+}
+
+.caged-root {
+  font-size: 0.85rem;
+  color: #7a8a7e;
+  font-weight: 600;
+}
+
+.caged-description {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #6a7a6e;
+  margin: 0;
+  text-align: center;
+}
+
+.chord-restore {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 0;
+  font-size: 0.85rem;
+  color: #6a7a6e;
+}

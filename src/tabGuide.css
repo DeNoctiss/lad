@@ -1,0 +1,241 @@
+.tab-guide {
+  margin: 18px 0;
+  border: 1px solid #dce5d3;
+  border-radius: 9px;
+  background: #f5f8ef;
+  color: #556c49;
+}
+.tab-guide > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  padding: 15px 17px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.tab-guide > summary::-webkit-details-marker {
+  display: none;
+}
+.tab-guide > summary > svg:last-child {
+  margin-left: auto;
+}
+.tab-guide[open] > summary > svg:last-child {
+  transform: rotate(180deg);
+}
+.tab-guide > summary:focus-visible {
+  outline: 2px solid #728d62;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.tab-guide-body {
+  padding: 0 18px 18px;
+  min-width: 0;
+}
+.tab-guide-body p,
+.tab-guide-body li {
+  color: #627557;
+  font-size: 12px;
+  line-height: 1.85;
+}
+.tab-guide-body h3 {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 500;
+  margin: 25px 0 12px;
+  color: #385034;
+}
+.tab-guide-body strong {
+  color: #415936;
+}
+.tab-guide-formula {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  flex-wrap: wrap;
+  padding: 17px;
+  border: 1px solid #dae3ce;
+  background: #fffefa;
+  border-radius: 7px;
+}
+.tab-guide-formula > code {
+  font-size: 20px;
+  padding: 6px 10px;
+}
+.tab-guide-formula > span {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.tab-guide-table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.tab-guide table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+  background: #fffefa;
+}
+.tab-guide th {
+  color: #445b3a;
+  font-size: 11px;
+  background: #eaf0e0;
+}
+.tab-guide td,
+.tab-guide th {
+  border-bottom: 1px solid #e4e9dc;
+  padding: 11px 12px;
+  line-height: 1.7;
+  vertical-align: top;
+}
+.tab-guide td:first-child {
+  min-width: 150px;
+}
+.tab-guide code {
+  white-space: nowrap;
+  color: #426331;
+}
+.tab-guide-example {
+  border: 1px solid #dce5d1;
+  padding: 14px;
+  border-radius: 7px;
+  color: #435c38;
+  background: #fffefa;
+  font:
+    13px/1.8 Consolas,
+    monospace;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.tab-guide .tab-guide-limit {
+  border-top: 1px solid #dce5d1;
+  padding-top: 14px;
+  font-size: 11px;
+}
+.modal:has(.part-editor-form) {
+  width: min(1100px, calc(100% - 28px));
+}
+.part-editor-modes,
+.part-score-modes {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px;
+  border: 1px solid #dee5d6;
+  background: #f0f4e9;
+  border-radius: 8px;
+  margin: 18px 0;
+  flex-wrap: wrap;
+}
+.part-editor-modes button,
+.part-score-modes button {
+  padding: 10px 14px;
+  border-radius: 5px;
+  font-size: 12px;
+  background: transparent;
+  color: #6c7e5f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.part-editor-modes button[aria-pressed="true"],
+.part-score-modes button[aria-pressed="true"] {
+  color: #365630;
+  background: #fffefa;
+  box-shadow: 0 1px 5px #2f442313;
+}
+.part-mode-hint {
+  font-size: 12px;
+  line-height: 1.75;
+  color: #718362;
+  margin-bottom: 18px;
+}
+.part-notation-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.part-notation-actions > span {
+  font-size: 11px;
+  color: #7b8d6a;
+}
+.part-notation-actions > div {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.part-validation {
+  background: #fff2e9;
+  border: 1px solid #e2c5b1;
+  color: #8c5636;
+  border-radius: 7px;
+  padding: 13px 16px;
+  margin: 14px 0;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.part-validation ul {
+  margin: 5px 0 0;
+  padding-left: 18px;
+}
+.part-notation-label {
+  display: block;
+  margin: 12px 0 8px;
+  color: #627357;
+  font-size: 12px;
+}
+.part-saved-format {
+  font-size: 9px;
+  padding: 3px 7px;
+  background: #e5edde;
+  color: #708561;
+  border-radius: 4px;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+.parts-guide-link {
+  margin: 0 0 20px;
+}
+@media (max-width: 580px) {
+  .tab-guide-body {
+    padding: 0 12px 14px;
+  }
+  .tab-guide td,
+  .tab-guide th {
+    padding: 9px 8px;
+    font-size: 11px;
+  }
+  .tab-guide td:first-child {
+    min-width: 125px;
+  }
+  .tab-guide > summary {
+    padding: 13px 12px;
+    font-size: 12px;
+  }
+  .part-editor-modes button,
+  .part-score-modes button {
+    padding: 9px 10px;
+    font-size: 11px;
+  }
+  .part-editor-modes button {
+    flex: 1;
+  }
+  .part-saved-format {
+    margin: 5px 0 0;
+    display: inline-block;
+  }
+}
+@media print {
+  .tab-guide,
+  .part-editor-modes,
+  .part-score-modes {
+    display: none;
+  }
+}

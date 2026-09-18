@@ -1,0 +1,456 @@
+/* Fretboard page */
+.fretboard-page {
+  color: #293b32;
+}
+
+/* Tabs */
+.fretboard-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e2e6d8;
+}
+
+.fretboard-tab-btn {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #7a8a7e;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+  font-family: inherit;
+}
+
+.fretboard-tab-btn:hover {
+  color: #4a5a4f;
+}
+
+.fretboard-tab-btn.active {
+  color: #293b32;
+  border-bottom-color: #5a8a5e;
+  font-weight: 600;
+}
+
+/* Controls */
+.fretboard-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.fretboard-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #4a5a4f;
+}
+
+.fretboard-field select {
+  padding: 6px 10px;
+  border: 1px solid #c8d0bc;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.9rem;
+  color: #293b32;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.fretboard-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #4a5a4f;
+  cursor: pointer;
+  user-select: none;
+}
+
+.fretboard-checkbox input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.fretboard-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 12px 18px;
+  background: #f3f5ee;
+  border-radius: 10px;
+  border: 1px solid #e2e6d8;
+}
+
+.fretboard-info strong {
+  font-size: 1.05rem;
+  color: #293b32;
+}
+
+.fretboard-info span {
+  font-size: 0.85rem;
+  color: #6a7a6e;
+}
+
+.fretboard-hint {
+  font-size: 0.85rem;
+  color: #6a7a6e;
+  margin-bottom: 12px;
+}
+
+/* Fretboard */
+.fretboard-wrapper {
+  margin-bottom: 24px;
+}
+
+.fretboard-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 12px;
+  border: 1px solid #d0d6c4;
+  background: #3a2a1a;
+  padding: 8px 0;
+}
+
+.fretboard {
+  display: flex;
+  flex-direction: column;
+  min-width: max-content;
+}
+
+/* Fret marker row */
+.fret-marker-row {
+  display: flex;
+  height: 20px;
+  align-items: center;
+}
+
+.fret-tuning-col {
+  width: 56px;
+  min-width: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fret-nut-col {
+  width: 6px;
+  min-width: 6px;
+  flex-shrink: 0;
+  background: #d0c8a0;
+  height: 100%;
+}
+
+.fret-open-cell {
+  width: 44px;
+  min-width: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.fret-open-cell.fret-open-highlighted {
+  background: rgba(90, 138, 94, 0.15);
+}
+
+.fret-open-cell.fret-open-root {
+  background: rgba(196, 90, 58, 0.15);
+}
+
+.fret-marker-cell {
+  width: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.fret-marker-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d8c8a0;
+  opacity: 0.5;
+}
+
+.fret-marker-dot-pair {
+  display: flex;
+  gap: 10px;
+}
+
+.fret-marker-dot-pair span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d8c8a0;
+  opacity: 0.5;
+}
+
+/* String rows */
+.fret-string-row {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  position: relative;
+}
+
+.fret-string-row::before {
+  content: "";
+  position: absolute;
+  left: 62px;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: linear-gradient(to right, #b0a890, #c0b8a0 50%, #b0a890);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Tuning selector */
+.tuning-select {
+  width: 48px;
+  height: 26px;
+  border: 1px solid #8a7a5a;
+  border-radius: 6px;
+  background: #f0e8d0;
+  color: #3a2a1a;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  padding: 0 2px;
+}
+
+.tuning-select:hover {
+  background: #e8d8b0;
+}
+
+.tuning-select:focus {
+  outline: 2px solid #5a8a5e;
+  outline-offset: 1px;
+}
+
+.tuning-note-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #d0c8a0;
+  padding: 4px 8px;
+}
+
+/* Fret cells */
+.fret-cell {
+  width: 44px;
+  min-width: 44px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  border-right: 1px solid rgba(200, 180, 140, 0.15);
+}
+
+.fret-cell.first-fret {
+  /* No special border — nut is a separate column now */
+}
+
+.note-dot-open {
+  background: #5a8a5e;
+}
+
+.fret-cell.octave-fret {
+  border-right: 2px solid rgba(200, 180, 140, 0.3);
+}
+
+/* Note dots */
+.note-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: #5a8a5e;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  padding: 0;
+  transition:
+    transform 0.1s,
+    background 0.15s;
+  z-index: 2;
+}
+
+.note-dot:hover {
+  transform: scale(1.1);
+}
+
+.note-dot.note-dot-root {
+  background: #c45a3a;
+}
+
+.note-dot.note-dot-selected {
+  background: #d45a3a;
+  box-shadow: 0 0 0 2px rgba(212, 90, 58, 0.4);
+}
+
+.note-dot.note-dot-empty {
+  background: transparent;
+  border: 1px dashed rgba(200, 180, 140, 0.3);
+  color: transparent;
+  cursor: pointer;
+}
+
+.note-dot.note-dot-empty:hover {
+  background: rgba(200, 180, 140, 0.1);
+}
+
+/* Results */
+.fretboard-results {
+  margin-top: 24px;
+}
+
+.fretboard-results h3 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: 1.2rem;
+  margin-bottom: 14px;
+  color: #293b32;
+}
+
+.chord-match-list,
+.key-match-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.chord-match-item,
+.key-match-item {
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #e2e6d8;
+  border-radius: 12px;
+  transition: border-color 0.15s;
+}
+
+.chord-match-item.chord-match-perfect,
+.key-match-item.key-match-perfect {
+  border-color: #5a8a5e;
+  background: #f3f8ee;
+}
+
+.chord-match-item.chord-match-close,
+.key-match-item.key-match-close {
+  border-color: #c8b860;
+  background: #faf8e8;
+}
+
+.chord-match-header,
+.key-match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.chord-match-header strong,
+.key-match-header strong {
+  font-size: 1rem;
+  color: #293b32;
+}
+
+.chord-match-score,
+.key-match-score {
+  font-size: 0.8rem;
+  color: #7a8a7e;
+  font-weight: 600;
+}
+
+.chord-match-perfect .chord-match-score,
+.key-match-perfect .key-match-score {
+  color: #5a8a5e;
+}
+
+.chord-match-close .chord-match-score,
+.key-match-close .key-match-score {
+  color: #a89520;
+}
+
+.chord-match-notes,
+.key-match-notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.note-chip {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #f0f0e8;
+  font-size: 0.78rem;
+  color: #6a7a6e;
+  font-weight: 600;
+}
+
+.note-chip.note-chip-match {
+  background: #5a8a5e;
+  color: #fff;
+}
+
+.fretboard-empty {
+  padding: 32px;
+  text-align: center;
+  color: #7a8a7e;
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fretboard-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fretboard-field {
+    width: 100%;
+  }
+
+  .fretboard-field select {
+    width: 100%;
+  }
+
+  .fretboard-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .fretboard-tab-btn {
+    white-space: nowrap;
+    padding: 10px 14px;
+  }
+
+  .chord-match-list,
+  .key-match-list {
+    grid-template-columns: 1fr;
+  }
+}
