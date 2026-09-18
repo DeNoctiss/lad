@@ -58,7 +58,12 @@ export function PartCard({
       </div>
       {!collapsed &&
         (part.format === "visual" && part.score ? (
-          <TabScoreView score={part.score} bpm={bpm} tuning={part.tuning} />
+          <TabScoreView
+            score={part.score}
+            bpm={bpm}
+            tuning={part.tuning}
+            sound={part.sound}
+          />
         ) : (
           <pre className="tab-content">
             {part.content || "Партия пока пуста"}

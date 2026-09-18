@@ -14,6 +14,7 @@ import {
 } from "../../lib/tablature";
 import { TabGuide } from "../tabs/TabGuide";
 import { PartMetaFields } from "./PartMetaFields";
+import { PartSoundSelect } from "./PartSoundSelect";
 import { FormatSwitch } from "./FormatSwitch";
 import { ScoreBlock } from "./ScoreBlock";
 import { TextTabBlock } from "./TextTabBlock";
@@ -33,6 +34,7 @@ export function PartEditor({
     part?.instrument ?? "Ритм-гитара",
   );
   const [tuning, setTuning] = useState(part?.tuning ?? "E A D G B e");
+  const [sound, setSound] = useState<string | undefined>(part?.sound);
   const [content, setContent] = useState(
     part?.content ?? emptyTab("Ритм-гитара"),
   );
@@ -54,6 +56,7 @@ export function PartEditor({
     name,
     instrument,
     tuning,
+    sound,
     content,
     format,
     score.meter,
@@ -85,7 +88,8 @@ export function PartEditor({
       changeScore(createScore(kindForInstrument(next)));
     }
     if (content === emptyTab(instrument)) setContent(emptyTab(next));
-    if (kindForInstrument(next) !== kind)
+    if (kindForInstrument(next) !== kind) {
+      setSound(undefined);
       setTuning(
         next === "Барабаны"
           ? "CC · SP · RD · HH · HT · MT · SD · LT · BD"
@@ -95,6 +99,7 @@ export function PartEditor({
               ? "88 клавиш · A0–C8"
               : "E A D G B e",
       );
+    }
     setInstrument(next);
   };
   const applyNotation = () => {
@@ -130,6 +135,7 @@ export function PartEditor({
         content,
         format,
         score,
+        ...(sound ? { sound } : {}),
       });
     } catch (error) {
       setNotationError(
@@ -159,6 +165,7 @@ export function PartEditor({
           onInstrumentChange={changeInstrument}
           onTuningChange={setTuning}
         />
+        <PartSoundSelect kind={kind} value={sound ?? ""} onChange={setSound} />
         <FormatSwitch format={format} onChange={setFormat} />
         <TabGuide key={kind} kind={kind} onInsertExample={insertExample} />
         {format === "visual" ? (
@@ -166,6 +173,7 @@ export function PartEditor({
             score={score}
             kind={kind}
             tuning={tuning}
+            sound={sound}
             notation={notation}
             sourcePending={sourcePending}
             scoreMode={scoreMode}

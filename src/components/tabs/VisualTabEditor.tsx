@@ -25,13 +25,17 @@ import { NotePanel } from "./editor/NotePanel";
 import { effects } from "./editor/editorShared";
 import type { Rhythm } from "./editor/editorShared";
 
-type Props = { score: TabScore; onChange: (score: TabScore) => void };
+type Props = {
+  score: TabScore;
+  onChange: (score: TabScore) => void;
+  sound?: string;
+};
 
 export function VisualTabEditor(props: Props) {
   return <VisualTabEditorBody key={props.score.kind} {...props} />;
 }
 
-function VisualTabEditorBody({ score, onChange }: Props) {
+function VisualTabEditorBody({ score, onChange, sound }: Props) {
   const drums = score.kind === "drums";
   const piano = score.kind === "piano";
   const lanes = lanesFor(score.kind);
@@ -161,6 +165,16 @@ function VisualTabEditorBody({ score, onChange }: Props) {
     };
   }
 
+  /** Palm mute is moment-wide: a note joining a muted event inherits it. */
+  function applyEventPm(notes: TabNote[]): TabNote[] {
+    if (!notes.some((note) => note.effects.includes("pm"))) return notes;
+    return notes.map((note) =>
+      note.effects.includes("pm")
+        ? note
+        : { ...note, effects: [...note.effects, "pm"] },
+    );
+  }
+
   function addEvent(rest: boolean) {
     if (!measure || measure.events.length >= 64) return;
     const moment: TabEvent = {
@@ -216,6 +230,19 @@ function VisualTabEditorBody({ score, onChange }: Props) {
       next = [...next, effect];
     }
     setNoteEffects(next);
+    // Palm mute marks the whole moment, not a single string.
+    if (effect === "pm") {
+      updateEvent(eventIndex, (previous) => ({
+        ...previous,
+        notes: previous.notes.map((note) => ({
+          ...note,
+          effects: checked
+            ? [...note.effects.filter((item) => item !== "pm"), "pm"]
+            : note.effects.filter((item) => item !== "pm"),
+        })),
+      }));
+      return;
+    }
     changeSelectedNote((previous) => ({ ...previous, effects: next }));
   }
 
@@ -238,7 +265,7 @@ function VisualTabEditorBody({ score, onChange }: Props) {
       return;
     updateEvent(eventIndex, (previous) => ({
       ...previous,
-      notes: [...previous.notes, makeNote()],
+      notes: applyEventPm([...previous.notes, makeNote()]),
     }));
   }
 
@@ -299,9 +326,11 @@ function VisualTabEditorBody({ score, onChange }: Props) {
       momentIndex,
       (previous) => ({
         ...previous,
-        notes: existing
-          ? previous.notes.filter((note) => note.lane !== targetLane)
-          : [...previous.notes, makeNote(targetLane)],
+        notes: applyEventPm(
+          existing
+            ? previous.notes.filter((note) => note.lane !== targetLane)
+            : [...previous.notes, makeNote(targetLane)],
+        ),
       }),
       barIndex,
     );
@@ -392,6 +421,7 @@ function VisualTabEditorBody({ score, onChange }: Props) {
           selectedEvent={eventIndex >= 0 ? eventIndex : undefined}
           onSelect={select}
           onLaneClick={laneClick}
+          sound={sound}
         />
       </div>
       <EventChips

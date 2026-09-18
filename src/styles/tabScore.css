@@ -460,6 +460,23 @@
   font-size: 10px;
 }
 
+.tab-score-pm-label {
+  fill: #8a6d3b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  paint-order: stroke;
+  stroke: var(--tab-score-paper);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.tab-score-pm-line {
+  stroke: #8a6d3b;
+  stroke-width: 1.3;
+  stroke-dasharray: 5 4;
+}
+
 .tab-score-rest-symbol {
   font-family: "Segoe UI Symbol", "Noto Music", serif;
   font-size: 27px;
@@ -547,6 +564,23 @@
   stroke: var(--tab-score-paper);
   stroke-width: 3px;
   stroke-linejoin: round;
+}
+
+.tab-score-pm-label {
+  fill: #8a6d3b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  paint-order: stroke;
+  stroke: var(--tab-score-paper);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.tab-score-pm-line {
+  stroke: #8a6d3b;
+  stroke-width: 1.4;
+  stroke-dasharray: 5 4;
 }
 
 .tab-score-measure-hint {

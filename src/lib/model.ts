@@ -16,6 +16,8 @@ export type TabPart = {
   content: string;
   format?: "text" | "visual";
   score?: TabScore;
+  /** SoundFont timbre id from lib/partSounds; missing means the instrument default. */
+  sound?: string;
 };
 export type Song = {
   id: string;

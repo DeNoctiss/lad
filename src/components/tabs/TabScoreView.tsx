@@ -25,6 +25,7 @@ export function TabScoreView({
   onLaneClick,
   bpm = 92,
   tuning = "E A D G B e",
+  sound,
 }: TabScoreViewProps) {
   const id = useId();
   const stripRef = useRef<HTMLDivElement>(null);
@@ -64,6 +65,7 @@ export function TabScoreView({
     void player.play(score, {
       bpm,
       tuningText: tuning,
+      sound,
       onEvent: (measure, event) => {
         setPlayhead(
           measure === null || event === null ? null : { measure, event },

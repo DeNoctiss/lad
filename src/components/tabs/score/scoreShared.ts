@@ -19,6 +19,8 @@ export type TabScoreViewProps = {
   bpm?: number;
   /** Instrument tuning text, e.g. "E A D G B e". */
   tuning?: string;
+  /** Timbre id from lib/partSounds for playback. */
+  sound?: string;
   /** Currently playing position (for highlight). */
   playingMeasure?: number;
   playingEvent?: number;

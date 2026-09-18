@@ -147,6 +147,15 @@ export function StringMeasure({
             ? score.measures[measureIndex + 1]?.events[0]
             : undefined);
         const crossBar = eventIndex === measure.events.length - 1;
+        const palmMuted = event.notes.some((note) =>
+          note.effects.includes("pm"),
+        );
+        const previousMoment =
+          eventIndex > 0 ? measure.events[eventIndex - 1] : previousEvent;
+        const pmContinues = Boolean(
+          palmMuted &&
+            previousMoment?.notes.some((note) => note.effects.includes("pm")),
+        );
         return (
           <g
             key={event.id}
@@ -207,6 +216,30 @@ export function StringMeasure({
                 </text>
               )}
             </g>
+            {palmMuted && (
+              <g className="tab-score-pm" aria-hidden="true">
+                {!pmContinues && (
+                  <text
+                    x={x}
+                    y={15}
+                    textAnchor="middle"
+                    className="tab-score-pm-label"
+                  >
+                    P.M.
+                  </text>
+                )}
+                <line
+                  x1={pmContinues ? x - 10 : x + 20}
+                  x2={Math.max(
+                    (pmContinues ? x - 10 : x + 20) + 6,
+                    x + Math.max(24, slotWidth) - 2,
+                  )}
+                  y1={11}
+                  y2={11}
+                  className="tab-score-pm-line"
+                />
+              </g>
+            )}
             {lanes.map((lane, laneIndex) => {
               const note = event.notes.find(
                 (candidate) => candidate.lane === lane.id,
@@ -339,7 +372,9 @@ export function StringMeasure({
                           className="tab-score-effect"
                         >
                           {note.effects
-                            .filter((effect) => effect !== "ghost")
+                            .filter(
+                              (effect) => effect !== "ghost" && effect !== "pm",
+                            )
                             .map((effect) => effectLabels[effect])
                             .join(" ")}
                         </text>

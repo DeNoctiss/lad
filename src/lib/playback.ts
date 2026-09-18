@@ -1,6 +1,8 @@
 import type { NoteEffect, TabKind, TabNote, TabScore } from "./tabTypes";
 import { durationTicks, measureTicks } from "./tablature";
 import { pianoMidi } from "./piano";
+import { soundFile, soundFx } from "./partSounds";
+import type { DriveType } from "./partSounds";
 import { Soundfont } from "smplr";
 
 /**
@@ -208,6 +210,8 @@ export function buildTimeline(
     measure.events.forEach((event, e) => {
       marks.push({ tick: elapsed, measure: m, event: e });
       const dur = durationTicks(event);
+      // Palm mute is moment-wide: one muted string marks the whole event.
+      const palmMuted = event.notes.some((note) => note.effects.includes("pm"));
       for (const note of event.notes) {
         const key = eventKey(m, e, note.lane);
         if (consumed.has(key)) continue;
@@ -219,7 +223,10 @@ export function buildTimeline(
           drum,
           startTick: elapsed,
           endTick: elapsed + dur,
-          effects: [...note.effects],
+          effects:
+            palmMuted && !note.effects.includes("pm")
+              ? [...note.effects, "pm"]
+              : [...note.effects],
           muted,
           waypoints: [],
           bend: note.effects.includes("b1")
@@ -553,23 +560,53 @@ function drumVoice(
 }
 
 /* ------------------------------------------------------------------ */
+/*  Drum samples                                                       */
+/* ------------------------------------------------------------------ */
+
+/** Real one-shot samples (Sonic Pi kit) per drum lane; HH has an open variant. */
+const DRUM_FILES: Record<string, { hit: string; open?: string }> = {
+  BD: { hit: "drum_heavy_kick.flac" },
+  SD: { hit: "drum_snare_hard.flac" },
+  HH: { hit: "drum_cymbal_closed.flac", open: "drum_cymbal_open.flac" },
+  HT: { hit: "drum_tom_hi_hard.flac" },
+  MT: { hit: "drum_tom_mid_hard.flac" },
+  LT: { hit: "drum_tom_lo_hard.flac" },
+  CC: { hit: "drum_cymbal_hard.flac" },
+  SP: { hit: "drum_splash_hard.flac" },
+  RD: { hit: "drum_cymbal_soft.flac" },
+};
+
+/* ------------------------------------------------------------------ */
 /*  Player                                                             */
 /* ------------------------------------------------------------------ */
 
 export type PlayerState = "stopped" | "loading" | "playing" | "paused";
 
-const SOUNDFONT_FILES: Record<string, string> = {
-  guitar: "acoustic_guitar_steel-mp3.js",
-  bass: "electric_bass_finger-mp3.js",
-  piano: "acoustic_grand_piano-mp3.js",
-};
-
 const midiVelocity = (velocity: number) =>
   Math.max(10, Math.min(127, Math.round(85 * velocity)));
+
+/** Waveshaper transfer curve: soft atan clip for drive, hard tanh for distortion. */
+function driveCurve(
+  type: DriveType,
+  amount: number,
+): Float32Array<ArrayBuffer> {
+  const size = 1024;
+  const curve = new Float32Array(size);
+  const k = type === "distortion" ? 3 + amount * 22 : 1.5 + amount * 6.5;
+  const norm = type === "distortion" ? Math.tanh(k) : Math.atan(k);
+  for (let i = 0; i < size; i++) {
+    const x = (i / (size - 1)) * 2 - 1;
+    curve[i] =
+      type === "distortion" ? Math.tanh(k * x) / norm : Math.atan(k * x) / norm;
+  }
+  return curve;
+}
 
 export type PlayerOptions = {
   bpm: number;
   tuningText: string;
+  /** Timbre id from lib/partSounds; defaults to the instrument's first option. */
+  sound?: string;
   onEvent?: (measure: number | null, event: number | null) => void;
   onStateChange?: (state: PlayerState) => void;
 };
@@ -579,6 +616,8 @@ export class TabPlayer {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private instruments = new Map<string, Promise<Soundfont>>();
+  private drums = new Map<string, Promise<AudioBuffer | null>>();
+  private fx = new Map<string, GainNode>();
   private stops: ((time?: number) => void)[] = [];
   private raf = 0;
   private endAt = 0;
@@ -597,22 +636,97 @@ export class TabPlayer {
       const comp = this.ctx.createDynamicsCompressor();
       this.master.connect(comp).connect(this.ctx.destination);
       this.instruments.clear();
+      this.drums.clear();
+      this.fx.clear();
     }
     return this.ctx;
   }
 
-  private instrument(kind: TabKind): Promise<Soundfont> | null {
-    const file = SOUNDFONT_FILES[kind];
+  /** Amp simulation chain: pre-gain → waveshaper → tone filter → out → master. */
+  private fxInput(type: DriveType, amount: number): GainNode | null {
+    const ctx = this.ctx;
+    const master = this.master;
+    if (!ctx || !master) return null;
+    const key = `${type}:${Math.round(amount * 10)}`;
+    let input = this.fx.get(key);
+    if (!input) {
+      const heavy = type === "distortion";
+      input = ctx.createGain();
+      const preGain = ctx.createGain();
+      const shaper = ctx.createWaveShaper();
+      const mudCut = ctx.createBiquadFilter();
+      const tone = ctx.createBiquadFilter();
+      const out = ctx.createGain();
+      preGain.gain.value = heavy ? 1.5 + amount * 7 : 1 + amount * 3.5;
+      shaper.curve = driveCurve(type, amount);
+      shaper.oversample = "4x";
+      mudCut.type = "highpass";
+      mudCut.frequency.value = 90;
+      tone.type = "lowpass";
+      tone.frequency.value = heavy
+        ? 2800 + amount * 4000
+        : 2700 + amount * 2200;
+      tone.Q.value = 0.8;
+      out.gain.value = heavy ? 0.72 - amount * 0.42 : 0.8 - amount * 0.3;
+      input.connect(preGain);
+      preGain.connect(shaper);
+      shaper.connect(mudCut);
+      mudCut.connect(tone);
+      tone.connect(out);
+      out.connect(master);
+      this.fx.set(key, input);
+    }
+    return input;
+  }
+
+  private drumBuffer(file: string): Promise<AudioBuffer | null> {
+    const ctx = this.ctx;
+    if (!ctx) return Promise.resolve(null);
+    let pending = this.drums.get(file);
+    if (!pending) {
+      pending = fetch(`${import.meta.env.BASE_URL}drums/${file}`)
+        .then((response) => {
+          if (!response.ok) throw new Error(String(response.status));
+          return response.arrayBuffer();
+        })
+        .then((data) => ctx.decodeAudioData(data))
+        .catch(() => null);
+      this.drums.set(file, pending);
+    }
+    return pending;
+  }
+
+  private async loadDrums() {
+    const files = new Set<string>();
+    for (const lane of Object.values(DRUM_FILES)) {
+      files.add(lane.hit);
+      if (lane.open) files.add(lane.open);
+    }
+    const map = new Map<string, AudioBuffer | null>();
+    await Promise.all(
+      [...files].map(async (file) =>
+        map.set(file, await this.drumBuffer(file)),
+      ),
+    );
+    return map;
+  }
+
+  private instrument(kind: TabKind, sound?: string): Promise<Soundfont> | null {
+    const file = soundFile(kind, sound);
     const ctx = this.ctx;
     if (!file || !ctx || !this.master) return null;
-    let pending = this.instruments.get(kind);
+    const fx = soundFx(kind, sound);
+    // Fixed amp settings: gentle blend so the recorded sample stays dominant.
+    const amount = fx === "distortion" ? 0.1 : fx ? 0.2 : 0;
+    const key = `${kind}:${file}:${fx ?? ""}`;
+    let pending = this.instruments.get(key);
     if (!pending) {
       const soundfont = new Soundfont(ctx, {
         instrumentUrl: `${import.meta.env.BASE_URL}soundfonts/${file}`,
-        destination: this.master,
+        destination: (fx && this.fxInput(fx, amount)) || this.master,
       });
       pending = soundfont.load.then(() => soundfont);
-      this.instruments.set(kind, pending);
+      this.instruments.set(key, pending);
     }
     return pending;
   }
@@ -693,7 +807,7 @@ export class TabPlayer {
     this.marks = timeline.marks;
     this.secPerTick = timeline.secPerTick;
 
-    const pending = this.instrument(score.kind);
+    const pending = this.instrument(score.kind, options.sound);
     let inst: Soundfont | null = null;
     if (pending) {
       this.setState("loading");
@@ -702,6 +816,12 @@ export class TabPlayer {
       } catch {
         inst = null;
       }
+      if (session !== this.session) return;
+    }
+    let drumSamples: Map<string, AudioBuffer | null> | null = null;
+    if (score.kind === "drums") {
+      this.setState("loading");
+      drumSamples = await this.loadDrums();
       if (session !== this.session) return;
     }
     if (ctx.state === "suspended") await ctx.resume();
@@ -719,15 +839,22 @@ export class TabPlayer {
         (note.endTick - note.startTick) * timeline.secPerTick,
       );
       if (note.drum) {
-        drumVoice(
-          ctx,
-          master,
-          noise,
-          note.drum,
-          at,
-          note.velocity,
-          note.effects.includes("open"),
-        );
+        const open = note.effects.includes("open");
+        const lane = DRUM_FILES[note.drum];
+        const file = open && lane?.open ? lane.open : lane?.hit;
+        const buffer = file ? drumSamples?.get(file) : null;
+        if (buffer) {
+          const source = ctx.createBufferSource();
+          source.buffer = buffer;
+          const velocity = Math.min(1.15, Math.max(0.05, note.velocity));
+          const gain = ctx.createGain();
+          gain.gain.value = velocity * 0.85;
+          source.playbackRate.value = 0.97 + velocity * 0.06;
+          source.connect(gain).connect(master);
+          source.start(at);
+        } else {
+          drumVoice(ctx, master, noise, note.drum, at, note.velocity, open);
+        }
         continue;
       }
       if (note.midi === null) continue;
