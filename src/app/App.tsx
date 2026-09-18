@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Music2, Plus, Search, X } from "lucide-react";
+import { ArrowRight, Music2, Plus, Search } from "lucide-react";
 import type { Band, Chord, Library, Song } from "../lib/model";
 import { readLibrary, STORAGE_KEY, validateLibrary } from "../lib/model";
 import { initialLibrary } from "../lib/seed";
 import { allChords } from "../lib/chordDatabase";
 import { Sidebar } from "../components/layout/Sidebar";
 import { Topbar, Footer } from "../components/layout/Topbar";
-import { BandEditor } from "../components/editors/BandEditor";
-import { SongEditor } from "../components/editors/SongEditor";
 import { EmptyState } from "../components/ui/EmptyState";
+import { AppOverlays } from "./AppOverlays";
 import { BandsPage } from "../pages/BandsPage";
 import { BandPage } from "../pages/BandPage";
 import { SongListPage } from "../pages/SongListPage";
@@ -469,58 +468,24 @@ export default function App() {
         </main>
         <Footer storageError={storageError} />
       </div>
-      <input
-        ref={importRef}
-        type="file"
-        accept=".json,application/json"
-        hidden
-        aria-label="Импорт резервной копии"
-        onChange={(event) => {
-          void importLibrary(event.target.files?.[0]);
-          event.target.value = "";
-        }}
+      <AppOverlays
+        importRef={importRef}
+        onImportFile={(file) => void importLibrary(file)}
+        bandEditor={bandEditor}
+        songEditor={songEditor}
+        songs={library.songs}
+        bands={library.bands}
+        currentBandId={currentBand?.id}
+        chords={visibleChords}
+        notice={notice}
+        onSaveBand={saveBand}
+        onDeleteBand={deleteBand}
+        onSaveSong={saveSong}
+        onDeleteSong={deleteSong}
+        onCloseBandEditor={() => setBandEditor(null)}
+        onCloseSongEditor={() => setSongEditor(null)}
+        onCloseNotice={() => setNotice("")}
       />
-      {bandEditor && (
-        <BandEditor
-          band={bandEditor === "new" ? undefined : bandEditor}
-          songsCount={
-            bandEditor === "new"
-              ? 0
-              : library.songs.filter((song) => song.bandId === bandEditor.id)
-                  .length
-          }
-          onSave={saveBand}
-          onDelete={
-            bandEditor === "new" ? undefined : () => deleteBand(bandEditor)
-          }
-          onClose={() => setBandEditor(null)}
-        />
-      )}
-      {songEditor && (
-        <SongEditor
-          song={songEditor === "new" ? undefined : songEditor}
-          bands={library.bands}
-          bandId={currentBand?.id}
-          chords={visibleChords}
-          onSave={saveSong}
-          onDelete={
-            songEditor === "new" ? undefined : () => deleteSong(songEditor)
-          }
-          onClose={() => setSongEditor(null)}
-        />
-      )}
-      {notice && (
-        <div className="toast" role="status">
-          <span>{notice}</span>
-          <button
-            className="btn-icon"
-            aria-label="Закрыть уведомление"
-            onClick={() => setNotice("")}
-          >
-            <X size={15} />
-          </button>
-        </div>
-      )}
     </div>
   );
 }

@@ -8,6 +8,11 @@ import {
   matchCount,
 } from "../../lib/scales";
 import { FretboardView } from "./FretboardView";
+import {
+  FretboardControls,
+  TuningSelect,
+  NamesCheckbox,
+} from "./FretboardControls";
 
 type KeyMatch = {
   root: number;
@@ -85,29 +90,9 @@ export function KeyIdentifierTab() {
 
   return (
     <div className="fretboard-tab">
-      <div className="fretboard-controls">
-        <label className="fretboard-field">
-          <span>Строй</span>
-          <select
-            value={tuningPreset}
-            onChange={(e) => handleTuningPreset(e.target.value)}
-          >
-            {TUNINGS.map((t) => (
-              <option key={t.name} value={t.name}>
-                {t.name}
-              </option>
-            ))}
-            <option value="Свой строй">Свой строй</option>
-          </select>
-        </label>
-        <label className="fretboard-checkbox">
-          <input
-            type="checkbox"
-            checked={showNames}
-            onChange={(e) => setShowNames(e.target.checked)}
-          />
-          <span>Показывать названия нот</span>
-        </label>
+      <FretboardControls>
+        <TuningSelect value={tuningPreset} onChange={handleTuningPreset} />
+        <NamesCheckbox checked={showNames} onChange={setShowNames} />
         {selectedPositions.size > 0 && (
           <button
             className="btn btn-small"
@@ -116,7 +101,7 @@ export function KeyIdentifierTab() {
             Очистить
           </button>
         )}
-      </div>
+      </FretboardControls>
       <p className="fretboard-hint">
         Кликайте по грифу, чтобы выбрать ноты. Снизу появятся подходящие
         тональности и гаммы.

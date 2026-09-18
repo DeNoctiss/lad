@@ -2,7 +2,8 @@ import { useState } from "react";
 import type { Band, Chord, Song } from "../../lib/model";
 import { extractChords, uid } from "../../lib/model";
 import { Modal } from "../ui/Modal";
-import { Check, Music2, Guitar, Trash2 } from "lucide-react";
+import { Check, Music2, Trash2 } from "lucide-react";
+import { VoicingPicker } from "./VoicingPicker";
 
 export function SongEditor({
   song,
@@ -166,46 +167,12 @@ export function SongEditor({
             placeholder="Am, F, C, G"
           />
         </label>
-        {detected.length > 0 && (
-          <div className="field">
-            <span className="field-label">
-              <Guitar size={15} /> Основные аппликатуры
-            </span>
-            <span className="field-help">
-              Выберите, какой вариант взятия показывать для каждого аккорда при
-              открытии песни.
-            </span>
-            <div className="voicing-picker">
-              {detected.map((name) => {
-                const variants = chords.filter((c) => c.name === name);
-                if (!variants.length) return null;
-                const current =
-                  variants.find((v) => v.id === defaultVoicings[name]) ??
-                  variants[0];
-                return (
-                  <label key={name} className="voicing-picker-item">
-                    <span className="voicing-picker-name">{name}</span>
-                    <select
-                      value={current.id}
-                      onChange={(event) =>
-                        setDefaultVoicings((prev) => ({
-                          ...prev,
-                          [name]: event.target.value,
-                        }))
-                      }
-                    >
-                      {variants.map((variant, index) => (
-                        <option key={variant.id} value={variant.id}>
-                          {index + 1}: с {variant.baseFret} лада
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        <VoicingPicker
+          chordNames={detected}
+          chords={chords}
+          defaultVoicings={defaultVoicings}
+          onChange={setDefaultVoicings}
+        />
         <div className="modal-actions">
           {song && onDelete && (
             <button

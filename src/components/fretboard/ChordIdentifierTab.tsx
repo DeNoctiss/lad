@@ -2,6 +2,11 @@ import { useMemo, useState } from "react";
 import { TUNINGS, STANDARD_TUNING, noteName, noteAt } from "../../lib/scales";
 import { CHORD_TYPES, chordName } from "../../lib/chordDatabase";
 import { FretboardView } from "./FretboardView";
+import {
+  FretboardControls,
+  TuningSelect,
+  NamesCheckbox,
+} from "./FretboardControls";
 
 type ChordMatch = {
   name: string;
@@ -89,29 +94,9 @@ export function ChordIdentifierTab() {
 
   return (
     <div className="fretboard-tab">
-      <div className="fretboard-controls">
-        <label className="fretboard-field">
-          <span>Строй</span>
-          <select
-            value={tuningPreset}
-            onChange={(e) => handleTuningPreset(e.target.value)}
-          >
-            {TUNINGS.map((t) => (
-              <option key={t.name} value={t.name}>
-                {t.name}
-              </option>
-            ))}
-            <option value="Свой строй">Свой строй</option>
-          </select>
-        </label>
-        <label className="fretboard-checkbox">
-          <input
-            type="checkbox"
-            checked={showNames}
-            onChange={(e) => setShowNames(e.target.checked)}
-          />
-          <span>Показывать названия нот</span>
-        </label>
+      <FretboardControls>
+        <TuningSelect value={tuningPreset} onChange={handleTuningPreset} />
+        <NamesCheckbox checked={showNames} onChange={setShowNames} />
         {selectedPositions.size > 0 && (
           <button
             className="btn btn-small"
@@ -120,7 +105,7 @@ export function ChordIdentifierTab() {
             Очистить
           </button>
         )}
-      </div>
+      </FretboardControls>
       <p className="fretboard-hint">
         Кликайте по грифу, чтобы выбрать ноты. Снизу появятся подходящие
         аккорды. Выбрано нот: {selectedNotes.length}

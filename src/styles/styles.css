@@ -1651,7 +1651,9 @@ select {
 }
 .song-chord-switcher select {
   width: auto;
-  font-size: 8px;
+  font-size: 10px;
+  height: 33px;
+  padding: 0 4px;
   flex: 1;
   min-width: 0;
 }

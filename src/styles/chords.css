@@ -73,6 +73,15 @@
   font-size: 13px;
 }
 
+.chord-search input:focus {
+  outline: none;
+}
+
+.chord-search input::-webkit-search-decoration,
+.chord-search input::-webkit-search-cancel-button {
+  display: none;
+}
+
 .chord-search input::placeholder {
   color: #8b9188;
 }

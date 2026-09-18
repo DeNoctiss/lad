@@ -3,8 +3,8 @@ import type { FormEvent } from "react";
 import { Trash2, X } from "lucide-react";
 import { uid } from "../../lib/model";
 import type { Chord } from "../../lib/model";
-import { strings } from "./chordUtils";
-import { ChordDiagram } from "./ChordDiagram";
+import { FretInputs } from "./FretInputs";
+import { ChordPreview } from "./ChordPreview";
 
 type Draft = { name: string; baseFret: string; frets: string[] };
 
@@ -65,7 +65,6 @@ export function ChordEditor({
   const [saveError, setSaveError] = useState("");
   const errors = validateDraft(draft);
   const isValid = Object.keys(errors).length === 0;
-  const canPreview = !errors.baseFret && !errors.frets;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -176,73 +175,20 @@ export function ChordEditor({
             <p id={`${prefix}-range`} className="chord-field-hint">
               На схеме всегда пять ладов. Начальная позиция — от 1 до 20.
             </p>
-            <fieldset
-              className="chord-fret-fieldset"
-              aria-describedby={`${prefix}-fret-help${submitted && errors.frets ? ` ${prefix}-errors` : ""}`}
-            >
-              <legend>Лады на струнах</legend>
-              <div className="chord-fret-inputs">
-                {strings.map((string, index) => (
-                  <label
-                    className="field"
-                    key={string}
-                    htmlFor={`${prefix}-string-${index}`}
-                  >
-                    <span>
-                      {string}
-                      <small>{6 - index}</small>
-                    </span>
-                    <input
-                      id={`${prefix}-string-${index}`}
-                      type="number"
-                      min={-1}
-                      max={24}
-                      step={1}
-                      required
-                      aria-label={`${6 - index}-я струна ${string}, лад`}
-                      aria-invalid={submitted && !!errors.frets}
-                      value={draft.frets[index]}
-                      onChange={(event) =>
-                        setDraft({
-                          ...draft,
-                          frets: draft.frets.map((value, fretIndex) =>
-                            fretIndex === index ? event.target.value : value,
-                          ),
-                        })
-                      }
-                    />
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-            <p id={`${prefix}-fret-help`} className="chord-field-hint">
-              От толстой E к тонкой e. −1 — не звучит, 0 — открытая струна, 1–24
-              — номер лада.
-            </p>
+            <FretInputs
+              prefix={prefix}
+              frets={draft.frets}
+              invalid={submitted && !!errors.frets}
+              errorsId={`${prefix}-errors`}
+              onChange={(frets) => setDraft({ ...draft, frets })}
+            />
           </div>
-          <div className="chord-preview">
-            <span className="eyebrow">ПРЕДПРОСМОТР</span>
-            <h3>{draft.name.trim() || "Ваш аккорд"}</h3>
-            {canPreview ? (
-              <ChordDiagram
-                chord={{
-                  id: "preview",
-                  name: draft.name,
-                  baseFret: Number(draft.baseFret),
-                  frets: draft.frets.map(Number),
-                }}
-              />
-            ) : (
-              <p className="chord-preview-hint">
-                {errors.baseFret || errors.frets}
-              </p>
-            )}
-            {canPreview && (
-              <span className="chord-position">
-                {Number(draft.baseFret)}–{Number(draft.baseFret) + 4} лады
-              </span>
-            )}
-          </div>
+          <ChordPreview
+            name={draft.name}
+            baseFret={Number(draft.baseFret)}
+            frets={draft.frets.map(Number)}
+            error={errors.baseFret || errors.frets}
+          />
         </div>
         {((submitted && !isValid) || saveError) && (
           <div

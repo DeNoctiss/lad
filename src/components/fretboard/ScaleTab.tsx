@@ -8,6 +8,11 @@ import {
   scaleNoteSet,
 } from "../../lib/scales";
 import { FretboardView } from "./FretboardView";
+import {
+  FretboardControls,
+  TuningSelect,
+  NamesCheckbox,
+} from "./FretboardControls";
 
 export function ScaleTab() {
   const [tuning, setTuning] = useState<number[]>([...STANDARD_TUNING]);
@@ -35,21 +40,8 @@ export function ScaleTab() {
 
   return (
     <div className="fretboard-tab">
-      <div className="fretboard-controls">
-        <label className="fretboard-field">
-          <span>Строй</span>
-          <select
-            value={tuningPreset}
-            onChange={(e) => handleTuningPreset(e.target.value)}
-          >
-            {TUNINGS.map((t) => (
-              <option key={t.name} value={t.name}>
-                {t.name}
-              </option>
-            ))}
-            <option value="Свой строй">Свой строй</option>
-          </select>
-        </label>
+      <FretboardControls>
+        <TuningSelect value={tuningPreset} onChange={handleTuningPreset} />
         <label className="fretboard-field">
           <span>Тоника</span>
           <select
@@ -76,15 +68,8 @@ export function ScaleTab() {
             ))}
           </select>
         </label>
-        <label className="fretboard-checkbox">
-          <input
-            type="checkbox"
-            checked={showNames}
-            onChange={(e) => setShowNames(e.target.checked)}
-          />
-          <span>Показывать названия нот</span>
-        </label>
-      </div>
+        <NamesCheckbox checked={showNames} onChange={setShowNames} />
+      </FretboardControls>
       <div className="fretboard-info">
         <strong>
           {noteName(rootNote)} {scale.name}

@@ -1,20 +1,12 @@
 import { useState } from "react";
-import {
-  Clock3,
-  Guitar,
-  Heart,
-  Minus,
-  Music2,
-  Pencil,
-  Plus,
-  Printer,
-} from "lucide-react";
 import type { Band, Chord, Song, TabPart } from "../lib/model";
 import { extractChords } from "../lib/model";
 import { PartEditor } from "../components/editors/PartEditor";
 import { LyricsView } from "../components/song/LyricsView";
 import { PartsPanel } from "../components/song/PartsPanel";
 import { ChordSidebar } from "../components/song/ChordSidebar";
+import { SongHeader } from "../components/song/SongHeader";
+import { SheetToolbar } from "../components/song/SheetToolbar";
 import { BackLink } from "../components/ui/BackLink";
 
 export function SongView({
@@ -53,96 +45,21 @@ export function SongView({
       <BackLink onClick={() => navigate(`band/${band.id}`)}>
         {band.name}
       </BackLink>
-      <div className="song-heading">
-        <div>
-          <span className="eyebrow">{band.genre} / ПЕСНЯ</span>
-          <h1>{song.title}</h1>
-          <div className="song-meta">
-            <span>
-              <Music2 size={15} />
-              {song.key || "Без тональности"}
-            </span>
-            <span>
-              <Clock3 size={15} />
-              {song.bpm} BPM
-            </span>
-            <span>
-              <Guitar size={15} />
-              {song.capo ? `Каподастр: ${song.capo} лад` : "Без каподастра"}
-            </span>
-          </div>
-        </div>
-        <div className="heading-actions">
-          <button
-            className={`btn-icon favorite ${song.favorite ? "is-favorite" : ""}`}
-            aria-label={song.favorite ? "Убрать из избранного" : "В избранное"}
-            aria-pressed={song.favorite}
-            onClick={() => onUpdate({ ...song, favorite: !song.favorite })}
-          >
-            <Heart size={20} fill={song.favorite ? "currentColor" : "none"} />
-          </button>
-          <button className="btn" onClick={onEdit}>
-            <Pencil size={16} />
-            Редактировать
-          </button>
-        </div>
-      </div>
+      <SongHeader
+        song={song}
+        band={band}
+        onToggleFavorite={() => onUpdate({ ...song, favorite: !song.favorite })}
+        onEdit={onEdit}
+      />
       <div className="song-layout">
         <section className="song-sheet">
-          <div className="sheet-toolbar">
-            <div
-              className="sheet-tabs"
-              role="tablist"
-              aria-label="Содержимое песни"
-            >
-              <button
-                role="tab"
-                aria-selected={tab === "lyrics"}
-                onClick={() => setTab("lyrics")}
-                className={tab === "lyrics" ? "active" : ""}
-              >
-                Текст и аккорды
-              </button>
-              <button
-                role="tab"
-                aria-selected={tab === "tabs"}
-                onClick={() => setTab("tabs")}
-                className={tab === "tabs" ? "active" : ""}
-              >
-                Табулатуры <span>{song.parts.length}</span>
-              </button>
-            </div>
-            <div className="sheet-tools">
-              {tab === "lyrics" && (
-                <>
-                  <button
-                    className="btn-icon"
-                    disabled={fontSize <= 14}
-                    aria-label="Уменьшить текст"
-                    onClick={() => setFontSize((size) => size - 2)}
-                  >
-                    <Minus size={15} />
-                  </button>
-                  <span>Aa</span>
-                  <button
-                    className="btn-icon"
-                    disabled={fontSize >= 28}
-                    aria-label="Увеличить текст"
-                    onClick={() => setFontSize((size) => size + 2)}
-                  >
-                    <Plus size={15} />
-                  </button>
-                </>
-              )}
-              <button
-                className="btn-icon print-button"
-                aria-label="Распечатать песню"
-                onClick={() => window.print()}
-              >
-                <Printer size={16} />
-              </button>
-            </div>
-          </div>
+          <SheetToolbar
+            tab={tab}
+            partsCount={song.parts.length}
+            fontSize={fontSize}
+            onTabChange={setTab}
+            onFontSizeChange={setFontSize}
+          />
           {tab === "lyrics" ? (
             <LyricsView
               lyrics={song.lyrics}
