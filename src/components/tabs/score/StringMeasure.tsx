@@ -221,18 +221,11 @@ export function StringMeasure({
                 <title>
                   {event.strum === "down" ? "Бой вниз" : "Бой вверх"}
                 </title>
-                <line
-                  x1={x + 20}
-                  y1={TOP - 3}
-                  x2={x + 20}
-                  y2={TOP + (lanes.length - 1) * ROW + 3}
-                  aria-hidden="true"
-                />
                 <path
                   d={
                     event.strum === "down"
-                      ? `M ${x + 20} ${TOP + (lanes.length - 1) * ROW + 9} l -5 -9 h 10 z`
-                      : `M ${x + 20} ${TOP - 9} l -5 9 h 10 z`
+                      ? `M ${x} ${TOP + (lanes.length - 1) * ROW + 23} V ${TOP + (lanes.length - 1) * ROW + 37} M ${x - 5} ${TOP + (lanes.length - 1) * ROW + 32} L ${x} ${TOP + (lanes.length - 1) * ROW + 40} L ${x + 5} ${TOP + (lanes.length - 1) * ROW + 32}`
+                      : `M ${x} ${TOP + (lanes.length - 1) * ROW + 40} V ${TOP + (lanes.length - 1) * ROW + 26} M ${x - 5} ${TOP + (lanes.length - 1) * ROW + 31} L ${x} ${TOP + (lanes.length - 1) * ROW + 23} L ${x + 5} ${TOP + (lanes.length - 1) * ROW + 31}`
                   }
                   aria-hidden="true"
                 />
