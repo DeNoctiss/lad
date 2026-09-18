@@ -102,6 +102,7 @@ export function SongView({
       {partEditor && (
         <PartEditor
           part={partEditor === "new" ? undefined : partEditor}
+          bpm={song.bpm}
           onSave={savePart}
           onClose={() => setPartEditor(null)}
         />

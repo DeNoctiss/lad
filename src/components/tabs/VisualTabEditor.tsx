@@ -29,13 +29,14 @@ type Props = {
   score: TabScore;
   onChange: (score: TabScore) => void;
   sound?: string;
+  bpm?: number;
 };
 
 export function VisualTabEditor(props: Props) {
   return <VisualTabEditorBody key={props.score.kind} {...props} />;
 }
 
-function VisualTabEditorBody({ score, onChange, sound }: Props) {
+function VisualTabEditorBody({ score, onChange, sound, bpm }: Props) {
   const drums = score.kind === "drums";
   const piano = score.kind === "piano";
   const lanes = lanesFor(score.kind);
@@ -422,6 +423,7 @@ function VisualTabEditorBody({ score, onChange, sound }: Props) {
           onSelect={select}
           onLaneClick={laneClick}
           sound={sound}
+          bpm={bpm}
         />
       </div>
       <EventChips

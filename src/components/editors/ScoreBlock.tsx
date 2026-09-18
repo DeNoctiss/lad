@@ -8,6 +8,7 @@ export function ScoreBlock({
   kind,
   tuning,
   sound,
+  bpm,
   notation,
   sourcePending,
   scoreMode,
@@ -20,6 +21,7 @@ export function ScoreBlock({
   kind: TabKind;
   tuning: string;
   sound?: string;
+  bpm?: number;
   notation: string;
   sourcePending: boolean;
   scoreMode: "visual" | "notation";
@@ -52,7 +54,12 @@ export function ScoreBlock({
         </button>
       </div>
       {scoreMode === "visual" ? (
-        <VisualTabEditor score={score} onChange={onScoreChange} sound={sound} />
+        <VisualTabEditor
+          score={score}
+          onChange={onScoreChange}
+          sound={sound}
+          bpm={bpm}
+        />
       ) : (
         <>
           <label className="field">
@@ -102,7 +109,12 @@ export function ScoreBlock({
               ? "Предпросмотр последней применённой записи"
               : "Предпросмотр"}
           </span>
-          <TabScoreView score={score} tuning={tuning} sound={sound} />
+          <TabScoreView
+            score={score}
+            tuning={tuning}
+            sound={sound}
+            bpm={bpm}
+          />
         </>
       )}
     </>

@@ -22,10 +22,13 @@ import { PartValidation } from "./PartValidation";
 
 export function PartEditor({
   part,
+  bpm,
   onSave,
   onClose,
 }: {
   part?: TabPart;
+  /** Song tempo passed to the preview player; defaults to 92. */
+  bpm?: number;
   onSave: (part: TabPart) => void;
   onClose: () => void;
 }) {
@@ -174,6 +177,7 @@ export function PartEditor({
             kind={kind}
             tuning={tuning}
             sound={sound}
+            bpm={bpm}
             notation={notation}
             sourcePending={sourcePending}
             scoreMode={scoreMode}
