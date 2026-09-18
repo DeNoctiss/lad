@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import type { TabScoreViewProps } from "./TabScoreView";
-import { durationTicks, measureTicks } from "./tablature";
+import { durationTicks, measureTicks } from "../../lib/tablature";
 import {
   pianoBlack,
   pianoKeys,
   pianoLabel,
   pianoMidi,
   pianoName,
-} from "./piano";
-import type { TabEvent } from "./tabTypes";
-import "./piano.css";
+} from "../../lib/piano";
+import type { TabEvent } from "../../lib/tabTypes";
+import "../../styles/piano.css";
 
 function rhythm(event: TabEvent) {
   return `1/${event.duration}${event.dotted ? "." : ""}${event.triplet ? " · 3" : ""}`;

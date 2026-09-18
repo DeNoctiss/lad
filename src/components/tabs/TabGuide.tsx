@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { BookOpen, ChevronDown } from "lucide-react";
-import type { TabKind } from "./tabTypes";
-import { exampleNotation, parseNotation } from "./tablature";
+import type { TabKind } from "../../lib/tabTypes";
+import { exampleNotation, parseNotation } from "../../lib/tablature";
 import { TabScoreView } from "./TabScoreView";
-import "./tabGuide.css";
+import "../../styles/tabGuide.css";
 
 const examples: {
   title: string;

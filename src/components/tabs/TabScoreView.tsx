@@ -7,10 +7,10 @@ import type {
   TabEvent,
   TabNote,
   TabScore,
-} from "./tabTypes";
-import { durationTicks, lanesFor, measureTicks } from "./tablature";
-import { TabPlayer, laneLabels } from "./playback";
-import "./tabScore.css";
+} from "../../lib/tabTypes";
+import { durationTicks, lanesFor, measureTicks } from "../../lib/tablature";
+import { TabPlayer, laneLabels } from "../../lib/playback";
+import "../../styles/tabScore.css";
 import { PianoNotation } from "./PianoNotation";
 
 export type TabScoreViewProps = {

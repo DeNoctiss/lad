@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   BookOpenText,
   CircleAlert,
   Download,
@@ -17,6 +16,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
+import { BackLink } from "../components/ui/BackLink";
 
 const steps = [
   {
@@ -113,9 +113,7 @@ export function HelpPage({
 }) {
   return (
     <section className="chord-library guide-page" aria-label="Как это работает">
-      <button className="back-link" onClick={() => navigate("bands")}>
-        <ArrowLeft size={16} />К библиотеке
-      </button>
+      <BackLink onClick={() => navigate("bands")}>К библиотеке</BackLink>
       <div className="page-heading chord-page-heading">
         <div>
           <p className="eyebrow">РУКОВОДСТВО ПО САЙТУ</p>

@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { uid } from "./model";
+import { uid } from "../../lib/model";
 import {
   durationTicks,
   lanesFor,
   measureTicks,
   scoreIssues,
-} from "./tablature";
+} from "../../lib/tablature";
 import { TabScoreView } from "./TabScoreView";
 import type {
   NoteEffect,
@@ -14,8 +14,8 @@ import type {
   TabMeasure,
   TabNote,
   TabScore,
-} from "./tabTypes";
-import "./visualTabEditor.css";
+} from "../../lib/tabTypes";
+import "../../styles/visualTabEditor.css";
 
 type Props = { score: TabScore; onChange: (score: TabScore) => void };
 type Rhythm = Pick<TabEvent, "duration" | "dotted" | "triplet">;
