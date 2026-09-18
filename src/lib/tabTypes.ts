@@ -2,6 +2,7 @@ export type TabKind = "guitar" | "bass" | "drums" | "piano";
 export type NoteEffect =
   | "pm"
   | "v"
+  | "harm"
   | "b0.5"
   | "b1"
   | "accent"

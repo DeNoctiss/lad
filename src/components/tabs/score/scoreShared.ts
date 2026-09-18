@@ -34,6 +34,7 @@ export const ROW = 26;
 export const effectLabels: Record<NoteEffect, string> = {
   pm: "P.M.",
   v: "~",
+  harm: "◇",
   "b0.5": "b½",
   b1: "b1",
   accent: ">",
@@ -43,6 +44,7 @@ export const effectLabels: Record<NoteEffect, string> = {
 export const effectNames: Record<NoteEffect, string> = {
   pm: "приглушение ладонью",
   v: "вибрато",
+  harm: "искусственный флажолет",
   "b0.5": "бенд на полтона",
   b1: "бенд на тон",
   accent: "акцент",

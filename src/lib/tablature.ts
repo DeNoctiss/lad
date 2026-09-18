@@ -15,6 +15,7 @@ const durations = [1, 2, 4, 8, 16] as const;
 const effects: readonly NoteEffect[] = [
   "pm",
   "v",
+  "harm",
   "b0.5",
   "b1",
   "accent",
@@ -288,6 +289,8 @@ export function scoreIssues(score: TabScore): TabIssue[] {
         }
         if (note.effects.includes("open"))
           add("Эффект open доступен только для барабанов HH.");
+        if (note.fret === "x" && note.effects.includes("harm"))
+          add("Флажолет недоступен на приглушённой ноте x.");
         if (note.link === undefined) return;
         let next = measure.events[e + 1];
         if (e === measure.events.length - 1 && total === capacity)

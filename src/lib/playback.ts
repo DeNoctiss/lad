@@ -331,6 +331,8 @@ type VoiceOpts = {
   vibrato: boolean;
   bend: number;
   legato: boolean;
+  /** Harmonic: sound an octave above the fretted note. */
+  harm?: boolean;
   waypoints: { at: number; midi: number }[]; // absolute seconds
 };
 
@@ -345,7 +347,8 @@ function pitchedVoice(
 ) {
   const out = ctx.createGain();
   out.connect(dest);
-  const freq = midiFreq(midi);
+  const harmShift = opts.harm ? 12 : 0;
+  const freq = midiFreq(midi + harmShift);
   const end = at + Math.max(dur, 0.08);
   const stopAt = end + 1.6;
 
@@ -413,11 +416,13 @@ function pitchedVoice(
     oscA.frequency.setValueAtTime(freq, at);
     for (const point of opts.waypoints) {
       oscA.frequency.linearRampToValueAtTime(
-        midiFreq(point.midi),
+        midiFreq(point.midi + harmShift),
         Math.max(at + 0.01, point.at - 0.06),
       );
       oscB.frequency.linearRampToValueAtTime(
-        kind === "bass" ? midiFreq(point.midi) / 2 : midiFreq(point.midi),
+        kind === "bass"
+          ? midiFreq(point.midi + harmShift) / 2
+          : midiFreq(point.midi + harmShift),
         Math.max(at + 0.01, point.at - 0.06),
       );
     }
@@ -778,13 +783,15 @@ export class TabPlayer {
     const pm = note.effects.includes("pm");
     const velocity = note.velocity;
     if (note.midi === null) return;
+    // Harmonic: the touched node sounds an octave above the fretted note.
+    const harm = note.effects.includes("harm") ? 12 : 0;
 
     // Slide chain: each waypoint starts a legato segment.
     const segments: { tick: number; midi: number; legato: boolean }[] = [
-      { tick: note.startTick, midi: note.midi, legato: note.legato },
+      { tick: note.startTick, midi: note.midi + harm, legato: note.legato },
       ...note.waypoints.map((w) => ({
         tick: w.tick,
-        midi: w.midi,
+        midi: w.midi + harm,
         legato: true,
       })),
     ];
@@ -793,15 +800,19 @@ export class TabPlayer {
       const span = note.endTick - note.startTick;
       segments.length = 0;
       segments.push(
-        { tick: note.startTick, midi: note.midi, legato: note.legato },
+        {
+          tick: note.startTick,
+          midi: note.midi + harm,
+          legato: note.legato,
+        },
         {
           tick: note.startTick + span * 0.3,
-          midi: note.midi + note.bend,
+          midi: note.midi + harm + note.bend,
           legato: true,
         },
         {
           tick: note.startTick + span * 0.8,
-          midi: note.midi,
+          midi: note.midi + harm,
           legato: true,
         },
       );
@@ -906,6 +917,7 @@ export class TabPlayer {
         vibrato: note.effects.includes("v"),
         bend: note.bend,
         legato: note.legato,
+        harm: note.effects.includes("harm"),
         waypoints: note.waypoints.map((w) => ({
           at: t0 + w.tick * timeline.secPerTick,
           midi: w.midi,

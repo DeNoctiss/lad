@@ -22,6 +22,7 @@ export const durations: { value: TabEvent["duration"]; label: string }[] = [
 export const effects: { value: NoteEffect; label: string }[] = [
   { value: "pm", label: "pm · глушение (весь момент)" },
   { value: "v", label: "v · вибрато" },
+  { value: "harm", label: "harm · флажолет" },
   { value: "b0.5", label: "b0.5 · бенд ½ тона" },
   { value: "b1", label: "b1 · бенд 1 тон" },
   { value: "accent", label: "Акцент" },
