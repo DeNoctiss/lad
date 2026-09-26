@@ -133,7 +133,6 @@ export function PianoNotation({
       </div>
       <PianoKeyboard
         notes={names}
-        focusKey={names[0] ?? "C4"}
         onKey={
           onLaneClick
             ? (key) => onLaneClick(barIndex, eventIndex, key)

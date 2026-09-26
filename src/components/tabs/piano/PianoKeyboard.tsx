@@ -1,27 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { pianoKeys, pianoLabel } from "../../../lib/piano";
 
 export function PianoKeyboard({
   notes,
   onKey,
-  focusKey = "C4",
 }: {
   notes: string[];
   onKey?: (key: string) => void;
-  focusKey?: string;
 }) {
   const viewport = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const container = viewport.current;
-    const key = container?.querySelector<HTMLElement>(
-      `[data-note="${focusKey}"]`,
-    );
-    if (container && key)
-      container.scrollLeft = Math.max(
-        0,
-        key.offsetLeft - container.clientWidth / 2 + 14,
-      );
-  }, [focusKey]);
   let white = 0;
   const positions = pianoKeys.map((key) => ({
     ...key,
