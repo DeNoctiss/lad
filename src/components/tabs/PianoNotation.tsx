@@ -34,8 +34,13 @@ export function PianoNotation({
       : start;
   const eventIndex = controlled ? (selectedEvent ?? -1) : localSelection.event;
   const selected = score.measures[barIndex]?.events[eventIndex];
-  const names = selected?.notes.map((note) => note.lane) ?? [];
   const capacity = measureTicks(score.meter);
+  // Highlight the playing event during playback, otherwise the selected one.
+  const isPlaying = playingMeasure !== undefined && playingEvent !== undefined;
+  const highlightBar = isPlaying ? playingMeasure : barIndex;
+  const highlightEvent = isPlaying ? playingEvent : eventIndex;
+  const highlight = score.measures[highlightBar]?.events[highlightEvent];
+  const names = highlight?.notes.map((note) => note.lane) ?? [];
   const barWidth = Math.max(260, width);
   const pick = (measure: number, event: number) => {
     setLocalSelection({ measure, event });
