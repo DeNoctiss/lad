@@ -329,7 +329,7 @@ export default function App() {
       {sidebarOpen && (
         <button
           className="sidebar-scrim"
-          aria-label="Закрыть меню"
+          aria-label="Закрыть меню по фону"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -342,8 +342,9 @@ export default function App() {
         recent={recent}
         navigate={navigate}
         onImport={openImport}
+        onClose={() => setSidebarOpen(false)}
       />
-      <div className="workspace">
+      <div className="workspace" inert={sidebarOpen}>
         <Topbar
           breadcrumb={currentBand?.name ?? currentSong?.title ?? pageTitle}
           query={query}
@@ -351,6 +352,8 @@ export default function App() {
           searchRef={searchRef}
           onExport={exportLibrary}
           onMenuOpen={() => setSidebarOpen(true)}
+          navigate={navigate}
+          navSection={navSection}
         />
         <main
           className={`main-content ${currentSong && !normalizedQuery ? "song-page" : ""}`}

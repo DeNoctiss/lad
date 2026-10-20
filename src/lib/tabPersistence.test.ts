@@ -75,3 +75,24 @@ describe("visual part persistence", () => {
     ).toThrow();
   });
 });
+
+describe("strum persistence", () => {
+  it.each(["down", "up"])(
+    "preserves %s through the actual library import validator",
+    (strum) => {
+      const withStrum = structuredClone(score);
+      Object.assign(withStrum.measures[0].events[0], { strum });
+      const library = libraryWithPart({ format: "visual", score: withStrum });
+      expect(validateLibrary(JSON.parse(JSON.stringify(library)))).toEqual(
+        library,
+      );
+    },
+  );
+  it("rejects invalid strum metadata instead of silently discarding it", () => {
+    const invalid = structuredClone(score);
+    Object.assign(invalid.measures[0].events[0], { strum: "sideways" });
+    expect(() =>
+      validateLibrary(libraryWithPart({ format: "visual", score: invalid })),
+    ).toThrow(/направление боя/);
+  });
+});

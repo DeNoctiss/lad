@@ -56,6 +56,7 @@ export function ScoreBlock({
       {scoreMode === "visual" ? (
         <VisualTabEditor
           score={score}
+          tuning={tuning}
           onChange={onScoreChange}
           sound={sound}
           bpm={bpm}

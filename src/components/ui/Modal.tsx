@@ -7,11 +7,17 @@ export function Modal({
   onClose,
   children,
   wide = false,
+  className = "",
+  headerActions,
+  eyebrow = "ВАША МУЗЫКАЛЬНАЯ БИБЛИОТЕКА",
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
   wide?: boolean;
+  className?: string;
+  headerActions?: ReactNode;
+  eyebrow?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -34,7 +40,7 @@ export function Modal({
     <dialog
       ref={ref}
       aria-labelledby={titleId}
-      className={`modal ${wide ? "modal-wide" : ""}`}
+      className={`modal ${wide ? "modal-wide" : ""} ${className}`}
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -42,12 +48,20 @@ export function Modal({
     >
       <div className="modal-header">
         <div>
-          <span className="eyebrow">ВАША МУЗЫКАЛЬНАЯ БИБЛИОТЕКА</span>
+          <span className="eyebrow">{eyebrow}</span>
           <h2 id={titleId}>{title}</h2>
         </div>
-        <button className="btn-icon" aria-label="Закрыть" onClick={onClose}>
-          <X size={20} />
-        </button>
+        <div className="modal-header-actions">
+          {headerActions}
+          <button
+            type="button"
+            className="btn-icon"
+            aria-label="Закрыть"
+            onClick={onClose}
+          >
+            <X size={20} />
+          </button>
+        </div>
       </div>
       {children}
     </dialog>

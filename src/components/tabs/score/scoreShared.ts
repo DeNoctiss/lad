@@ -13,7 +13,11 @@ export type TabScoreViewProps = {
   score: TabScore;
   selectedMeasure?: number;
   selectedEvent?: number;
-  onSelect?: (measure: number, event: number) => void;
+  selectedLane?: string;
+  selectedTick?: number;
+  entryRhythm?: Pick<TabEvent, "duration" | "dotted" | "triplet">;
+  onEmptyClick?: (measure: number, tick: number, lane: string) => void;
+  onSelect?: (measure: number, event: number, lane?: string) => void;
   onLaneClick?: (measure: number, event: number, lane: string) => void;
   /** Beats per minute for playback. */
   bpm?: number;
@@ -26,11 +30,10 @@ export type TabScoreViewProps = {
   playingEvent?: number;
 };
 
-export const ROW_SIZE = 3;
 export const LEFT = 56;
 export const RIGHT = 16;
 export const TOP = 84;
-export const ROW = 26;
+export const ROW = 34;
 export const effectLabels: Record<NoteEffect, string> = {
   pm: "P.M.",
   v: "~",
@@ -92,7 +95,9 @@ export function activate(event: KeyboardEvent<SVGElement>, action: () => void) {
   }
 }
 
-export function rhythmLabel(event: TabEvent) {
+export function rhythmLabel(
+  event: Pick<TabEvent, "duration" | "dotted" | "triplet">,
+) {
   return `1/${event.duration}${event.dotted ? " ·" : ""}${event.triplet ? " · 3" : ""}`;
 }
 

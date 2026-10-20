@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { pianoKeys, pianoLabel } from "../../../lib/piano";
 
 export function PianoKeyboard({
@@ -9,10 +9,19 @@ export function PianoKeyboard({
   onKey?: (key: string) => void;
 }) {
   const viewport = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const key =
+      viewport.current?.querySelector<HTMLElement>('[data-note="C4"]');
+    if (key && viewport.current)
+      viewport.current.scrollLeft = Math.max(
+        0,
+        key.offsetLeft - viewport.current.clientWidth / 3,
+      );
+  }, []);
   let white = 0;
   const positions = pianoKeys.map((key) => ({
     ...key,
-    left: key.black ? white * 28 - 9 : white++ * 28,
+    left: key.black ? white * 42 - 16 : white++ * 42,
   }));
   return (
     <div
@@ -22,7 +31,7 @@ export function PianoKeyboard({
       role="region"
       aria-label="Клавиатура пианино, A0–C8, горизонтальная прокрутка"
     >
-      <div className="piano-keyboard" style={{ width: white * 28 }}>
+      <div className="piano-keyboard" style={{ width: white * 42 }}>
         {positions.map((key) => (
           <button
             type="button"

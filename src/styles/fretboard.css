@@ -1,6 +1,6 @@
 /* Fretboard page */
 .fretboard-page {
-  color: #293b32;
+  color: var(--ink);
 }
 
 /* Tabs */
@@ -8,7 +8,7 @@
   display: flex;
   gap: 4px;
   margin-bottom: 24px;
-  border-bottom: 2px solid #e2e6d8;
+  border-bottom: 2px solid var(--line);
 }
 
 .fretboard-tab-btn {
@@ -17,7 +17,7 @@
   background: none;
   cursor: pointer;
   font-size: 0.95rem;
-  color: #7a8a7e;
+  color: var(--muted);
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
   transition:
@@ -27,12 +27,12 @@
 }
 
 .fretboard-tab-btn:hover {
-  color: #4a5a4f;
+  color: var(--muted);
 }
 
 .fretboard-tab-btn.active {
-  color: #293b32;
-  border-bottom-color: #5a8a5e;
+  color: var(--ink);
+  border-bottom-color: var(--accent);
   font-weight: 600;
 }
 
@@ -49,17 +49,17 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 0.85rem;
-  color: #4a5a4f;
+  font-size: 0.875rem;
+  color: var(--muted);
 }
 
 .fretboard-field select {
   padding: 6px 10px;
-  border: 1px solid #c8d0bc;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
   font-size: 0.9rem;
-  color: #293b32;
+  color: var(--ink);
   font-family: inherit;
   cursor: pointer;
 }
@@ -68,8 +68,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.85rem;
-  color: #4a5a4f;
+  font-size: 0.875rem;
+  color: var(--muted);
   cursor: pointer;
   user-select: none;
 }
@@ -86,24 +86,24 @@
   gap: 4px;
   margin-bottom: 16px;
   padding: 12px 18px;
-  background: #f3f5ee;
+  background: var(--surface-soft);
   border-radius: 10px;
-  border: 1px solid #e2e6d8;
+  border: 1px solid var(--line);
 }
 
 .fretboard-info strong {
   font-size: 1.05rem;
-  color: #293b32;
+  color: var(--ink);
 }
 
 .fretboard-info span {
-  font-size: 0.85rem;
-  color: #6a7a6e;
+  font-size: 0.875rem;
+  color: var(--muted);
 }
 
 .fretboard-hint {
-  font-size: 0.85rem;
-  color: #6a7a6e;
+  font-size: 0.875rem;
+  color: var(--muted);
   margin-bottom: 12px;
 }
 
@@ -229,7 +229,7 @@
   border-radius: 6px;
   background: #f0e8d0;
   color: #3a2a1a;
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -247,7 +247,7 @@
 }
 
 .tuning-note-label {
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #d0c8a0;
   padding: 4px 8px;
@@ -286,7 +286,7 @@
   border: none;
   background: #5a8a5e;
   color: #fff;
-  font-size: 0.72rem;
+  font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -334,7 +334,7 @@
   font-weight: 400;
   font-size: 1.2rem;
   margin-bottom: 14px;
-  color: #293b32;
+  color: var(--ink);
 }
 
 .chord-match-list,
@@ -347,22 +347,22 @@
 .chord-match-item,
 .key-match-item {
   padding: 14px 16px;
-  background: #fff;
-  border: 1px solid #e2e6d8;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 12px;
   transition: border-color 0.15s;
 }
 
 .chord-match-item.chord-match-perfect,
 .key-match-item.key-match-perfect {
-  border-color: #5a8a5e;
-  background: #f3f8ee;
+  border-color: var(--line-strong);
+  background: var(--surface-soft);
 }
 
 .chord-match-item.chord-match-close,
 .key-match-item.key-match-close {
-  border-color: #c8b860;
-  background: #faf8e8;
+  border-color: var(--line);
+  background: var(--surface-soft);
 }
 
 .chord-match-header,
@@ -376,24 +376,24 @@
 .chord-match-header strong,
 .key-match-header strong {
   font-size: 1rem;
-  color: #293b32;
+  color: var(--ink);
 }
 
 .chord-match-score,
 .key-match-score {
-  font-size: 0.8rem;
-  color: #7a8a7e;
+  font-size: 0.875rem;
+  color: var(--muted);
   font-weight: 600;
 }
 
 .chord-match-perfect .chord-match-score,
 .key-match-perfect .key-match-score {
-  color: #5a8a5e;
+  color: var(--accent);
 }
 
 .chord-match-close .chord-match-score,
 .key-match-close .key-match-score {
-  color: #a89520;
+  color: var(--muted);
 }
 
 .chord-match-notes,
@@ -406,21 +406,21 @@
 .note-chip {
   padding: 2px 8px;
   border-radius: 6px;
-  background: #f0f0e8;
-  font-size: 0.78rem;
-  color: #6a7a6e;
+  background: var(--surface-soft);
+  font-size: 0.875rem;
+  color: var(--muted);
   font-weight: 600;
 }
 
 .note-chip.note-chip-match {
-  background: #5a8a5e;
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .fretboard-empty {
   padding: 32px;
   text-align: center;
-  color: #7a8a7e;
+  color: var(--muted);
   font-size: 0.9rem;
 }
 

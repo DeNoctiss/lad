@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { TabKind } from "../../lib/tabTypes";
 
 const INSTRUMENTS = [
@@ -17,6 +18,8 @@ export function PartMetaFields({
   onNameChange,
   onInstrumentChange,
   onTuningChange,
+  children,
+  autoFocus = false,
 }: {
   name: string;
   instrument: string;
@@ -25,6 +28,8 @@ export function PartMetaFields({
   onNameChange: (value: string) => void;
   onInstrumentChange: (value: string) => void;
   onTuningChange: (value: string) => void;
+  children?: ReactNode;
+  autoFocus?: boolean;
 }) {
   return (
     <>
@@ -32,7 +37,7 @@ export function PartMetaFields({
         <label className="field">
           Название партии
           <input
-            autoFocus
+            autoFocus={autoFocus}
             required
             maxLength={80}
             value={name}
@@ -53,19 +58,25 @@ export function PartMetaFields({
           </select>
         </label>
       </div>
-      <label className="field">
-        Строй / обозначения дорожек
-        <input
-          value={tuning}
-          onChange={(event) => onTuningChange(event.target.value)}
-          placeholder="E A D G B e"
-        />
-        <span className="field-help">
-          {kind === "piano"
-            ? "C4 — среднее до. Доступны клавиши A0–C8; это поле служит заметкой о партии."
-            : "Это заметка о строе. Номера струн на схеме идут от тонкой к толстой; подписи показывают стандартный строй."}
-        </span>
-      </label>
+      <details className="part-sound-settings">
+        <summary>Строй и звучание инструмента</summary>
+        <div>
+          <label className="field">
+            Строй / обозначения дорожек
+            <input
+              value={tuning}
+              onChange={(event) => onTuningChange(event.target.value)}
+              placeholder="E A D G B e"
+            />
+            <span className="field-help">
+              {kind === "piano"
+                ? "C4 — среднее до. Доступны клавиши A0–C8; это поле служит заметкой о партии."
+                : "Для струнных строй влияет на подписи и звук: указывайте от толстой струны к тонкой, например D A D G B e. На схеме тонкая струна сверху."}
+            </span>
+          </label>
+          {children}
+        </div>
+      </details>
     </>
   );
 }

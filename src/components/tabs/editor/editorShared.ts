@@ -20,7 +20,7 @@ export const durations: { value: TabEvent["duration"]; label: string }[] = [
 ];
 
 export const effects: { value: NoteEffect; label: string }[] = [
-  { value: "pm", label: "pm · глушение (весь момент)" },
+  { value: "pm", label: "P.M. · приглушение ладонью всего созвучия" },
   { value: "v", label: "v · вибрато" },
   { value: "harm", label: "harm · флажолет" },
   { value: "b0.5", label: "b0.5 · бенд ½ тона" },
@@ -32,9 +32,9 @@ export const effects: { value: NoteEffect; label: string }[] = [
 
 export const links: { value: NoteLink | ""; label: string }[] = [
   { value: "", label: "Нет" },
-  { value: "h", label: "h · hammer-on" },
-  { value: "p", label: "p · pull-off" },
+  { value: "h", label: "H · хаммер-он" },
+  { value: "p", label: "P · пулл-офф" },
   { value: "/", label: "/ · слайд вверх" },
   { value: "\\", label: "\\ · слайд вниз" },
-  { value: "tie", label: "tie · лига" },
+  { value: "tie", label: "Лига продления" },
 ];

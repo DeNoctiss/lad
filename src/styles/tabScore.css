@@ -50,7 +50,7 @@
   width: 36px;
   height: 36px;
   padding: 0;
-  border: 1px solid #dce3d5;
+  border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--tab-score-paper);
   color: var(--tab-score-green);
@@ -60,7 +60,7 @@
 .tab-score-play:hover:not(:disabled),
 .tab-score-stop:hover:not(:disabled) {
   border-color: var(--tab-score-green);
-  background: #f0f4ec;
+  background: var(--surface-soft);
 }
 
 .tab-score-play:disabled,
@@ -80,7 +80,7 @@
 }
 
 .tab-score-bpm {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--tab-score-muted);
   min-width: 48px;
@@ -88,28 +88,28 @@
 }
 
 .tab-score-playhead {
-  stroke: #d47b3f;
+  stroke: var(--playhead);
   stroke-width: 2.5;
   opacity: 0.85;
   pointer-events: none;
 }
 
 .tab-score-event-playing .tab-score-fret-background {
-  fill: #d47b3f;
+  fill: var(--playhead);
   opacity: 0.18;
 }
 
 .tab-score-event-playing .tab-score-fret {
-  fill: #b85c1f;
+  fill: var(--playhead);
   font-weight: 700;
 }
 
 .tab-score-drum-playing {
-  background: #fdf3e7;
+  background: var(--surface-soft);
 }
 
 .tab-score-drum-playing .tab-score-drum-hit {
-  color: #b85c1f;
+  color: var(--playhead);
   font-weight: 700;
 }
 
@@ -119,7 +119,7 @@
   width: 44px;
   height: 44px;
   border-radius: 13px;
-  background: #edf2e8;
+  background: var(--surface-soft);
   color: var(--tab-score-green);
 }
 
@@ -132,7 +132,7 @@
 
 .tab-score-heading h3 > span {
   margin-left: 8px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 450;
   color: var(--tab-score-muted);
 }
@@ -140,13 +140,13 @@
 .tab-score-heading p {
   margin: 0;
   color: var(--tab-score-muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .tab-score-pagination {
   flex-wrap: wrap;
   gap: 8px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .tab-score-pagination button {
@@ -155,14 +155,14 @@
   width: 36px;
   height: 36px;
   padding: 0;
-  border: 1px solid #dce3d5;
+  border: 1px solid var(--line);
   border-radius: 9px;
-  background: #f3f5ef;
+  background: var(--surface-soft);
   color: var(--tab-score-green);
 }
 
 .tab-score-pagination button:hover:not(:disabled) {
-  background: #e5edde;
+  background: var(--surface-soft);
 }
 
 .tab-score-pagination > span {
@@ -179,7 +179,7 @@
 .tab-score-pagination input {
   width: 68px;
   height: 36px;
-  border: 1px solid #dce3d5;
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 6px 8px;
   background: var(--tab-score-paper);
@@ -188,7 +188,7 @@
 
 .tab-score-pagination-hint {
   color: var(--tab-score-muted);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .tab-score-strip {
@@ -203,7 +203,7 @@
   min-height: 120px;
 }
 .tab-score-strip:focus-visible {
-  outline: 2px solid #789a65;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 .tab-score-measures {
@@ -221,27 +221,27 @@
   overflow: hidden;
 }
 .tab-score-strip .tab-score-measure-selected {
-  box-shadow: inset 0 3px #7e9e72;
+  box-shadow: inset 0 3px var(--shadow-color);
 }
 .tab-score-strip .tab-score-measure-header {
   height: 32px;
   padding: 4px 8px;
   flex-wrap: nowrap;
   gap: 5px;
-  border-right: 1px solid #d4dfca;
+  border-right: 1px solid var(--line);
 }
 .tab-score-strip .tab-score-measure-header h4 {
-  font-size: 10px;
+  font-size: 14px;
   gap: 5px;
   white-space: nowrap;
 }
 .tab-score-strip .tab-score-measure-number {
   width: 21px;
   height: 21px;
-  font-size: 10px;
+  font-size: 14px;
 }
 .tab-score-strip .tab-score-capacity {
-  font-size: 8px;
+  font-size: 14px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -253,11 +253,11 @@
 .tab-score-strip .tab-score-measure-hint {
   margin: 0;
   padding: 0 8px 5px;
-  font-size: 9px;
+  font-size: 14px;
 }
 .tab-score-strip .tab-score-string-label {
   paint-order: stroke;
-  stroke: #fffefa;
+  stroke: var(--line);
   stroke-width: 4px;
   stroke-linejoin: round;
 }
@@ -272,7 +272,7 @@
   padding: 2px 3px;
   gap: 1px;
   align-items: center;
-  font-size: 9px;
+  font-size: 14px;
 }
 .tab-score-strip .tab-score-drum-hit,
 .tab-score-strip .tab-score-drum-empty {
@@ -283,27 +283,27 @@
   padding: 2px 4px;
   align-items: center;
   overflow: hidden;
-  font-size: 9px;
+  font-size: 14px;
 }
 .tab-score-strip .tab-score-drum-table th small {
   display: none;
 }
 .tab-score-strip .tab-score-drum-beats {
   height: 20px;
-  font-size: 9px;
+  font-size: 14px;
 }
 .tab-score-strip .tab-score-drum-cell .tab-score-effect {
-  font-size: 7px;
+  font-size: 14px;
 }
 .tab-score-view > .tab-score-legend {
   margin-top: 10px;
   padding-top: 9px;
-  font-size: 10px;
+  font-size: 14px;
 }
 .tab-score-legend > summary {
   cursor: pointer;
-  color: #60784f;
-  font-size: 11px;
+  color: var(--accent);
+  font-size: 14px;
   margin-bottom: 6px;
 }
 .part-card > .tab-score-view {
@@ -325,21 +325,21 @@
 }
 
 .tab-score-measure-selected {
-  border-color: #7e9e72;
-  box-shadow: 0 0 0 1px #7e9e7224;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--shadow-color);
 }
 
 .tab-score-measure-header {
   justify-content: space-between;
   flex-wrap: wrap;
   padding: 12px 16px;
-  background: #f6f7f1;
-  border-bottom: 1px solid #edf0e7;
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--line);
 }
 
 .tab-score-measure-header h4 {
   gap: 9px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
   margin: 0;
   color: var(--tab-score-muted);
@@ -351,26 +351,26 @@
   width: 27px;
   height: 27px;
   border-radius: 7px;
-  background: #e8eedd;
-  color: #38563f;
-  font-size: 13px;
+  background: var(--surface-soft);
+  color: var(--accent);
+  font-size: 14px;
   font-weight: 700;
 }
 
 .tab-score-meter {
   margin-left: 7px;
-  color: #536b4d;
+  color: var(--accent);
   font-variant-numeric: tabular-nums;
   font-weight: 650;
 }
 
 .tab-score-capacity {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--tab-score-muted);
 }
 
 .tab-score-capacity-error {
-  color: #a23f28;
+  color: var(--danger);
   font-weight: 600;
 }
 
@@ -380,7 +380,7 @@
   overflow-y: hidden;
   overscroll-behavior-inline: contain;
   scrollbar-width: thin;
-  scrollbar-color: #bfccb5 #f6f7f1;
+  scrollbar-color: var(--surface-muted) var(--surface-soft);
   padding: 12px 0 6px;
 }
 
@@ -397,46 +397,46 @@
 }
 
 .tab-score-string {
-  stroke: #9aa38e;
+  stroke: var(--line-strong);
 }
 
 .tab-score-barline {
   fill: none;
-  stroke: #5a6a50;
+  stroke: var(--line-strong);
   stroke-width: 1.7;
 }
 
 .tab-score-string-label {
-  fill: #4a6141;
-  font-size: 13px;
+  fill: var(--accent);
+  font-size: 14px;
   font-weight: 650;
 }
 
 .tab-score-unused {
-  fill: #eff2e9;
+  fill: var(--muted);
   opacity: 0.65;
 }
 
 .tab-score-beat,
 .tab-score-subbeat {
-  stroke: #e3e8dc;
+  stroke: var(--line);
   stroke-width: 1;
   stroke-dasharray: 3 5;
 }
 
 .tab-score-subbeat {
-  stroke: #eef0e8;
+  stroke: var(--line);
   stroke-dasharray: 2 6;
 }
 
 .tab-score-beat-label {
   fill: var(--tab-score-muted);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .tab-score-rhythm {
   fill: var(--tab-score-ink);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .tab-score-rhythm path {
@@ -456,13 +456,13 @@
 }
 
 .tab-score-duration {
-  fill: #667264;
-  font-size: 10px;
+  fill: var(--muted);
+  font-size: 14px;
 }
 
 .tab-score-pm-label {
-  fill: #8a6d3b;
-  font-size: 10px;
+  fill: var(--playhead);
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.5px;
   paint-order: stroke;
@@ -472,7 +472,7 @@
 }
 
 .tab-score-pm-line {
-  stroke: #8a6d3b;
+  stroke: var(--playhead);
   stroke-width: 1.3;
   stroke-dasharray: 5 4;
 }
@@ -492,8 +492,8 @@
 
 .tab-score-rest-label,
 .tab-score-empty-svg {
-  fill: #627158;
-  font-size: 12px;
+  fill: var(--muted);
+  font-size: 14px;
   paint-order: stroke;
   stroke: var(--tab-score-paper);
   stroke-width: 6px;
@@ -507,8 +507,8 @@
 }
 
 .tab-score-event-selected .tab-score-event-focus {
-  fill: #dce9d080;
-  stroke: #92b17c;
+  fill: var(--muted);
+  stroke: var(--accent);
 }
 
 .tab-score-interactive {
@@ -519,7 +519,7 @@
 .tab-score-event-target.tab-score-interactive:hover .tab-score-event-focus,
 .tab-score-event-target.tab-score-interactive:focus-visible
   .tab-score-event-focus {
-  fill: #dce9d066;
+  fill: var(--muted);
   stroke: var(--tab-score-green);
 }
 
@@ -531,7 +531,7 @@
 
 .tab-score-note.tab-score-interactive:hover .tab-score-lane-target,
 .tab-score-note.tab-score-interactive:focus-visible .tab-score-lane-target {
-  fill: #deead4;
+  fill: var(--muted);
   stroke: var(--tab-score-green);
 }
 
@@ -540,7 +540,7 @@
 }
 
 .tab-score-fret {
-  fill: #283924;
+  fill: var(--ink);
   font:
     600 17px "Consolas",
     "Courier New",
@@ -548,9 +548,9 @@
 }
 
 .tab-score-effect {
-  fill: #446637;
-  color: #446637;
-  font-size: 10px;
+  fill: var(--accent);
+  color: var(--accent);
+  font-size: 14px;
   font-weight: 650;
 }
 
@@ -560,13 +560,13 @@
 
 .tab-score-link path {
   fill: none;
-  stroke: #587f47;
+  stroke: var(--line-strong);
   stroke-width: 1.4;
 }
 
 .tab-score-link-label {
-  fill: #436735;
-  font-size: 10px;
+  fill: var(--accent);
+  font-size: 14px;
   font-weight: 600;
   paint-order: stroke;
   stroke: var(--tab-score-paper);
@@ -575,8 +575,8 @@
 }
 
 .tab-score-pm-label {
-  fill: #8a6d3b;
-  font-size: 10px;
+  fill: var(--playhead);
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.5px;
   paint-order: stroke;
@@ -586,7 +586,7 @@
 }
 
 .tab-score-pm-line {
-  stroke: #8a6d3b;
+  stroke: var(--playhead);
   stroke-width: 1.4;
   stroke-dasharray: 5 4;
 }
@@ -594,7 +594,7 @@
 .tab-score-measure-hint {
   margin: 0;
   padding: 4px 16px 12px;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--tab-score-muted);
 }
 
@@ -607,14 +607,14 @@
 .tab-score-drum-beats {
   position: relative;
   height: 29px;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--tab-score-muted);
 }
 
 .tab-score-drum-beats span {
   position: absolute;
   top: 0;
-  border-left: 1px solid #ccd7c2;
+  border-left: 1px solid var(--line);
   padding-left: 5px;
   height: 24px;
 }
@@ -623,7 +623,7 @@
   border-collapse: collapse;
   table-layout: fixed;
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .tab-score-drum-table tr {
@@ -635,14 +635,14 @@
   min-width: 0;
   padding: 0;
   text-align: center;
-  border-bottom: 1px solid #e4e9dc;
-  border-right: 1px solid #e4e9dc;
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
   font-weight: 500;
 }
 
 .tab-score-drum-table thead th {
-  background: #f6f8f1;
-  font-size: 10px;
+  background: var(--surface-soft);
+  font-size: 14px;
 }
 
 .tab-score-drum-table th:first-child {
@@ -652,14 +652,14 @@
   gap: 3px;
   align-items: flex-start;
   padding: 7px 8px 7px 15px;
-  color: #48613c;
+  color: var(--accent);
   font-weight: 650;
 }
 
 .tab-score-drum-table th small {
   display: block;
   color: var(--tab-score-muted);
-  font-size: 9px;
+  font-size: 14px;
   line-height: 1.25;
   font-weight: 400;
 }
@@ -691,23 +691,23 @@
     650 21px "Consolas",
     monospace;
   line-height: 22px;
-  color: #3e6432;
+  color: var(--accent);
 }
 
 .tab-score-drum-empty {
   font-size: 20px;
-  color: #a7b29b;
+  color: var(--muted);
   line-height: 22px;
 }
 
 .tab-score-drum-table .tab-score-drum-selected {
-  background: #e6efdd;
-  box-shadow: inset 2px 0 #91ad79;
+  background: var(--surface-soft);
+  box-shadow: inset 2px 0 var(--shadow-color);
 }
 
 .tab-score-drum-cell:is(button):hover,
 .tab-score-drum-event:is(button):hover {
-  background: #e7efde;
+  background: var(--surface-soft);
 }
 
 .tab-score-drum-cell:is(button):focus-visible,
@@ -716,18 +716,18 @@
   z-index: 1;
   outline: 2px solid var(--tab-score-green);
   outline-offset: -3px;
-  background: #e7efde;
+  background: var(--surface-soft);
 }
 
 .tab-score-drum-table .tab-score-drum-unused {
   background: repeating-linear-gradient(
     135deg,
-    #f4f6ee,
-    #f4f6ee 6px,
-    #f0f3e9 6px,
-    #f0f3e9 7px
+    var(--surface-soft),
+    var(--surface-soft) 6px,
+    var(--surface-soft) 6px,
+    var(--surface-soft) 7px
   );
-  color: #6c785e;
+  color: var(--muted);
   overflow: hidden;
   padding-top: 10px;
   text-align: left;
@@ -737,7 +737,7 @@
 .tab-score-drum-guidance,
 .tab-score-empty {
   color: var(--tab-score-muted);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
   padding: 20px;
   margin: 0;
@@ -748,7 +748,7 @@
   margin-top: 20px;
   padding-top: 14px;
   color: var(--tab-score-muted);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .tab-score-legend p {
@@ -757,14 +757,14 @@
 }
 
 .tab-score-legend strong {
-  color: #46573d;
+  color: var(--accent);
   font-weight: 600;
 }
 
 .tab-score-print-note {
   margin: 12px 0 0;
   color: var(--tab-score-muted);
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -835,7 +835,7 @@
   .tab-score-view {
     border: 0;
     padding: 0;
-    background: white;
+    background: var(--surface);
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
@@ -846,7 +846,7 @@
 
   .tab-score-measure {
     break-inside: avoid;
-    border-color: #c3c9bb;
+    border-color: var(--line);
     box-shadow: none;
   }
 
@@ -875,12 +875,12 @@
   .tab-score-drum-cell,
   .tab-score-drum-event {
     padding: 4px 2px;
-    font-size: 9px;
+    font-size: 14px;
   }
 
   .tab-score-print-note {
     display: block;
-    color: #333;
+    color: var(--ink);
     font-weight: 600;
   }
 }

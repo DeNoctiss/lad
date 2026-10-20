@@ -1,12 +1,6 @@
-import {
-  ArrowDownToLine,
-  BookOpen,
-  ChevronRight,
-  Menu,
-  Search,
-  X,
-} from "lucide-react";
+import { ArrowDownToLine, Menu, Search, X } from "lucide-react";
 import type { ReactNode, RefObject } from "react";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Topbar({
   breadcrumb,
@@ -15,6 +9,8 @@ export function Topbar({
   searchRef,
   onExport,
   onMenuOpen,
+  navigate,
+  navSection,
 }: {
   breadcrumb: ReactNode;
   query: string;
@@ -22,10 +18,12 @@ export function Topbar({
   searchRef: RefObject<HTMLInputElement | null>;
   onExport: () => void;
   onMenuOpen: () => void;
+  navigate: (route: string) => void;
+  navSection: string;
 }) {
   return (
     <header className="topbar">
-      <div className="breadcrumb">
+      <div className="topbar-brand-group">
         <button
           className="btn-icon mobile-menu"
           aria-label="Открыть меню"
@@ -33,11 +31,38 @@ export function Topbar({
         >
           <Menu size={21} />
         </button>
-        <BookOpen size={17} />
-        <span>Моя библиотека</span>
-        <ChevronRight size={13} />
-        <strong>{breadcrumb}</strong>
+        <button
+          className="topbar-brand"
+          onClick={() => navigate("bands")}
+          aria-label="Лад — на главную"
+        >
+          Лад<span>.</span>
+        </button>
       </div>
+      <nav className="topbar-nav" aria-label="Основная навигация">
+        {[
+          {
+            id: "bands",
+            label: "Библиотека",
+            active: ["bands", "songs"].includes(navSection),
+          },
+          {
+            id: "favorites",
+            label: "Избранное",
+            active: navSection === "favorites",
+          },
+          { id: "chords", label: "Аккорды", active: navSection === "chords" },
+        ].map((item) => (
+          <button
+            key={item.id}
+            aria-current={item.active ? "page" : undefined}
+            onClick={() => navigate(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+      <span className="visual-tab-sr-only">{breadcrumb}</span>
       <div className="topbar-actions">
         <div className="global-search">
           <Search size={16} />
@@ -60,13 +85,16 @@ export function Topbar({
             <kbd>/</kbd>
           )}
         </div>
-        <button className="export-button btn" onClick={onExport}>
+        <button
+          className="export-button btn"
+          aria-label="Экспорт"
+          title="Экспорт библиотеки"
+          onClick={onExport}
+        >
           <ArrowDownToLine size={16} />
           <span>Экспорт</span>
         </button>
-        <span className="profile-mark" title="Личная библиотека">
-          Я
-        </span>
+        <ThemeToggle />
       </div>
     </header>
   );

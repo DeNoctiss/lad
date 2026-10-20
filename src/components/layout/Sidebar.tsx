@@ -7,7 +7,9 @@ import {
   Music2,
   Upload,
   Users,
+  X,
 } from "lucide-react";
+import { useEffect, useRef } from "react";
 import type { Band, Song } from "../../lib/model";
 
 function ClockIcon() {
@@ -39,6 +41,7 @@ export function Sidebar({
   recent,
   navigate,
   onImport,
+  onClose,
 }: {
   isOpen: boolean;
   navSection: string;
@@ -48,10 +51,61 @@ export function Sidebar({
   recent: Song[];
   navigate: (route: string) => void;
   onImport: () => void;
+  onClose: () => void;
 }) {
+  const drawer = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const previous =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    drawer.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    return () => {
+      document.body.style.overflow = overflow;
+      previous?.focus();
+    };
+  }, [isOpen]);
   const bandOf = (song: Song) => bands.find((band) => band.id === song.bandId);
   return (
-    <aside className={`sidebar ${isOpen ? "is-open" : ""}`}>
+    <aside
+      ref={drawer}
+      className={`sidebar ${isOpen ? "is-open" : ""}`}
+      role="dialog"
+      aria-modal={isOpen || undefined}
+      aria-label="Меню библиотеки"
+      aria-hidden={!isOpen}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          onClose();
+        }
+        if (event.key !== "Tab") return;
+        const controls = Array.from(
+          drawer.current?.querySelectorAll<HTMLButtonElement>(
+            "button:not(:disabled)",
+          ) ?? [],
+        );
+        const first = controls[0],
+          last = controls.at(-1);
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }}
+    >
+      <button
+        className="btn-icon sidebar-close"
+        aria-label="Закрыть меню"
+        onClick={onClose}
+      >
+        <X size={19} />
+      </button>
       <button
         className="brand"
         onClick={() => navigate("bands")}

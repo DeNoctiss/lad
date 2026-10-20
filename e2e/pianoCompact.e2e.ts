@@ -15,7 +15,7 @@ async function editor(page: Page, instrument: string, name: string) {
   return dialog;
 }
 
-test("consecutive guitar bars form one compact strip inside one accordion", async ({
+test("consecutive guitar bars adapt to the workspace and part navigation keeps the score", async ({
   page,
 }) => {
   const dialog = await editor(page, "Ритм-гитара", "Соединённые такты");
@@ -35,10 +35,13 @@ test("consecutive guitar bars form one compact strip inside one accordion", asyn
   const second = await bars.nth(1).boundingBox();
   expect(Math.abs(first!.y - second!.y)).toBeLessThan(2);
   expect(Math.abs(first!.x + first!.width - second!.x)).toBeLessThan(2);
-  expect(first!.height).toBeLessThan(340);
-  await card.locator(".part-title").click();
-  await expect(card.locator(".tab-score-view")).toHaveCount(0);
-  await card.locator(".part-title").click();
+  expect(first!.height).toBeLessThan(440);
+  await page.locator(".part-navigation-item").first().click();
+  await expect(card).toHaveCount(0);
+  await page
+    .locator(".part-navigation-item")
+    .filter({ hasText: "Соединённые такты" })
+    .click();
   await expect(card.locator(".tab-score-strip")).toBeVisible();
 });
 
@@ -55,19 +58,25 @@ test("dense sixteenth bars scroll horizontally inside the part block", async ({
     .fill(`${notes} | ${notes} | ${notes}`);
   await dialog.getByRole("button", { name: "Применить запись" }).click();
   await dialog.getByRole("button", { name: "Сохранить партию" }).click();
+  await page.setViewportSize({ width: 768, height: 900 });
   const card = page.locator(".part-card").filter({ hasText: "Плотные такты" });
   const strip = card.locator(".tab-score-strip");
-  const stripBox = await strip.boundingBox();
   const measures = card.locator(".tab-score-measure");
   const firstBox = await measures.nth(0).boundingBox();
   const thirdBox = await measures.nth(2).boundingBox();
-  expect(firstBox!.width).toBeGreaterThan(stripBox!.width / 4);
-  expect(thirdBox!.x + thirdBox!.width - firstBox!.x).toBeGreaterThan(
-    stripBox!.width,
-  );
-  expect(await strip.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(
-    true,
-  );
+  expect(thirdBox!.y).toBeGreaterThan(firstBox!.y);
+  expect(
+    await strip.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+  ).toBe(true);
+  expect(
+    await card
+      .locator(".tab-score-scroll")
+      .first()
+      .evaluate((el) => el.scrollWidth > el.clientWidth),
+  ).toBe(true);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(768);
 });
 
 test("piano notation switches between keys and roll without changing notes and persists", async ({
@@ -101,6 +110,10 @@ test("piano notation switches between keys and roll without changing notes and p
   await dialog.getByRole("button", { name: "Сохранить партию" }).click();
   await page.reload();
   await page.getByRole("tab", { name: /Табулатуры/ }).click();
+  await page
+    .locator(".part-navigation-item")
+    .filter({ hasText: "Клавишная партия" })
+    .click();
   const card = page
     .locator(".part-card")
     .filter({ hasText: "Клавишная партия" });

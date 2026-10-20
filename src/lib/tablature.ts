@@ -156,6 +156,12 @@ export function validateScore(
           );
         if (event.dotted && event.triplet)
           fail(`${location}: точку и триоль нельзя совмещать.`);
+        if (
+          event.strum !== undefined &&
+          event.strum !== "down" &&
+          event.strum !== "up"
+        )
+          fail(`${location}: направление боя должно быть down или up.`);
         const notes = Array.from(
           list(event.notes, kind === "piano" ? 10 : 6, `${location}, ноты`),
           (rawNote, n): TabNote => {
@@ -205,6 +211,7 @@ export function validateScore(
           duration: event.duration as TabEvent["duration"],
           dotted: event.dotted,
           triplet: event.triplet,
+          ...(event.strum === undefined ? {} : { strum: event.strum }),
           notes,
         };
       },

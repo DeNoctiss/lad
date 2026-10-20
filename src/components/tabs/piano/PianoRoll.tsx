@@ -35,9 +35,9 @@ export function PianoRoll({
   playingMeasure?: number;
   playingEvent?: number;
   onLaneClick?: (measure: number, event: number, lane: string) => void;
-  onPick: (measure: number, event: number) => void;
+  onPick: (measure: number, event: number, lane?: string) => void;
 }) {
-  const row = 19;
+  const row = 26;
   const top = 32;
   const rollHeight = top + pitches.length * row;
   const pick = onPick;
@@ -75,8 +75,8 @@ export function PianoRoll({
               y={top + index * row}
               width={barWidth * (end - start)}
               height={row}
-              fill={pianoBlack(midi) ? "#eef0ea" : "#fffefa"}
-              stroke="#e2e8dc"
+              fill={pianoBlack(midi) ? "var(--surface-soft)" : "var(--surface)"}
+              stroke="var(--line)"
               strokeWidth={0.5}
             />
           ))}
@@ -105,8 +105,8 @@ export function PianoRoll({
                     y2={rollHeight}
                     stroke={
                       beat === 0 || beat === score.meter.beats
-                        ? "#7f9570"
-                        : "#d8e2d0"
+                        ? "var(--muted)"
+                        : "var(--line)"
                     }
                     strokeDasharray={
                       beat === 0 || beat === score.meter.beats
@@ -159,11 +159,11 @@ export function PianoRoll({
                           role="button"
                           tabIndex={0}
                           aria-label={`${eventLabel(event, m, index)}, клавиша ${pianoLabel(note.lane)}`}
-                          onClick={() => pick(m, index)}
+                          onClick={() => pick(m, index, note.lane)}
                           onKeyDown={(key) => {
                             if (key.key === "Enter" || key.key === " ") {
                               key.preventDefault();
-                              pick(m, index);
+                              pick(m, index, note.lane);
                             }
                           }}
                         >
@@ -176,7 +176,7 @@ export function PianoRoll({
                           />
                           <text
                             x={x + 5}
-                            y={top + (high - pianoMidi(note.lane)!) * row + 13}
+                            y={top + (high - pianoMidi(note.lane)!) * row + 18}
                           >
                             {note.lane}
                             {note.link === "tie" ? " ↔" : ""}

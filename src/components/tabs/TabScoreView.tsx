@@ -1,13 +1,13 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Music2, Loader2, Pause, Play, Square } from "lucide-react";
 import { durationTicks, measureTicks } from "../../lib/tablature";
+import { emptySlots } from "../../lib/tabEditing";
 import { TabPlayer } from "../../lib/playback";
 import "../../styles/tabScore.css";
 import { PianoNotation } from "./PianoNotation";
 import { StringMeasure } from "./score/StringMeasure";
 import { DrumMeasure } from "./score/DrumMeasure";
 import {
-  ROW_SIZE,
   LEFT,
   RIGHT,
   instruments,
@@ -15,12 +15,17 @@ import {
   remainingLabel,
 } from "./score/scoreShared";
 import type { TabScoreViewProps } from "./score/scoreShared";
+import { useScoreLayout } from "./score/useScoreLayout";
 export type { TabScoreViewProps };
 
 export function TabScoreView({
   score,
   selectedMeasure,
   selectedEvent,
+  selectedLane,
+  selectedTick,
+  entryRhythm,
+  onEmptyClick,
   onSelect,
   onLaneClick,
   bpm = 92,
@@ -28,6 +33,10 @@ export function TabScoreView({
   sound,
 }: TabScoreViewProps) {
   const id = useId();
+  const lastSelection = useRef(
+    `${selectedMeasure}:${selectedTick}:${selectedLane}`,
+  );
+  const viewRef = useRef<HTMLElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<TabPlayer | null>(null);
   const [playerState, setPlayerState] = useState<
@@ -37,8 +46,8 @@ export function TabScoreView({
     measure: number;
     event: number;
   } | null>(null);
+  const [playbackError, setPlaybackError] = useState("");
   const measureCount = score.measures.length;
-  const multiRow = measureCount > ROW_SIZE;
 
   useEffect(
     () => () => {
@@ -51,7 +60,12 @@ export function TabScoreView({
     m.events.some((e) => e.notes.length > 0),
   );
 
+  useEffect(() => {
+    playerRef.current?.stop();
+  }, [score, tuning, sound, bpm]);
+
   function togglePlay() {
+    setPlaybackError("");
     const player = (playerRef.current ??= new TabPlayer());
     if (playerState === "playing") {
       player.pause();
@@ -62,17 +76,24 @@ export function TabScoreView({
       return;
     }
     if (playerState === "loading") return;
-    void player.play(score, {
-      bpm,
-      tuningText: tuning,
-      sound,
-      onEvent: (measure, event) => {
-        setPlayhead(
-          measure === null || event === null ? null : { measure, event },
+    void player
+      .play(score, {
+        bpm,
+        tuningText: tuning,
+        sound,
+        onEvent: (measure, event) => {
+          setPlayhead(
+            measure === null || event === null ? null : { measure, event },
+          );
+        },
+        onStateChange: setPlayerState,
+      })
+      .catch(() => {
+        player.stop();
+        setPlaybackError(
+          "Не удалось запустить звук. Попробуйте нажать «Играть» ещё раз.",
         );
-      },
-      onStateChange: setPlayerState,
-    });
+      });
   }
 
   function stopPlayback() {
@@ -81,7 +102,7 @@ export function TabScoreView({
 
   useEffect(() => {
     if (selectedMeasure === undefined) return;
-    const strip = stripRef.current;
+    const strip = stripRef.current ?? viewRef.current;
     const bar = strip?.querySelector<HTMLElement>(
       `[data-measure="${selectedMeasure}"]`,
     );
@@ -91,15 +112,24 @@ export function TabScoreView({
 
   useEffect(() => {
     if (!playhead) return;
-    const strip = stripRef.current;
+    const strip = stripRef.current ?? viewRef.current;
     const bar = strip?.querySelector<HTMLElement>(
       `[data-measure="${playhead.measure}"]`,
     );
     if (strip && bar)
       bar.scrollIntoView({ block: "nearest", inline: "nearest" });
   }, [playhead]);
+  useEffect(() => {
+    const key = `${selectedMeasure}:${selectedTick}:${selectedLane}`;
+    if (key === lastSelection.current) return;
+    lastSelection.current = key;
+    viewRef.current
+      ?.querySelector('[data-cursor="true"]')
+      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [selectedMeasure, selectedTick, selectedLane]);
+
   function jumpToMeasure(value: number) {
-    const strip = stripRef.current;
+    const strip = stripRef.current ?? viewRef.current;
     const bar = strip?.querySelector<HTMLElement>(
       `[data-measure="${value - 1}"]`,
     );
@@ -112,11 +142,30 @@ export function TabScoreView({
       const ticks = durationTicks(event);
       if (ticks > 0) shortest = Math.min(shortest, ticks);
     }
-  const width = Math.max(320, LEFT + RIGHT + Math.ceil(total / shortest) * 32);
+  if (entryRhythm) {
+    shortest = Math.min(shortest, durationTicks(entryRhythm));
+    for (let measure = 0; measure < measureCount; measure++)
+      for (const slot of emptySlots(score, measure, entryRhythm))
+        shortest = Math.min(shortest, slot.ticks);
+  }
+  const minimumWidth = Math.max(
+    onEmptyClick ? 480 : 380,
+    LEFT + RIGHT + Math.ceil(total / shortest) * 48,
+  );
+  const { columns, width } = useScoreLayout(
+    viewRef,
+    minimumWidth,
+    measureCount,
+  );
+  const multiRow = measureCount > columns;
   const props = {
     score,
     selectedMeasure,
     selectedEvent,
+    selectedLane,
+    selectedTick,
+    entryRhythm,
+    onEmptyClick,
     onSelect,
     onLaneClick,
     width,
@@ -125,7 +174,11 @@ export function TabScoreView({
     tuning,
   };
   return (
-    <section className="tab-score-view" aria-labelledby={`${id}-heading`}>
+    <section
+      ref={viewRef}
+      className="tab-score-view"
+      aria-labelledby={`${id}-heading`}
+    >
       <header className="tab-score-header">
         <div className="tab-score-heading">
           <span className="tab-score-icon">
@@ -206,27 +259,42 @@ export function TabScoreView({
                 }}
               />
               <span className="tab-score-pagination-hint">
-                по {ROW_SIZE} в ряд
+                по {columns} в ряд
               </span>
             </nav>
           )}
         </div>
       </header>
+      {playbackError && (
+        <p role="status" className="editor-feedback">
+          {playbackError}
+        </p>
+      )}
       {measureCount === 0 ? (
         <p className="tab-score-empty">
           Пока нет тактов. Создайте первый такт в редакторе.
         </p>
       ) : score.kind === "piano" ? (
-        <PianoNotation {...props} start={0} end={measureCount} />
+        <PianoNotation
+          {...props}
+          columns={columns}
+          start={0}
+          end={measureCount}
+        />
       ) : (
         <div
           className="tab-score-strip"
           ref={stripRef}
           tabIndex={0}
           role="region"
-          aria-label="Такты по три в ряд, прокрутка и изменение высоты"
+          aria-label="Такты, прокрутка и изменение высоты"
         >
-          <div className="tab-score-measures">
+          <div
+            className="tab-score-measures"
+            style={{
+              gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+            }}
+          >
             {score.measures.map((measure, measureIndex) => {
               const used = usedTicks(measure.events);
               return (
@@ -301,7 +369,7 @@ export function TabScoreView({
               {onLaneClick
                 ? score.kind === "drums"
                   ? "Нажмите на ячейку, чтобы изменить удар."
-                  : "Нажмите на струну у существующего события, чтобы изменить ноту."
+                  : "Нажмите на струну и введите лад цифрами; X — заглушённый звук."
                 : "Нажмите на событие, чтобы выбрать его."}{" "}
               Клавиатура: Tab, затем Enter или Пробел.
             </p>

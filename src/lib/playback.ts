@@ -4,10 +4,11 @@ import { pianoMidi } from "./piano";
 import { soundFile, soundFx } from "./partSounds";
 import type { DriveType } from "./partSounds";
 import { Soundfont } from "smplr";
+import { mutedStringVoice } from "./mutedStrings";
 
 /**
  * Playback engine for structured tab scores.
- * Uses Web Audio API to synthesize instrument sounds — no audio files needed.
+ * Uses sampled instruments and drums, with Web Audio fallbacks and unpitched dead-note attacks.
  */
 
 export type EventMark = {
@@ -17,7 +18,7 @@ export type EventMark = {
 };
 
 export type PlayedNote = {
-  /** MIDI pitch, null for drums/muted. */
+  /** MIDI pitch (open-string pitch for a muted hit), null for drums. */
   midi: number | null;
   /** Drum lane id (HH/SD/BD/HT/MT/LT/CC/SP/RD) or null. */
   drum: string | null;
@@ -220,15 +221,13 @@ export function buildTimeline(
       // ~45ms total spread — down strokes hit the low strings first.
       let strumDelays: Map<string, number> | null = null;
       if (event.strum && event.notes.length > 1) {
-        const laneCount = lanesFor(score.kind).length;
-        const step = 0.045 / (event.notes.length - 1) / secPerTick;
+        const ordered = [...event.notes].sort(
+          (a, b) => (laneIndex.get(a.lane) ?? 0) - (laneIndex.get(b.lane) ?? 0),
+        );
+        if (event.strum === "down") ordered.reverse();
+        const step = 0.045 / (ordered.length - 1) / secPerTick;
         strumDelays = new Map(
-          event.notes.map((note) => {
-            const index = laneIndex.get(note.lane) ?? 0;
-            const order =
-              event.strum === "down" ? laneCount - 1 - index : index;
-            return [note.lane, order * step] as const;
-          }),
+          ordered.map((note, index) => [note.lane, index * step]),
         );
       }
       for (const note of event.notes) {
@@ -236,7 +235,7 @@ export function buildTimeline(
         if (consumed.has(key)) continue;
         const midi = laneMidi(note.lane);
         const drum = score.kind === "drums" ? note.lane : null;
-        const muted = note.fret === "x";
+        const muted = !drum && note.fret === "x";
         const played: PlayedNote = {
           midi: midi === null ? null : midi + (muted ? 0 : Number(note.fret)),
           drum,
@@ -326,7 +325,6 @@ function noiseBuffer(ctx: AudioContext): AudioBuffer {
 
 type VoiceOpts = {
   velocity: number;
-  muted: boolean;
   pm: boolean;
   vibrato: boolean;
   bend: number;
@@ -351,24 +349,6 @@ function pitchedVoice(
   const freq = midiFreq(midi + harmShift);
   const end = at + Math.max(dur, 0.08);
   const stopAt = end + 1.6;
-
-  if (opts.muted) {
-    // Percussive muted-string click.
-    const noise = ctx.createBufferSource();
-    noise.buffer = noiseBuffer(ctx);
-    const bp = ctx.createBiquadFilter();
-    bp.type = "bandpass";
-    bp.frequency.value = 2800;
-    bp.Q.value = 1.2;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, at);
-    g.gain.exponentialRampToValueAtTime(0.22 * opts.velocity, at + 0.004);
-    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.07);
-    noise.connect(bp).connect(g).connect(out);
-    noise.start(at);
-    noise.stop(at + 0.1);
-    return;
-  }
 
   const oscA = ctx.createOscillator();
   const oscB = ctx.createOscillator();
@@ -836,7 +816,12 @@ export class TabPlayer {
     this.marks = timeline.marks;
     this.secPerTick = timeline.secPerTick;
 
-    const pending = this.instrument(score.kind, options.sound);
+    const needsPitchedSamples = timeline.notes.some(
+      (note) => !note.muted && !note.drum && note.midi !== null,
+    );
+    const pending = needsPitchedSamples
+      ? this.instrument(score.kind, options.sound)
+      : null;
     let inst: Soundfont | null = null;
     if (pending) {
       this.setState("loading");
@@ -881,6 +866,7 @@ export class TabPlayer {
           source.playbackRate.value = 0.97 + velocity * 0.06;
           source.connect(gain).connect(master);
           source.start(at);
+          this.stops.push(() => source.stop());
         } else {
           drumVoice(ctx, master, noise, note.drum, at, note.velocity, open);
         }
@@ -888,15 +874,17 @@ export class TabPlayer {
       }
       if (note.midi === null) continue;
       if (note.muted) {
-        pitchedVoice(ctx, master, note.midi, at, dur, "guitar", {
-          velocity: note.velocity,
-          muted: true,
-          pm: false,
-          vibrato: false,
-          bend: 0,
-          legato: false,
-          waypoints: [],
-        });
+        this.stops.push(
+          mutedStringVoice(
+            ctx,
+            master,
+            noise,
+            at,
+            score.kind === "bass" ? "bass" : "guitar",
+            note.midi,
+            note.velocity,
+          ),
+        );
         continue;
       }
       if (inst) {
@@ -912,7 +900,6 @@ export class TabPlayer {
             : "guitar";
       pitchedVoice(ctx, master, note.midi, at, dur, kind, {
         velocity: note.velocity,
-        muted: false,
         pm: note.effects.includes("pm"),
         vibrato: note.effects.includes("v"),
         bend: note.bend,

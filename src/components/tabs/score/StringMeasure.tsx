@@ -1,3 +1,4 @@
+import { StringEntryCells } from "./StringEntryCells";
 import { useId } from "react";
 import { durationTicks, measureTicks } from "../../../lib/tablature";
 import {
@@ -27,6 +28,10 @@ export function StringMeasure({
   width,
   selectedMeasure,
   selectedEvent,
+  selectedLane,
+  selectedTick,
+  entryRhythm,
+  onEmptyClick,
   onSelect,
   onLaneClick,
   playingMeasure,
@@ -354,7 +359,7 @@ export function StringMeasure({
                       <rect
                         x={x - 16}
                         y={y - 12}
-                        width={32}
+                        width={Math.max(32, slotWidth - 2)}
                         height={24}
                         rx={5}
                         className="tab-score-lane-target"
@@ -382,7 +387,7 @@ export function StringMeasure({
                         </text>
                         <text
                           x={x}
-                          y={y + 17}
+                          y={y + 21}
                           textAnchor="middle"
                           className="tab-score-effect"
                         >
@@ -402,7 +407,18 @@ export function StringMeasure({
           </g>
         );
       })}
-      {measure.events.length === 0 && (
+      <StringEntryCells
+        score={score}
+        measureIndex={measureIndex}
+        width={width}
+        selectedMeasure={selectedMeasure}
+        selectedLane={selectedLane}
+        selectedTick={selectedTick}
+        entryRhythm={entryRhythm}
+        onEmptyClick={onEmptyClick}
+        tuning={tuning}
+      />
+      {measure.events.length === 0 && !onEmptyClick && (
         <text
           x={width / 2}
           y={TOP + ROW * 2 + 17}

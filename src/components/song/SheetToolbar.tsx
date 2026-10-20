@@ -15,10 +15,32 @@ export function SheetToolbar({
 }) {
   return (
     <div className="sheet-toolbar">
-      <div className="sheet-tabs" role="tablist" aria-label="Содержимое песни">
+      <div
+        className="sheet-tabs"
+        role="tablist"
+        aria-label="Содержимое песни"
+        onKeyDown={(event) => {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
+            return;
+          event.preventDefault();
+          const next =
+            event.key === "Home"
+              ? "lyrics"
+              : event.key === "End"
+                ? "tabs"
+                : tab === "lyrics"
+                  ? "tabs"
+                  : "lyrics";
+          onTabChange(next);
+          document.getElementById(`song-tab-${next}`)?.focus();
+        }}
+      >
         <button
           role="tab"
+          id="song-tab-lyrics"
+          aria-controls="song-panel-lyrics"
           aria-selected={tab === "lyrics"}
+          tabIndex={tab === "lyrics" ? 0 : -1}
           onClick={() => onTabChange("lyrics")}
           className={tab === "lyrics" ? "active" : ""}
         >
@@ -26,7 +48,10 @@ export function SheetToolbar({
         </button>
         <button
           role="tab"
+          id="song-tab-tabs"
+          aria-controls="song-panel-tabs"
           aria-selected={tab === "tabs"}
+          tabIndex={tab === "tabs" ? 0 : -1}
           onClick={() => onTabChange("tabs")}
           className={tab === "tabs" ? "active" : ""}
         >

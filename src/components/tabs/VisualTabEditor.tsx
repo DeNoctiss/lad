@@ -1,139 +1,177 @@
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { uid } from "../../lib/model";
+import { durationTicks, measureTicks, scoreIssues } from "../../lib/tablature";
 import {
-  durationTicks,
-  lanesFor,
-  measureTicks,
-  scoreIssues,
-} from "../../lib/tablature";
-import { TabScoreView } from "./TabScoreView";
+  barLength,
+  emptyPositions,
+  entryRhythmAt,
+  eventAtCursor,
+  eventPositions,
+  readFretDigit,
+  replaceEvent,
+  writeAtCursor,
+} from "../../lib/tabEditing";
+import type { Rhythm, ScoreCursor } from "../../lib/tabEditing";
 import type {
   NoteEffect,
   NoteLink,
   StrumDirection,
   TabEvent,
-  TabMeasure,
   TabNote,
   TabScore,
 } from "../../lib/tabTypes";
-import "../../styles/visualTabEditor.css";
+import { TabScoreView } from "./TabScoreView";
+import { orderedLanes } from "./score/scoreShared";
 import { EditorHeading } from "./editor/EditorHeading";
 import { IssuesBox } from "./editor/IssuesBox";
 import { BarTools } from "./editor/BarTools";
-import { EventChips } from "./editor/EventChips";
-import { DurationPanel } from "./editor/DurationPanel";
-import { NotePanel } from "./editor/NotePanel";
-import { effects } from "./editor/editorShared";
-import type { Rhythm } from "./editor/editorShared";
+import { EditorToolbar } from "./editor/EditorToolbar";
+import { useScoreHistory } from "./editor/useScoreHistory";
+import "../../styles/visualTabEditor.css";
 
 type Props = {
   score: TabScore;
   onChange: (score: TabScore) => void;
   sound?: string;
   bpm?: number;
+  tuning?: string;
 };
 
 export function VisualTabEditor(props: Props) {
   return <VisualTabEditorBody key={props.score.kind} {...props} />;
 }
 
-function VisualTabEditorBody({ score, onChange, sound, bpm }: Props) {
+function VisualTabEditorBody({ score, onChange, sound, bpm, tuning }: Props) {
+  const helpId = useId();
   const drums = score.kind === "drums";
   const piano = score.kind === "piano";
-  const lanes = lanesFor(score.kind);
-  const [measureId, setMeasureId] = useState(score.measures[0]?.id);
-  const [eventId, setEventId] = useState<string>();
-  const [laneId, setLaneId] = useState(piano ? "C4" : (lanes[0]?.id ?? ""));
+  const stringed = !drums && !piano;
+  const lanes = orderedLanes(score, tuning);
+  const [position, setPosition] = useState<ScoreCursor>({
+    measure: 0,
+    tick: 0,
+    lane: piano ? "C4" : lanes[0].id,
+  });
   const [rhythm, setRhythm] = useState<Rhythm>({
     duration: drums ? 8 : 4,
     dotted: false,
     triplet: false,
   });
-  const [fret, setFret] = useState<TabNote["fret"]>(0);
-  const [noteEffects, setNoteEffects] = useState<NoteEffect[]>([]);
-  const [noteLink, setNoteLink] = useState<NoteLink | "">("");
-  const measureIndex = Math.max(
-    0,
-    score.measures.findIndex((item) => item.id === measureId),
-  );
-  const measure = score.measures[measureIndex];
-  const eventIndex =
-    measure?.events.findIndex((item) => item.id === eventId) ?? -1;
-  const selectedEvent = measure?.events[eventIndex];
-  const lane = lanes.some((item) => item.id === laneId)
-    ? laneId
-    : (lanes[0]?.id ?? "");
-  const selectedNote = selectedEvent?.notes.find((note) => note.lane === lane);
-  const currentRhythm: Rhythm = selectedEvent ?? rhythm;
-  const currentFret = selectedNote?.fret ?? fret;
-  const currentEffects = selectedNote?.effects ?? noteEffects;
-  const currentLink = selectedNote?.link ?? (selectedNote ? "" : noteLink);
-  const issues = scoreIssues(score);
-  const usedTicks =
-    measure?.events.reduce((total, event) => total + durationTicks(event), 0) ??
-    0;
+  const [message, setMessage] = useState("");
+  const preview = useRef<HTMLDivElement>(null);
+  const digitBuffer = useRef({ text: "", at: 0, key: "" });
+  const history = useScoreHistory(score, onChange);
+  const cursor = {
+    ...position,
+    measure: Math.min(position.measure, score.measures.length - 1),
+  };
+  const measure = score.measures[cursor.measure];
+  // Undo or a meter/rhythm change can put an old tick inside another event.
+  // Keep the editing cursor on a real onset rather than in an unwritable gap.
+  if (measure && cursor.tick < barLength(measure.events)) {
+    const starts = eventPositions(measure.events);
+    cursor.tick = starts.filter((tick) => tick <= cursor.tick).at(-1) ?? 0;
+  }
+  const eventIndex = eventAtCursor(score, cursor);
+  const event = measure?.events[eventIndex];
+  const note = event?.notes.find((n) => n.lane === cursor.lane);
+  const currentRhythm = entryRhythmAt(score, cursor, rhythm);
+  const used = barLength(measure?.events ?? []);
   const capacity = measureTicks(score.meter);
-  const visibleEffects = effects.filter(({ value }) =>
-    piano
-      ? value === "accent" || value === "ghost"
-      : drums
-        ? value === "accent" ||
-          value === "ghost" ||
-          (value === "open" && lane.toUpperCase() === "HH")
-        : value !== "open",
-  );
+  const issues = scoreIssues(score);
 
-  function updateMeasure(
-    index: number,
-    change: (previous: TabMeasure) => TabMeasure,
-  ) {
-    onChange({
-      ...score,
-      measures: score.measures.map((item, itemIndex) =>
-        itemIndex === index ? change(item) : item,
-      ),
-    });
+  function focus() {
+    preview.current?.focus({ preventScroll: true });
   }
-
-  function updateEvent(
-    index: number,
-    change: (previous: TabEvent) => TabEvent,
-    barIndex = measureIndex,
-  ) {
-    updateMeasure(barIndex, (previous) => ({
-      ...previous,
-      events: previous.events.map((item, itemIndex) =>
-        itemIndex === index ? change(item) : item,
-      ),
-    }));
+  function resetDigits() {
+    digitBuffer.current = { text: "", at: 0, key: "" };
   }
-
-  function rememberNote(note: TabNote) {
-    setLaneId(note.lane);
-    setFret(note.fret);
-    setNoteEffects([...note.effects]);
-    setNoteLink(note.link ?? "");
+  function move(next: ScoreCursor) {
+    setPosition(next);
+    setMessage("");
+    resetDigits();
+    setRhythm(entryRhythmAt(score, next, rhythm));
+    focus();
   }
-
-  function select(barIndex: number, momentIndex?: number) {
-    const bar = score.measures[barIndex];
-    if (!bar) return;
-    const moment =
-      momentIndex === undefined ? undefined : bar.events[momentIndex];
-    setMeasureId(bar.id);
-    setEventId(moment?.id);
-    if (moment) {
-      setRhythm({
-        duration: moment.duration,
-        dotted: moment.dotted,
-        triplet: moment.triplet,
-      });
-      const note =
-        moment.notes.find((item) => item.lane === lane) ?? moment.notes[0];
-      if (note) rememberNote(note);
+  function commit(action: () => TabScore) {
+    try {
+      history.commit(action());
+      setMessage("");
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Не удалось изменить ноту.",
+      );
     }
   }
-
+  function select(bar: number, index?: number, lane?: string) {
+    const events = score.measures[bar]?.events;
+    if (!events) return;
+    const tick =
+      index === undefined || index < 0
+        ? bar === cursor.measure
+          ? cursor.tick
+          : barLength(events)
+        : eventPositions(events)[index];
+    move({
+      ...cursor,
+      measure: bar,
+      tick,
+      lane:
+        lane ??
+        (piano && index !== undefined
+          ? events[index]?.notes[0]?.lane
+          : undefined) ??
+        cursor.lane,
+    });
+  }
+  function selectNote(bar: number, index: number, lane: string) {
+    const events = score.measures[bar]?.events ?? [];
+    const tick =
+      index < 0
+        ? bar === cursor.measure
+          ? cursor.tick
+          : barLength(events)
+        : eventPositions(events)[index];
+    const next = { measure: bar, tick, lane };
+    move(next);
+    if (!stringed) write(piano ? 0 : "x", next, true);
+  }
+  function selectEmpty(bar: number, tick: number, lane: string) {
+    const next = { measure: bar, tick, lane };
+    move(next);
+    if (drums) write("x", next);
+  }
+  function write(fret: TabNote["fret"], target = cursor, toggle = false) {
+    const selected =
+      score.measures[target.measure]?.events[eventAtCursor(score, target)];
+    const old = selected?.notes.find((n) => n.lane === target.lane);
+    const next: TabNote = {
+      lane: target.lane,
+      fret,
+      effects:
+        stringed && fret === "x"
+          ? (old?.effects.filter((value) =>
+              ["pm", "accent", "ghost"].includes(value),
+            ) ?? [])
+          : (old?.effects ?? []),
+    };
+    if (old?.link && fret !== "x") next.link = old.link;
+    // A drum click selects and writes in one React event; do not depend on setState.
+    commit(() =>
+      writeAtCursor(
+        score,
+        target,
+        entryRhythmAt(score, target, rhythm),
+        next,
+        toggle,
+      ),
+    );
+  }
+  function updateEvent(change: (old: TabEvent) => TabEvent) {
+    if (!event) return;
+    commit(() => replaceEvent(score, cursor.measure, eventIndex, change));
+  }
   function changeRhythm(patch: Partial<Rhythm>) {
     const next = {
       duration: currentRhythm.duration,
@@ -141,269 +179,246 @@ function VisualTabEditorBody({ score, onChange, sound, bpm }: Props) {
       triplet: currentRhythm.triplet,
       ...patch,
     };
-    setRhythm(next);
-    if (selectedEvent)
-      updateEvent(eventIndex, (previous) => ({ ...previous, ...next }));
-  }
-
-  function allowedEffects(values: NoteEffect[], targetLane: string) {
-    return values.filter((effect) =>
-      piano
-        ? effect === "accent" || effect === "ghost"
-        : drums
-          ? effect === "accent" ||
-            effect === "ghost" ||
-            (effect === "open" && targetLane.toUpperCase() === "HH")
-          : effect !== "open",
-    );
-  }
-
-  function makeNote(targetLane = lane): TabNote {
-    return {
-      lane: targetLane,
-      fret: piano ? 0 : drums ? "x" : currentFret,
-      effects: allowedEffects(currentEffects, targetLane),
-      ...(!drums && currentLink ? { link: currentLink } : {}),
-    };
-  }
-
-  /** Palm mute is moment-wide: a note joining a muted event inherits it. */
-  function applyEventPm(notes: TabNote[]): TabNote[] {
-    if (!notes.some((note) => note.effects.includes("pm"))) return notes;
-    return notes.map((note) =>
-      note.effects.includes("pm")
-        ? note
-        : { ...note, effects: [...note.effects, "pm"] },
-    );
-  }
-
-  function addEvent(rest: boolean) {
-    if (!measure || measure.events.length >= 64) return;
-    const moment: TabEvent = {
-      id: uid(),
-      duration: currentRhythm.duration,
-      dotted: currentRhythm.dotted,
-      triplet: currentRhythm.triplet,
-      notes: rest ? [] : [makeNote()],
-    };
-    if (selectedEvent && moment.notes[0]) delete moment.notes[0].link;
-    setNoteLink("");
-    updateMeasure(measureIndex, (previous) => ({
-      ...previous,
-      events: [...previous.events, moment],
-    }));
-    setEventId(moment.id);
-    setMeasureId(measure.id);
-    setRhythm({
-      duration: moment.duration,
-      dotted: moment.dotted,
-      triplet: moment.triplet,
-    });
-  }
-
-  function changeSelectedNote(change: (previous: TabNote) => TabNote) {
-    if (!selectedEvent || !selectedNote) return;
-    updateEvent(eventIndex, (previous) => ({
-      ...previous,
-      notes: previous.notes.map((note) =>
-        note.lane === lane ? change(note) : note,
-      ),
-    }));
-  }
-
-  function chooseLane(nextLane: string) {
-    setLaneId(nextLane);
-    const note = selectedEvent?.notes.find((item) => item.lane === nextLane);
-    if (note) rememberNote(note);
-  }
-
-  function changeFret(next: TabNote["fret"]) {
-    setFret(next);
-    changeSelectedNote((previous) => ({ ...previous, fret: next }));
-  }
-
-  function toggleEffect(effect: NoteEffect, checked: boolean) {
-    let next = allowedEffects(currentEffects, lane).filter(
-      (item) => item !== effect,
-    );
-    if (checked) {
-      if (effect === "b0.5" || effect === "b1")
-        next = next.filter((item) => item !== "b0.5" && item !== "b1");
-      next = [...next, effect];
-    }
-    setNoteEffects(next);
-    // Palm mute marks the whole moment, not a single string.
-    if (effect === "pm") {
-      updateEvent(eventIndex, (previous) => ({
-        ...previous,
-        notes: previous.notes.map((note) => ({
-          ...note,
-          effects: checked
-            ? [...note.effects.filter((item) => item !== "pm"), "pm"]
-            : note.effects.filter((item) => item !== "pm"),
-        })),
-      }));
+    // A dot and a triplet are distinct subdivisions.
+    if (patch.dotted) next.triplet = false;
+    if (patch.triplet) next.dotted = false;
+    if (event && used - durationTicks(event) + durationTicks(next) > capacity) {
+      setMessage(
+        "Эта длительность переполнит такт. Сначала освободите место или выберите более короткую ноту.",
+      );
       return;
     }
-    changeSelectedNote((previous) => ({ ...previous, effects: next }));
+    if (!event && cursor.tick + durationTicks(next) > capacity) {
+      setMessage(
+        "Эта длительность не помещается в оставшуюся часть такта. Выберите более короткую ноту.",
+      );
+      return;
+    }
+    setRhythm(next);
+    updateEvent((old) => ({ ...old, ...next }));
+    resetDigits();
+    focus();
   }
-
-  function toggleStrum(direction: StrumDirection) {
-    if (!selectedEvent) return;
-    updateEvent(eventIndex, (previous) => {
-      const next = { ...previous };
-      if (previous.strum === direction) delete next.strum;
+  function effect(value: NoteEffect) {
+    if (!note) return;
+    const enabled = !note.effects.includes(value);
+    updateEvent((old) => ({
+      ...old,
+      notes: old.notes.map((n) => {
+        if (value !== "pm" && n.lane !== cursor.lane) return n;
+        const effects = n.effects.filter(
+          (v) =>
+            v !== value &&
+            !(
+              enabled &&
+              (value === "b1" || value === "b0.5") &&
+              (v === "b1" || v === "b0.5")
+            ),
+        );
+        if (enabled) effects.push(value);
+        return { ...n, effects };
+      }),
+    }));
+    focus();
+  }
+  function link(value: NoteLink | "") {
+    updateEvent((old) => ({
+      ...old,
+      notes: old.notes.map((n) => {
+        if (n.lane !== cursor.lane) return n;
+        const next = { ...n };
+        if (value) next.link = value;
+        else delete next.link;
+        return next;
+      }),
+    }));
+    focus();
+  }
+  function strum(direction: StrumDirection) {
+    updateEvent((old) => {
+      const next = { ...old };
+      if (next.strum === direction) delete next.strum;
       else next.strum = direction;
       return next;
     });
+    focus();
   }
-
-  function changeLink(value: NoteLink | "") {
-    setNoteLink(value);
-    changeSelectedNote((previous) => {
-      const next = { ...previous };
-      if (value) next.link = value;
-      else delete next.link;
+  function rest() {
+    commit(() => writeAtCursor(score, cursor, currentRhythm, null));
+    focus();
+  }
+  function removeNote() {
+    if (!note) return;
+    updateEvent((old) => {
+      const next = {
+        ...old,
+        notes: old.notes.filter((n) => n.lane !== cursor.lane),
+      };
+      if (!next.notes.length) delete next.strum;
       return next;
     });
+    resetDigits();
+    focus();
   }
-
-  function addToMoment() {
-    if (
-      !selectedEvent ||
-      selectedNote ||
-      selectedEvent.notes.length >= (piano ? 10 : 6)
-    )
-      return;
-    updateEvent(eventIndex, (previous) => ({
-      ...previous,
-      notes: applyEventPm([...previous.notes, makeNote()]),
+  function removeEvent() {
+    if (!event) return;
+    commit(() => ({
+      ...score,
+      measures: score.measures.map((bar, m) =>
+        m === cursor.measure
+          ? { ...bar, events: bar.events.filter((e) => e.id !== event.id) }
+          : bar,
+      ),
     }));
+    resetDigits();
+    focus();
   }
-
-  function removeNote(targetLane: string) {
-    if (!selectedEvent) return;
-    updateEvent(eventIndex, (previous) => ({
-      ...previous,
-      notes: previous.notes.filter((note) => note.lane !== targetLane),
-    }));
-  }
-
-  function laneClick(
-    barIndex: number,
-    momentIndex: number,
-    targetLane: string,
-  ) {
-    const moment = score.measures[barIndex]?.events[momentIndex];
-    if (!lanes.some((item) => item.id === targetLane)) return;
-    if (piano && !moment && momentIndex === -1) {
-      const bar = score.measures[barIndex];
-      if (!bar || bar.events.length >= 64) return;
-      const next: TabEvent = {
-        id: uid(),
-        ...rhythm,
-        notes: [
-          {
-            lane: targetLane,
-            fret: 0,
-            effects: allowedEffects(noteEffects, targetLane),
-          },
-        ],
-      };
-      updateMeasure(barIndex, (previous) => ({
-        ...previous,
-        events: [...previous.events, next],
-      }));
-      setMeasureId(bar.id);
-      setEventId(next.id);
-      setLaneId(targetLane);
-      setNoteLink("");
-      return;
-    }
-    if (!moment) return;
-    if (
-      piano &&
-      moment.notes.length >= 10 &&
-      !moment.notes.some((note) => note.lane === targetLane)
-    )
-      return;
-    select(barIndex, momentIndex);
-    setLaneId(targetLane);
-    const existing = moment.notes.find((note) => note.lane === targetLane);
-    if (existing && !drums && !piano) {
-      rememberNote(existing);
-      return;
-    }
-    updateEvent(
-      momentIndex,
-      (previous) => ({
-        ...previous,
-        notes: applyEventPm(
-          existing
-            ? previous.notes.filter((note) => note.lane !== targetLane)
-            : [...previous.notes, makeNote(targetLane)],
-        ),
-      }),
-      barIndex,
-    );
-  }
-
   function addMeasure(copy = false) {
-    if (score.measures.length >= 128) return;
-    const next: TabMeasure = {
+    if (score.measures.length >= 128) {
+      setMessage("Достигнут предел: 128 тактов.");
+      return;
+    }
+    const next = {
       id: uid(),
-      events:
-        copy && measure
-          ? measure.events.map((event) => ({
-              ...event,
-              id: uid(),
-              notes: event.notes.map((note) => ({
-                ...note,
-                effects: [...note.effects],
-              })),
-            }))
-          : [],
+      events: copy
+        ? measure.events.map((e) => ({ ...structuredClone(e), id: uid() }))
+        : [],
     };
     const measures = [...score.measures];
-    measures.splice(measureIndex + 1, 0, next);
-    onChange({ ...score, measures });
-    setMeasureId(next.id);
-    setEventId(undefined);
+    measures.splice(cursor.measure + 1, 0, next);
+    history.commit({ ...score, measures });
+    move({ ...cursor, measure: cursor.measure + 1, tick: 0 });
   }
-
   function removeMeasure() {
-    if (!measure || score.measures.length <= 1) return;
+    if (score.measures.length <= 1) return;
     if (
       measure.events.length &&
-      !window.confirm(`Удалить такт ${measureIndex + 1} со всеми событиями?`)
+      !window.confirm(
+        `Удалить такт ${cursor.measure + 1}? Действие можно отменить.`,
+      )
     )
       return;
-    const measures = score.measures.filter((item) => item.id !== measure.id);
-    onChange({ ...score, measures });
-    setMeasureId(measures[Math.min(measureIndex, measures.length - 1)]?.id);
-    setEventId(undefined);
+    history.commit({
+      ...score,
+      measures: score.measures.filter((_, m) => m !== cursor.measure),
+    });
+    move({ ...cursor, measure: Math.max(0, cursor.measure - 1), tick: 0 });
   }
-
-  function removeEvent() {
-    if (!measure || !selectedEvent) return;
-    const remaining = measure.events.filter(
-      (event) => event.id !== selectedEvent.id,
-    );
-    updateMeasure(measureIndex, (previous) => ({
-      ...previous,
-      events: remaining,
-    }));
-    const next = remaining[Math.min(eventIndex, remaining.length - 1)];
-    setEventId(next?.id);
-    if (next) {
-      setRhythm({
-        duration: next.duration,
-        dotted: next.dotted,
-        triplet: next.triplet,
+  function nextMoment() {
+    const tick = event
+      ? cursor.tick + durationTicks(event)
+      : cursor.tick + durationTicks(currentRhythm);
+    if (tick < capacity) move({ ...cursor, tick });
+    else if (cursor.measure + 1 < score.measures.length)
+      move({ ...cursor, measure: cursor.measure + 1, tick: 0 });
+    else addMeasure();
+  }
+  function navigate(key: string) {
+    if (key === "ArrowRight" || key === "Enter") {
+      nextMoment();
+      return;
+    }
+    if (key === "ArrowLeft") {
+      const ticks = [
+        ...eventPositions(measure.events),
+        ...emptyPositions(score, cursor.measure, rhythm),
+      ].filter((t) => t < cursor.tick);
+      if (ticks.length) move({ ...cursor, tick: ticks.at(-1)! });
+      else if (cursor.measure > 0) {
+        const m = cursor.measure - 1;
+        move({
+          ...cursor,
+          measure: m,
+          tick: eventPositions(score.measures[m].events).at(-1) ?? 0,
+        });
+      }
+      return;
+    }
+    const index = lanes.findIndex((l) => l.id === cursor.lane);
+    const direction = piano
+      ? key === "ArrowUp"
+        ? 1
+        : -1
+      : key === "ArrowUp"
+        ? -1
+        : 1;
+    move({
+      ...cursor,
+      lane: lanes[Math.max(0, Math.min(lanes.length - 1, index + direction))]
+        .id,
+    });
+  }
+  function keyDown(key: KeyboardEvent<HTMLDivElement>) {
+    const target = key.target as Element;
+    if (target.closest("input, select, textarea, [contenteditable=true]"))
+      return;
+    if (
+      target !== preview.current &&
+      !target.closest(".tab-score-staff, .tab-score-drum-cell, .piano-key")
+    )
+      return;
+    if (key.nativeEvent.isComposing || key.altKey) return;
+    if ((key.ctrlKey || key.metaKey) && key.code === "KeyZ") {
+      key.preventDefault();
+      key.stopPropagation();
+      resetDigits();
+      if (key.shiftKey) history.redo();
+      else history.undo();
+      return;
+    }
+    if (key.ctrlKey || key.metaKey) return;
+    if (stringed && /^[0-9]$/.test(key.key)) {
+      key.preventDefault();
+      key.stopPropagation();
+      const now = Date.now();
+      const id = `${cursor.measure}:${cursor.tick}:${cursor.lane}`;
+      const previous = digitBuffer.current;
+      const value = readFretDigit(
+        previous.key === id && now - previous.at < 1200 ? previous.text : "",
+        key.key,
+      );
+      digitBuffer.current = { text: value.text, at: now, key: id };
+      write(value.fret);
+      return;
+    }
+    const handled =
+      [
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowUp",
+        "ArrowDown",
+        "Enter",
+        "Delete",
+        "Backspace",
+        "+",
+        "=",
+        "-",
+        ".",
+      ].includes(key.key) ||
+      ["KeyX", "KeyR", "KeyM", "KeyH", "KeyP"].includes(key.code);
+    if (!handled) return;
+    key.preventDefault();
+    key.stopPropagation();
+    resetDigits();
+    if (key.key.startsWith("Arrow") || key.key === "Enter") navigate(key.key);
+    else if (key.key === "Delete" || key.key === "Backspace") {
+      if (key.shiftKey) removeEvent();
+      else removeNote();
+    } else if (key.code === "KeyX" && stringed) write("x");
+    else if (key.code === "KeyR") rest();
+    else if (key.code === "KeyM" && stringed) effect("pm");
+    else if (key.code === "KeyH" && stringed && note?.fret !== "x")
+      link(note?.link === "h" ? "" : "h");
+    else if (key.code === "KeyP" && stringed && note?.fret !== "x")
+      link(note?.link === "p" ? "" : "p");
+    else if (key.key === ".") changeRhythm({ dotted: !currentRhythm.dotted });
+    else if (["+", "=", "-"].includes(key.key)) {
+      const values = [1, 2, 4, 8, 16] as const;
+      const i = values.indexOf(currentRhythm.duration);
+      changeRhythm({
+        duration:
+          values[Math.max(0, Math.min(4, i + (key.key === "-" ? -1 : 1)))],
       });
-      const note =
-        next.notes.find((item) => item.lane === lane) ?? next.notes[0];
-      if (note) rememberNote(note);
     }
   }
 
@@ -416,75 +431,102 @@ function VisualTabEditorBody({ score, onChange, sound, bpm }: Props) {
         drums={drums}
         piano={piano}
         meter={score.meter}
-        onMeterChange={(meter) => onChange({ ...score, meter })}
+        onMeterChange={(meter) => history.commit({ ...score, meter })}
       />
-      <IssuesBox issues={issues} />
       <BarTools
         measures={score.measures}
-        measureIndex={measureIndex}
-        onSelect={select}
+        measureIndex={cursor.measure}
+        onSelect={(m) => move({ ...cursor, measure: m, tick: 0 })}
         onAddMeasure={addMeasure}
         onRemoveMeasure={removeMeasure}
       />
-      <div className="visual-tab-preview">
+      <div
+        className="visual-tab-preview"
+        ref={preview}
+        tabIndex={0}
+        onKeyDownCapture={keyDown}
+        aria-label="Поле ввода нот. Стрелки — навигация, цифры — лад, X — заглушённая струна"
+        aria-describedby={helpId}
+      >
         <TabScoreView
           score={score}
-          selectedMeasure={measureIndex}
+          selectedMeasure={cursor.measure}
           selectedEvent={eventIndex >= 0 ? eventIndex : undefined}
+          selectedLane={cursor.lane}
+          selectedTick={cursor.tick}
+          entryRhythm={rhythm}
           onSelect={select}
-          onLaneClick={laneClick}
+          onLaneClick={selectNote}
+          onEmptyClick={selectEmpty}
           sound={sound}
           bpm={bpm}
+          tuning={tuning}
         />
       </div>
-      <EventChips
-        measureIndex={measureIndex}
-        measure={measure}
-        selectedEvent={selectedEvent}
-        eventIndex={eventIndex}
-        drums={drums}
-        usedTicks={usedTicks}
-        capacity={capacity}
-        onSelect={select}
+      <EditorToolbar
+        kind={score.kind}
+        rhythm={currentRhythm}
+        note={note}
+        event={event}
+        lane={cursor.lane}
+        measure={cursor.measure}
+        tick={cursor.tick}
+        canUndo={history.canUndo}
+        canRedo={history.canRedo}
+        onRhythm={changeRhythm}
+        onEffect={effect}
+        onLink={link}
+        onStrum={strum}
+        onMute={() => {
+          write("x");
+          focus();
+        }}
+        onFret={(fret) => write(fret)}
+        onRest={rest}
+        onNext={nextMoment}
+        onRemoveNote={removeNote}
+        onRemoveEvent={removeEvent}
+        onUndo={() => {
+          history.undo();
+          resetDigits();
+          focus();
+        }}
+        onRedo={() => {
+          history.redo();
+          resetDigits();
+          focus();
+        }}
       />
-      <div className="visual-tab-panels">
-        <DurationPanel
-          selectedEvent={Boolean(selectedEvent)}
-          currentRhythm={currentRhythm}
-          strum={selectedEvent?.strum}
-          stringed={!drums && !piano}
-          drums={drums}
-          measure={measure}
-          onChangeRhythm={changeRhythm}
-          onStrum={toggleStrum}
-          onAddEvent={addEvent}
-          onRemoveEvent={removeEvent}
-        />
-        <NotePanel
-          piano={piano}
-          drums={drums}
-          lanes={lanes}
-          lane={lane}
-          selectedEvent={selectedEvent}
-          selectedNote={selectedNote}
-          currentFret={currentFret}
-          currentLink={currentLink}
-          currentEffects={currentEffects}
-          visibleEffects={visibleEffects}
-          onChooseLane={chooseLane}
-          onChangeFret={changeFret}
-          onAddToMoment={addToMoment}
-          onRemoveNote={removeNote}
-          onLinkChange={changeLink}
-          onToggleEffect={toggleEffect}
-          onRememberNote={rememberNote}
-        />
-      </div>
-      {issues.length === 0 && (
-        <p className="visual-tab-valid" role="status">
-          Размер и связи нот: ошибок нет.
+      {message && (
+        <p className="editor-feedback" role="status">
+          {message}
         </p>
       )}
+      <IssuesBox issues={issues} />
+      <details className="editor-shortcuts" id={helpId}>
+        <summary>Как вводить ноты · горячие клавиши</summary>
+        <p>
+          {stringed
+            ? "Кликните по струне и введите лад 0–24. Две цифры подряд (например, 1 и 2) дают лад 12. X — заглушённая струна; M — palm mute; H / P — хаммер-он / пулл-офф."
+            : piano
+              ? "Клавиши добавляют и убирают ноты текущего созвучия. «Следующая позиция» переходит к новой группе; максимум 10 клавиш одновременно."
+              : "Клик по сетке включает или выключает удар. В свободной части такта доступна сетка выбранной длительности."}
+        </p>
+        <p>
+          ← → — предыдущая / следующая позиция; ↑ ↓ — струна или клавиша; Enter
+          — следующая позиция; R — пауза; + / − — короче / длиннее; точка —
+          длительность с точкой; Delete — убрать ноту, сохранив ритм;
+          Shift+Delete — удалить событие со сдвигом последующих; Ctrl / ⌘ Z —
+          отменить, Shift+Ctrl / ⌘ Z — вернуть.
+        </p>
+        <p>
+          При вводе после пустого промежутка он заполняется явными паузами.
+          Остаток такта доступен для выбора, даже если он короче выбранной ноты:
+          панель подставит подходящую длительность для новой ноты. Длительность
+          меняет весь столбец нот. Связь H / P / слайд задаётся на первой из
+          двух нот.
+        </p>
+      </details>
     </section>
   );
 }

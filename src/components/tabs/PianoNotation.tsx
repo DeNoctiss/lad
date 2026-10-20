@@ -14,13 +14,23 @@ export function PianoNotation({
   start,
   end,
   width,
+  columns = 1,
   selectedMeasure,
   selectedEvent,
+  selectedLane,
+  selectedTick,
+  entryRhythm,
+  onEmptyClick,
   onSelect,
   onLaneClick,
   playingMeasure,
   playingEvent,
-}: TabScoreViewProps & { start: number; end: number; width: number }) {
+}: TabScoreViewProps & {
+  start: number;
+  end: number;
+  width: number;
+  columns?: number;
+}) {
   const [mode, setMode] = useState<"keys" | "roll">("keys");
   const [localSelection, setLocalSelection] = useState({
     measure: start,
@@ -42,9 +52,9 @@ export function PianoNotation({
   const highlight = score.measures[highlightBar]?.events[highlightEvent];
   const names = highlight?.notes.map((note) => note.lane) ?? [];
   const barWidth = Math.max(260, width);
-  const pick = (measure: number, event: number) => {
+  const pick = (measure: number, event: number, lane?: string) => {
     setLocalSelection({ measure, event });
-    onSelect?.(measure, event);
+    onSelect?.(measure, event, lane);
   };
   const pitchValues = score.measures
     .slice(start, end)
@@ -96,7 +106,15 @@ export function PianoNotation({
           start={start}
           end={end}
           barWidth={barWidth}
+          columns={columns}
           capacity={capacity}
+          entryRhythm={entryRhythm}
+          selectedTick={selectedTick}
+          onEmptyPick={
+            onEmptyClick
+              ? (bar, tick) => onEmptyClick(bar, tick, selectedLane ?? "C4")
+              : undefined
+          }
           barIndex={barIndex}
           eventIndex={eventIndex}
           playingMeasure={playingMeasure}
@@ -147,7 +165,7 @@ export function PianoNotation({
       <p className="piano-help">
         C4 — среднее до. # — чёрная клавиша (диез), цифра — октава.{" "}
         {onLaneClick
-          ? "Клик по клавише включает или выключает её в выбранном моменте. Для следующего созвучия нажмите «Новый момент»."
+          ? "Клик по клавише включает или выключает её в выбранном моменте. Для следующего созвучия нажмите «Далее»."
           : "Выберите группу нот — клавиатура подсветит все клавиши этого момента."}{" "}
         {mode === "roll" &&
           "Длина прямоугольника соответствует длительности ноты; прокрутка по высоте доступна для широкого диапазона."}

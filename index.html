@@ -3,14 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#171c19" />
+    <meta name="theme-color" content="#f3f5f9" />
+    <script>
+      // Set the palette before the app paints. A blocked storage is harmless.
+      (() => {
+        let theme = matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+        try {
+          const saved = localStorage.getItem("lad-theme-v1");
+          if (saved === "light" || saved === "dark") theme = saved;
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
     <meta
       name="description"
       content="Личный блокнот песен, аккордов и табулатур"
     />
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2349735b'/%3E%3Cpath d='M19 42V25m9 20V18m9 23V22m9 14V28' stroke='%23edf3e7' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23335de6'/%3E%3Cpath d='M19 42V25m9 20V18m9 23V22m9 14V28' stroke='%23ffffff' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E"
     />
     <title>Лад — блокнот музыканта</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

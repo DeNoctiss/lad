@@ -1,3 +1,4 @@
+import { emptySlots } from "../../../lib/tabEditing";
 import { durationTicks, measureTicks } from "../../../lib/tablature";
 import {
   LEFT,
@@ -19,6 +20,8 @@ export function DrumMeasure({
   measureIndex,
   selectedMeasure,
   selectedEvent,
+  entryRhythm,
+  onEmptyClick,
   onSelect,
   onLaneClick,
   playingMeasure,
@@ -31,7 +34,15 @@ export function DrumMeasure({
   const onsets = eventOnsets(measure.events);
   const lanes = orderedLanes(score);
   const blank = Math.max(0, total - used);
-  const template = `${LEFT}px ${measure.events.map((event) => `minmax(0, ${durationTicks(event)}fr)`).join(" ")}${blank ? ` minmax(0, ${blank}fr)` : ""} ${RIGHT}px`;
+  const slots =
+    onEmptyClick && entryRhythm
+      ? emptySlots(score, measureIndex, entryRhythm)
+      : [];
+  const tail = Math.max(
+    0,
+    blank - slots.reduce((sum, slot) => sum + slot.ticks, 0),
+  );
+  const template = `${LEFT}px ${measure.events.map((event) => `minmax(0, ${durationTicks(event)}fr)`).join(" ")}${slots.map((slot) => ` minmax(0, ${slot.ticks}fr)`).join("")}${tail ? ` minmax(0, ${tail}fr)` : ""} ${RIGHT}px`;
   const subdivisions = score.meter.unit === 4 ? 2 : 1;
   return (
     <div className="tab-score-drum-wrap">
@@ -63,7 +74,7 @@ export function DrumMeasure({
         </caption>
         <thead>
           <tr style={{ gridTemplateColumns: template }}>
-            <th scope="col">Инструмент</th>
+            <th scope="col">Звук</th>
             {measure.events.map((event, eventIndex) => (
               <th
                 key={event.id}
@@ -105,7 +116,18 @@ export function DrumMeasure({
                 )}
               </th>
             ))}
-            {blank > 0 && (
+            {slots.map(({ tick, rhythm }) => (
+              <th
+                key={`blank-${tick}`}
+                scope="col"
+                className="tab-score-drum-unused"
+              >
+                <span className="tab-score-drum-event">
+                  {rhythm ? `+ ${rhythmLabel(rhythm)}` : "Свободно"}
+                </span>
+              </th>
+            ))}
+            {tail > 0 && (
               <th scope="col" className="tab-score-drum-unused">
                 Свободно
               </th>
@@ -202,7 +224,19 @@ export function DrumMeasure({
                   </td>
                 );
               })}
-              {blank > 0 && (
+              {slots.map(({ tick }) => (
+                <td key={`blank-${tick}`} className="tab-score-drum-unused">
+                  <button
+                    type="button"
+                    className="tab-score-drum-cell tab-drum-new"
+                    aria-label={`Такт ${measureIndex + 1}, позиция ${Number((tick / 480 + 1).toFixed(2))}, ${drumNames[lane.id]}: добавить удар`}
+                    onClick={() => onEmptyClick!(measureIndex, tick, lane.id)}
+                  >
+                    +
+                  </button>
+                </td>
+              ))}
+              {tail > 0 && (
                 <td className="tab-score-drum-unused">
                   <span className="tab-score-sr-only">Не заполнено</span>
                 </td>
@@ -214,7 +248,7 @@ export function DrumMeasure({
       </table>
       {measure.events.length === 0 && (
         <p className="tab-score-drum-guidance">
-          Пустой такт. Добавьте событие, затем отметьте удары в его столбце.
+          Нажмите «+» на нужной дорожке, чтобы поставить первый удар.
         </p>
       )}
     </div>

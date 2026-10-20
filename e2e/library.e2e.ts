@@ -135,8 +135,9 @@ test("manual instrument tabs support creation, editing, persistence and confirme
     page.getByRole("textbox", { name: "Табулатура", exact: true }),
   ).toHaveValue(/5h7--8\/10/);
   await page.getByRole("button", { name: "Сохранить партию" }).click();
-  await expect(page.locator(".part-card")).toHaveCount(3);
+  await expect(page.locator(".part-navigation-item")).toHaveCount(3);
   await page.getByRole("button", { name: "Редактировать Новое соло" }).click();
+  await page.getByRole("dialog").locator(".part-settings > summary").click();
   await page.getByLabel("Название партии").fill("Соло на повторе");
   await page.getByRole("button", { name: "Сохранить партию" }).click();
   await page.getByRole("button", { name: "Партия", exact: true }).click();
@@ -153,16 +154,20 @@ test("manual instrument tabs support creation, editing, persistence and confirme
   await page.getByRole("button", { name: "Сохранить партию" }).click();
   await page.reload();
   await page.getByRole("tab", { name: /Табулатуры/ }).click();
-  await expect(page.locator(".part-card")).toHaveCount(4);
+  await expect(page.locator(".part-navigation-item")).toHaveCount(4);
+  await page
+    .locator(".part-navigation-item")
+    .filter({ hasText: "Соло на повторе" })
+    .click();
   await expect(
     page.locator(".tab-content").filter({ hasText: "5h7--8/10" }),
   ).toBeVisible();
   page.once("dialog", (dialog) => dialog.dismiss());
   await page.getByRole("button", { name: "Удалить Соло на повторе" }).click();
-  await expect(page.locator(".part-card")).toHaveCount(4);
+  await expect(page.locator(".part-navigation-item")).toHaveCount(4);
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Удалить Соло на повторе" }).click();
-  await expect(page.locator(".part-card")).toHaveCount(3);
+  await expect(page.locator(".part-navigation-item")).toHaveCount(3);
 });
 
 test("custom chord positions are validated, rendered, edited and saved", async ({

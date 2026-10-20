@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { TabPart } from "../../lib/model";
 import { emptyTab, uid } from "../../lib/model";
 import { Modal } from "../ui/Modal";
-import { Check } from "lucide-react";
+import { Check, Settings2 } from "lucide-react";
 import type { TabScore } from "../../lib/tabTypes";
 import {
   createScore,
@@ -19,19 +19,30 @@ import { FormatSwitch } from "./FormatSwitch";
 import { ScoreBlock } from "./ScoreBlock";
 import { TextTabBlock } from "./TextTabBlock";
 import { PartValidation } from "./PartValidation";
+import { PartNavigation } from "../song/PartNavigation";
+import { ThemeToggle } from "../layout/ThemeToggle";
 
 export function PartEditor({
   part,
   bpm,
   onSave,
   onClose,
+  parts = [],
+  songTitle,
+  onSwitchPart,
+  onLyrics,
 }: {
   part?: TabPart;
   /** Song tempo passed to the preview player; defaults to 92. */
   bpm?: number;
   onSave: (part: TabPart) => void;
   onClose: () => void;
+  parts?: TabPart[];
+  songTitle?: string;
+  onSwitchPart?: (part: TabPart | "new") => void;
+  onLyrics?: () => void;
 }) {
+  const formId = useId();
   const [name, setName] = useState(part?.name ?? "");
   const [instrument, setInstrument] = useState(
     part?.instrument ?? "Ритм-гитара",
@@ -67,13 +78,14 @@ export function PartEditor({
     notation,
   ]);
   const [initialSnapshot] = useState(snapshot);
-  const closeEditor = () => {
+  const leaveEditor = (action: () => void) => {
     if (
       snapshot === initialSnapshot ||
       window.confirm("Отменить несохранённые изменения партии?")
     )
-      onClose();
+      action();
   };
+  const closeEditor = () => leaveEditor(onClose);
   const changeScore = (next: TabScore) => {
     setScore(next);
     setNotation(serializeNotation(next));
@@ -151,67 +163,121 @@ export function PartEditor({
       title={part ? "Редактировать партию" : "Новая партия"}
       onClose={closeEditor}
       wide
-    >
-      <form
-        className="part-editor-form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          submit();
-        }}
-      >
-        <PartMetaFields
-          name={name}
-          instrument={instrument}
-          tuning={tuning}
-          kind={kind}
-          onNameChange={setName}
-          onInstrumentChange={changeInstrument}
-          onTuningChange={setTuning}
-        />
-        <PartSoundSelect kind={kind} value={sound ?? ""} onChange={setSound} />
-        <FormatSwitch format={format} onChange={setFormat} />
-        <TabGuide key={kind} kind={kind} onInsertExample={insertExample} />
-        {format === "visual" ? (
-          <ScoreBlock
-            score={score}
-            kind={kind}
-            tuning={tuning}
-            sound={sound}
-            bpm={bpm}
-            notation={notation}
-            sourcePending={sourcePending}
-            scoreMode={scoreMode}
-            onScoreModeChange={setScoreMode}
-            onScoreChange={changeScore}
-            onNotationChange={(value) => {
-              setNotation(value);
-              setNotationError("");
-            }}
-            onApplyNotation={applyNotation}
-          />
-        ) : (
-          <TextTabBlock
-            instrument={instrument}
-            content={content}
-            onChange={setContent}
-          />
-        )}
-        <PartValidation
-          notationError={notationError}
-          sourcePending={sourcePending}
-          issues={issues}
-        />
-        <div className="modal-actions">
-          <button type="button" className="btn" onClick={closeEditor}>
-            Отмена
-          </button>
+      className="part-editor-modal"
+      eyebrow={songTitle ? `ЛАД / ${songTitle}` : "ЛАД / ТАБУЛАТУРЫ"}
+      headerActions={
+        <>
+          <ThemeToggle />
           <button
+            type="submit"
+            form={formId}
             className="btn btn-primary"
             disabled={!name.trim() || sourcePending || issues.length > 0}
           >
             <Check size={17} />
             Сохранить партию
           </button>
+        </>
+      }
+    >
+      <div
+        className="editor-song-modes"
+        role="group"
+        aria-label="Содержимое песни"
+      >
+        <button type="button" onClick={() => leaveEditor(onLyrics ?? onClose)}>
+          Текст и аккорды
+        </button>
+        <button type="button" aria-pressed="true">
+          Табулатуры <span>{parts.length}</span>
+        </button>
+        <span className="editor-draft-state">
+          {snapshot === initialSnapshot
+            ? "Партия открыта"
+            : "Есть несохранённые изменения"}
+        </span>
+      </div>
+      <form
+        id={formId}
+        className="part-editor-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          submit();
+        }}
+      >
+        <div className="part-editor-layout">
+          <PartNavigation
+            parts={parts}
+            activeId={part?.id}
+            addDisabled={!part}
+            onSelect={(next) => {
+              if (next.id !== part?.id) leaveEditor(() => onSwitchPart?.(next));
+            }}
+            onAdd={() => {
+              if (part) leaveEditor(() => onSwitchPart?.("new"));
+            }}
+          />
+          <div className="part-editor-main">
+            <details className="part-settings" open={part ? undefined : true}>
+              <summary>
+                <Settings2 size={17} />
+                <span>
+                  <strong>{name.trim() || "Новая партия"}</strong>
+                  <small>{instrument} · Настройки партии</small>
+                </span>
+              </summary>
+              <div className="part-settings-body">
+                <PartMetaFields
+                  name={name}
+                  instrument={instrument}
+                  tuning={tuning}
+                  kind={kind}
+                  onNameChange={setName}
+                  onInstrumentChange={changeInstrument}
+                  onTuningChange={setTuning}
+                  autoFocus={!part}
+                >
+                  <PartSoundSelect
+                    kind={kind}
+                    value={sound ?? ""}
+                    onChange={setSound}
+                  />
+                </PartMetaFields>
+                <FormatSwitch format={format} onChange={setFormat} />
+              </div>
+            </details>
+            {format === "visual" ? (
+              <ScoreBlock
+                score={score}
+                kind={kind}
+                tuning={tuning}
+                sound={sound}
+                bpm={bpm}
+                notation={notation}
+                sourcePending={sourcePending}
+                scoreMode={scoreMode}
+                onScoreModeChange={setScoreMode}
+                onScoreChange={changeScore}
+                onNotationChange={(value) => {
+                  setNotation(value);
+                  setNotationError("");
+                }}
+                onApplyNotation={applyNotation}
+              />
+            ) : (
+              <TextTabBlock
+                instrument={instrument}
+                content={content}
+                onChange={setContent}
+              />
+            )}
+            <TabGuide key={kind} kind={kind} onInsertExample={insertExample} />
+            <PartValidation
+              notationError={notationError}
+              sourcePending={sourcePending}
+              issues={issues}
+            />
+          </div>
         </div>
       </form>
     </Modal>

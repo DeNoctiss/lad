@@ -1,6 +1,8 @@
 import type { TabEvent } from "../../../lib/tabTypes";
 
-export function rhythm(event: TabEvent) {
+export function rhythm(
+  event: Pick<TabEvent, "duration" | "dotted" | "triplet">,
+) {
   return `1/${event.duration}${event.dotted ? "." : ""}${event.triplet ? " · 3" : ""}`;
 }
 export function eventLabel(event: TabEvent, bar: number, index: number) {

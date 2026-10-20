@@ -1,5 +1,5 @@
 .chord-library {
-  color: #293b32;
+  color: var(--ink);
 }
 
 .chord-page-heading {
@@ -25,7 +25,7 @@
 
 .chord-page-description,
 .chord-editor-description {
-  color: #798079;
+  color: var(--muted);
   font-size: 14px;
   line-height: 1.7;
   margin: 0;
@@ -36,8 +36,8 @@
 }
 
 .chord-toolbar {
-  background: #fcfcf9;
-  border: 1px solid #e1e4da;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 14px;
   padding: 22px 24px;
 }
@@ -49,16 +49,16 @@
   position: relative;
   max-width: 460px;
   min-height: 46px;
-  background: #f6f5f0;
-  border: 1px solid #e0e2d8;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0 13px;
-  color: #899087;
+  color: var(--muted);
 }
 
 .chord-search:focus-within {
-  border-color: #42785a;
-  box-shadow: 0 0 0 3px #42785a16;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--shadow-color);
 }
 
 .chord-search input {
@@ -67,10 +67,10 @@
   min-height: 44px;
   border: 0;
   outline: none;
-  color: #293b32;
+  color: var(--ink);
   background: transparent;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .chord-search input:focus {
@@ -83,7 +83,7 @@
 }
 
 .chord-search input::placeholder {
-  color: #8b9188;
+  color: var(--muted);
 }
 
 .chord-search > svg,
@@ -96,8 +96,8 @@
   align-items: center;
   gap: 8px;
   margin: 22px 0 12px;
-  color: #7e867b;
-  font-size: 12px;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .chord-root-filters {
@@ -110,12 +110,12 @@
   min-width: 43px;
   min-height: 38px;
   padding: 8px 13px;
-  border: 1px solid #e3e5dc;
+  border: 1px solid var(--line);
   border-radius: 7px;
-  color: #6b7468;
+  color: var(--muted);
   background: transparent;
   font: inherit;
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   transition:
     background 150ms,
@@ -123,21 +123,21 @@
 }
 
 .chord-root:hover {
-  border-color: #96b09b;
-  background: #eef2e9;
+  border-color: var(--accent);
+  background: var(--surface-soft);
 }
 
 .chord-root-active,
 .chord-root-active:hover {
-  background: #42785a;
-  border-color: #42785a;
-  color: white;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
 }
 
 .chord-root:focus-visible,
 .chord-card:focus-visible,
 .chord-editor button:focus-visible {
-  outline: 3px solid #6d997b;
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -148,8 +148,8 @@
   flex-wrap: wrap;
   gap: 8px 20px;
   margin: 26px 0 16px;
-  color: #7a8277;
-  font-size: 12px;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .chord-results-bar p {
@@ -157,13 +157,13 @@
 }
 
 .chord-results-bar > p:first-child {
-  color: #414d40;
+  color: var(--ink);
   font-weight: 500;
 }
 
 .chord-results-bar > p:first-child span {
   margin-left: 8px;
-  color: #8b9286;
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 
@@ -190,10 +190,10 @@
   align-items: stretch;
   min-width: 0;
   padding: 20px 20px 0;
-  border: 1px solid #dfe3d7;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  color: #2c4432;
-  background: #fffefa;
+  color: var(--ink);
+  background: var(--surface);
   text-align: left;
   font: inherit;
   cursor: pointer;
@@ -206,8 +206,8 @@
 }
 
 .chord-card:hover {
-  border-color: #95ae92;
-  box-shadow: 0 5px 18px #30463408;
+  border-color: var(--accent);
+  box-shadow: 0 5px 18px var(--shadow-color);
   transform: translateY(-2px);
 }
 
@@ -226,10 +226,10 @@
 }
 
 .chord-card-count {
-  font-size: 12px;
+  font-size: 14px;
   font-family: inherit;
-  color: #8a9580;
-  background: #eef1e8;
+  color: var(--muted);
+  background: var(--surface-soft);
   border-radius: 10px;
   padding: 1px 8px;
   margin-left: auto;
@@ -238,18 +238,18 @@
 .chord-card-variant {
   font-size: 14px;
   font-family: inherit;
-  color: #8a9580;
+  color: var(--muted);
 }
 
 .chord-card-arrow {
   flex-shrink: 0;
-  color: #a5ae9d;
+  color: var(--muted);
   margin-top: 4px;
 }
 
 .chord-position {
-  color: #939987;
-  font-size: 10px;
+  color: var(--muted);
+  font-size: 14px;
   line-height: 1.5;
   margin-top: 5px;
 }
@@ -272,7 +272,7 @@
 
 .chord-fret,
 .chord-string {
-  stroke: #bec6b7;
+  stroke: var(--line);
 }
 
 .chord-fret {
@@ -280,41 +280,41 @@
 }
 
 .chord-nut {
-  stroke: #53694c;
+  stroke: var(--line-strong);
   stroke-width: 4;
 }
 
 .chord-string-label,
 .chord-fret-label {
   font-family: system-ui, sans-serif;
-  font-size: 11px;
-  fill: #89917f;
+  font-size: 14px;
+  fill: var(--muted);
 }
 
 .chord-fret-label {
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .chord-mute,
 .chord-open {
-  stroke: #6a7c5e;
+  stroke: var(--line-strong);
   stroke-width: 1.6;
   stroke-linecap: round;
   fill: none;
 }
 
 .chord-dot {
-  fill: #42785a;
+  fill: var(--accent);
 }
 
 .chord-barre {
-  fill: #42785a;
+  fill: var(--accent);
   opacity: 0.85;
 }
 
 .chord-finger {
-  fill: #fff;
-  font-size: 9px;
+  fill: var(--on-accent);
+  font-size: 14px;
   font-weight: 700;
   pointer-events: none;
   user-select: none;
@@ -326,10 +326,10 @@
   flex-wrap: wrap;
   gap: 6px;
   margin-top: auto;
-  border-top: 1px solid #eceee5;
+  border-top: 1px solid var(--line);
   padding: 13px 0;
-  color: #86907f;
-  font-size: 10px;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .chord-card-footer > span:first-child {
@@ -338,23 +338,23 @@
 }
 
 .chord-card-footer > span:last-child {
-  color: #597650;
+  color: var(--accent);
 }
 
 .chord-library-note {
   text-align: center;
-  color: #8b9284;
-  font-size: 11px;
+  color: var(--muted);
+  font-size: 14px;
   line-height: 1.8;
   margin: 26px 0 8px;
 }
 
 .chord-empty {
-  border: 1px dashed #ccd5c5;
+  border: 1px dashed var(--line);
   border-radius: 14px;
   padding: 50px 24px;
   text-align: center;
-  color: #7c8774;
+  color: var(--muted);
 }
 
 .chord-empty > svg {
@@ -363,7 +363,7 @@
 
 .chord-empty h2 {
   font-size: 28px;
-  color: #344b35;
+  color: var(--ink);
 }
 
 .chord-empty p {
@@ -385,15 +385,15 @@
   overflow-y: auto;
   margin: auto;
   padding: 28px;
-  border: 1px solid #d9dfd2;
+  border: 1px solid var(--line);
   border-radius: 18px;
-  background: #fffefa;
-  color: #293b32;
-  box-shadow: 0 24px 100px #1e2e292e;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 100px var(--shadow-color);
 }
 
 .chord-editor::backdrop {
-  background: #1b2a246b;
+  background: var(--shadow-color);
   backdrop-filter: blur(3px);
 }
 
@@ -422,7 +422,7 @@
   flex-direction: column;
   gap: 8px;
   margin-bottom: 17px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .chord-editor .field input {
@@ -430,26 +430,26 @@
   width: 100%;
   min-width: 0;
   min-height: 44px;
-  border: 1px solid #dce1d4;
+  border: 1px solid var(--line);
   border-radius: 7px;
   padding: 10px 12px;
-  background: #fff;
-  color: #293b32;
+  background: var(--surface);
+  color: var(--ink);
   font: inherit;
 }
 
 .chord-editor .field input:focus {
-  outline: 2px solid #83a48a;
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
 .chord-editor .field input[aria-invalid="true"] {
-  border-color: #b56c58;
+  border-color: var(--danger);
 }
 
 .chord-field-hint {
-  color: #7e8876;
-  font-size: 11px;
+  color: var(--muted);
+  font-size: 14px;
   line-height: 1.7;
   margin: -5px 0 19px;
 }
@@ -463,7 +463,7 @@
 
 .chord-fret-fieldset legend {
   padding: 0;
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 12px;
 }
 
@@ -478,12 +478,12 @@
   flex-direction: column;
   gap: 7px;
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .chord-fret-inputs small {
-  color: #959d8c;
-  font-size: 9px;
+  color: var(--muted);
+  font-size: 14px;
   margin-left: 3px;
 }
 
@@ -507,14 +507,14 @@
   align-self: start;
   min-width: 0;
   padding: 22px 10px;
-  border: 1px solid #e2e5da;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: #f6f5f0;
+  background: var(--surface-soft);
   text-align: center;
 }
 
 .chord-preview .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   letter-spacing: 0.12em;
 }
 
@@ -531,19 +531,19 @@
   min-height: 180px;
   display: flex;
   align-items: center;
-  color: #858a7d;
+  color: var(--muted);
   padding: 0 8px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.7;
 }
 
 .chord-errors {
-  border: 1px solid #e5c7b8;
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 9px 14px;
-  background: #fff4ed;
-  color: #98533c;
-  font-size: 12px;
+  background: var(--surface-soft);
+  color: var(--danger);
+  font-size: 14px;
   line-height: 1.6;
   margin: 8px 0 18px;
 }
@@ -557,7 +557,7 @@
   justify-content: flex-end;
   gap: 10px;
   padding-top: 21px;
-  border-top: 1px solid #e9ece1;
+  border-top: 1px solid var(--line);
 }
 
 .chord-sr-only {
@@ -653,15 +653,15 @@
   max-width: 720px;
   margin-bottom: 32px;
   padding: 22px 26px;
-  background: #f3f5ee;
+  background: var(--surface-soft);
   border-radius: 14px;
-  border: 1px solid #e2e6d8;
+  border: 1px solid var(--line);
 }
 
 .caged-intro p {
   margin: 0 0 12px;
   line-height: 1.65;
-  color: #4a5a4f;
+  color: var(--muted);
 }
 
 .caged-intro p:last-child {
@@ -669,14 +669,14 @@
 }
 
 .caged-intro strong {
-  color: #293b32;
+  color: var(--ink);
 }
 
 .caged-intro code {
-  background: #e2e6d8;
+  background: var(--surface-muted);
   padding: 2px 7px;
   border-radius: 5px;
-  font-size: 0.9em;
+  font-size: max(14px, 0.9em);
 }
 
 .caged-section-title {
@@ -692,8 +692,8 @@
 }
 
 .caged-card {
-  background: #fff;
-  border: 1px solid #e2e6d8;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 14px;
   padding: 18px;
   display: flex;
@@ -712,19 +712,19 @@
 .caged-shape-name {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.15rem;
-  color: #293b32;
+  color: var(--ink);
 }
 
 .caged-root {
-  font-size: 0.85rem;
-  color: #7a8a7e;
+  font-size: 0.875rem;
+  color: var(--muted);
   font-weight: 600;
 }
 
 .caged-description {
-  font-size: 0.82rem;
+  font-size: 0.875rem;
   line-height: 1.55;
-  color: #6a7a6e;
+  color: var(--muted);
   margin: 0;
   text-align: center;
 }
@@ -734,6 +734,6 @@
   align-items: center;
   gap: 12px;
   margin: 18px 0 0;
-  font-size: 0.85rem;
-  color: #6a7a6e;
+  font-size: 0.875rem;
+  color: var(--muted);
 }

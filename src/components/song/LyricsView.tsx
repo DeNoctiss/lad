@@ -12,7 +12,7 @@ export function LyricsView({
   onEdit: () => void;
 }) {
   return (
-    <div className="lyrics" style={{ fontSize }} role="tabpanel">
+    <div className="lyrics" style={{ fontSize }}>
       {lyrics.trim() ? (
         lyrics.split("\n").map((line, index) =>
           /^\{[^}]+\}$/.test(line.trim()) ? (

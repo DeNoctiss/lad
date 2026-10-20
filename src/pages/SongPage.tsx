@@ -27,6 +27,9 @@ export function SongView({
   const [tab, setTab] = useState<"lyrics" | "tabs">("lyrics");
   const [fontSize, setFontSize] = useState(18);
   const [partEditor, setPartEditor] = useState<TabPart | "new" | null>(null);
+  const [activePartId, setActivePartId] = useState<string | null>(
+    song.parts[0]?.id ?? null,
+  );
   const songChords = [
     ...new Set([...extractChords(song.lyrics), ...song.chords]),
   ];
@@ -39,6 +42,7 @@ export function SongView({
       updatedAt: new Date().toISOString(),
     });
     setPartEditor(null);
+    setActivePartId(part.id);
   };
   return (
     <>
@@ -51,15 +55,24 @@ export function SongView({
         onToggleFavorite={() => onUpdate({ ...song, favorite: !song.favorite })}
         onEdit={onEdit}
       />
-      <div className="song-layout">
-        <section className="song-sheet">
-          <SheetToolbar
-            tab={tab}
-            partsCount={song.parts.length}
-            fontSize={fontSize}
-            onTabChange={setTab}
-            onFontSizeChange={setFontSize}
-          />
+      <div className="song-mode-bar">
+        <SheetToolbar
+          tab={tab}
+          partsCount={song.parts.length}
+          fontSize={fontSize}
+          onTabChange={setTab}
+          onFontSizeChange={setFontSize}
+        />
+      </div>
+      <div
+        className={`song-layout ${tab === "tabs" ? "song-layout-tabs" : "song-layout-lyrics"}`}
+      >
+        <section
+          className="song-sheet"
+          id={`song-panel-${tab}`}
+          role="tabpanel"
+          aria-labelledby={`song-tab-${tab}`}
+        >
           {tab === "lyrics" ? (
             <LyricsView
               lyrics={song.lyrics}
@@ -71,6 +84,8 @@ export function SongView({
               song={song}
               onUpdate={onUpdate}
               onEditPart={setPartEditor}
+              activePartId={activePartId}
+              onSelectPart={setActivePartId}
             />
           )}
           <div className="sheet-footer">
@@ -80,28 +95,29 @@ export function SongView({
             </span>
           </div>
         </section>
-        <aside className="song-aside">
-          <ChordSidebar
-            song={song}
-            songChords={songChords}
-            chords={chords}
-            onUpdate={onUpdate}
-            navigate={navigate}
-          />
-          <div className="practice-note">
-            <span className="eyebrow">МАЛЕНЬКОЕ НАПОМИНАНИЕ</span>
-            <p>
-              Не обязательно играть идеально.
-              <br />
-              Главное — играть.
-            </p>
-            <div className="note-line" />
-          </div>
-        </aside>
+        {tab === "lyrics" && (
+          <aside className="song-aside">
+            <ChordSidebar
+              song={song}
+              songChords={songChords}
+              chords={chords}
+              onUpdate={onUpdate}
+              navigate={navigate}
+            />
+          </aside>
+        )}
       </div>
       {partEditor && (
         <PartEditor
+          key={partEditor === "new" ? "new" : partEditor.id}
           part={partEditor === "new" ? undefined : partEditor}
+          parts={song.parts}
+          songTitle={song.title}
+          onSwitchPart={setPartEditor}
+          onLyrics={() => {
+            setPartEditor(null);
+            setTab("lyrics");
+          }}
           bpm={song.bpm}
           onSave={savePart}
           onClose={() => setPartEditor(null)}

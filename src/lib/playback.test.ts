@@ -176,3 +176,40 @@ describe("buildTimeline", () => {
     expect(marks[1].tick).toBe(1920);
   });
 });
+
+describe("dead notes and strumming", () => {
+  it.each(["guitar", "bass"] as const)(
+    "keeps %s dead notes unpitched while preserving tuning and dynamics",
+    (kind) => {
+      const score = parseNotation("1:x@8 1:x~ghost@8 1:5~pm@4", kind, {
+        beats: 4,
+        unit: 4,
+      });
+      const tuning = laneTunings(
+        kind,
+        kind === "guitar" ? "D A D G B e" : "D A D G",
+      );
+      const { notes } = buildTimeline(score, tuning, 120);
+      expect(notes.map((n) => n.muted)).toEqual([true, true, false]);
+      expect(notes[0].midi).toBe(tuning.get("1"));
+      expect(notes[1].velocity).toBeLessThan(notes[0].velocity);
+      expect(notes[2].midi).toBe(tuning.get("1")! + 5);
+      expect(notes[2].effects).toContain("pm");
+      expect(notes[0].startTick).toBe(0);
+      expect(notes[1].startTick).toBe(240);
+    },
+  );
+  it("spreads a sparse strum over 45ms starting exactly on the beat", () => {
+    const score = guitarScore("[1:x,6:x]@4");
+    score.measures[0].events[0].strum = "down";
+    const down = buildTimeline(score, GUITAR_TUNING, 120);
+    expect(Math.min(...down.notes.map((n) => n.startTick))).toBe(0);
+    expect(
+      Math.max(...down.notes.map((n) => n.startTick)) * down.secPerTick,
+    ).toBeCloseTo(0.045);
+    expect(down.notes.find((n) => n.midi === 40)?.startTick).toBe(0);
+    score.measures[0].events[0].strum = "up";
+    const up = buildTimeline(score, GUITAR_TUNING, 120);
+    expect(up.notes.find((n) => n.midi === 64)?.startTick).toBe(0);
+  });
+});
