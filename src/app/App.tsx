@@ -1,8 +1,11 @@
+import { VocalPage } from "../pages/VocalPage";
+import { osenTemplate } from "../lib/vocal/osenTemplate";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Music2, Plus, Search } from "lucide-react";
 import type { Band, Chord, Library, Song } from "../lib/model";
 import { readLibrary, STORAGE_KEY, validateLibrary } from "../lib/model";
 import { initialLibrary } from "../lib/seed";
+import { demoSong, sourceSong, installSong } from "../lib/vocal/demoCatalog";
 import { allChords } from "../lib/chordDatabase";
 import { Sidebar } from "../components/layout/Sidebar";
 import { Topbar, Footer } from "../components/layout/Topbar";
@@ -264,6 +267,16 @@ export default function App() {
       );
     }
   };
+  const openVocalExample = (index: number, source = false) => {
+    const entry = source ? sourceSong(index) : demoSong(index);
+    setLibrary((value) => installSong(value, entry));
+    navigate(`song/${entry.song.id}`);
+  };
+  const openOsen = () => {
+    const entry = osenTemplate();
+    setLibrary((value) => installSong(value, entry));
+    navigate(`song/${entry.song.id}`);
+  };
   const newSong = () => {
     if (!library.bands.length) {
       setBandEditor("new");
@@ -273,29 +286,33 @@ export default function App() {
   const openImport = () => importRef.current?.click();
 
   const navSection =
-    route === "chords" || chordDetailName
-      ? "chords"
-      : route === "caged"
-        ? "caged"
-        : route === "fretboard"
-          ? "fretboard"
-          : route === "favorites"
-            ? "favorites"
-            : route === "songs" || currentSong
-              ? "songs"
-              : "bands";
+    route === "vocal"
+      ? "vocal"
+      : route === "chords" || chordDetailName
+        ? "chords"
+        : route === "caged"
+          ? "caged"
+          : route === "fretboard"
+            ? "fretboard"
+            : route === "favorites"
+              ? "favorites"
+              : route === "songs" || currentSong
+                ? "songs"
+                : "bands";
   const pageTitle =
-    navSection === "chords"
-      ? "Библиотека аккордов"
-      : navSection === "caged"
-        ? "Система CAGED"
-        : navSection === "fretboard"
-          ? "Гриф гитары"
-          : navSection === "favorites"
-            ? "Избранное"
-            : navSection === "songs"
-              ? "Все песни"
-              : "Мои группы";
+    route === "vocal"
+      ? "Вокальный тренажёр"
+      : navSection === "chords"
+        ? "Библиотека аккордов"
+        : navSection === "caged"
+          ? "Система CAGED"
+          : navSection === "fretboard"
+            ? "Гриф гитары"
+            : navSection === "favorites"
+              ? "Избранное"
+              : navSection === "songs"
+                ? "Все песни"
+                : "Мои группы";
 
   const songListEmpty = (
     <EmptyState
@@ -356,7 +373,7 @@ export default function App() {
           navSection={navSection}
         />
         <main
-          className={`main-content ${currentSong && !normalizedQuery ? "song-page" : ""}`}
+          className={`main-content ${(currentSong || route === "vocal") && !normalizedQuery ? "song-page" : ""}`}
         >
           {storageError && (
             <div className="storage-warning" role="alert">
@@ -378,22 +395,34 @@ export default function App() {
               navigate={navigate}
               empty={songListEmpty}
             />
-          ) : route === "bands" ? (
-            <BandsPage
-              bands={library.bands}
-              songs={library.songs}
-              displayedBands={displayedBands}
-              genres={genres}
-              genre={genre}
-              onGenreChange={setGenre}
-              sort={sort}
-              onSortChange={setSort}
-              layout={layout}
-              onLayoutChange={setLayout}
-              onAddBand={() => setBandEditor("new")}
-              onNewSong={newSong}
-              navigate={navigate}
+          ) : route === "vocal" ? (
+            <VocalPage
+              project={library.vocalDraft}
+              onChange={(vocalDraft) =>
+                setLibrary((value) => ({ ...value, vocalDraft }))
+              }
+              onOpenTemplate={openOsen}
+              onExercise={(i) => openVocalExample(i)}
+              onSong={(i) => openVocalExample(i, true)}
             />
+          ) : route === "bands" ? (
+            <>
+              <BandsPage
+                bands={library.bands}
+                songs={library.songs}
+                displayedBands={displayedBands}
+                genres={genres}
+                genre={genre}
+                onGenreChange={setGenre}
+                sort={sort}
+                onSortChange={setSort}
+                layout={layout}
+                onLayoutChange={setLayout}
+                onAddBand={() => setBandEditor("new")}
+                onNewSong={newSong}
+                navigate={navigate}
+              />
+            </>
           ) : chordDetailName ? (
             <ChordDetail
               name={chordDetailName}

@@ -1,0 +1,8 @@
+SoundTouchJS 0.3.0 — unmodified dependency, LGPL-2.1.
+Project: https://github.com/cutterbl/SoundTouchJS
+Authors/contributors: Steve 'Cutter' Blades, Olli Parviainen, Ryan Berdeen,
+Jakub Fiala, Adria Holovaty; copyright notices are retained in soundtouchjs-0.3.0.js.
+License: soundtouchjs-LGPL-2.1.txt in this directory.
+The unmodified JavaScript module is provided alongside this notice.
+Application source and package-lock.json are provided with the project;
+replace the soundtouchjs dependency and run npm run build to rebuild/relink.

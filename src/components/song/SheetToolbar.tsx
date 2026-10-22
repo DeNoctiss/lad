@@ -7,10 +7,10 @@ export function SheetToolbar({
   onTabChange,
   onFontSizeChange,
 }: {
-  tab: "lyrics" | "tabs";
+  tab: "lyrics" | "tabs" | "vocal";
   partsCount: number;
   fontSize: number;
-  onTabChange: (tab: "lyrics" | "tabs") => void;
+  onTabChange: (tab: "lyrics" | "tabs" | "vocal") => void;
   onFontSizeChange: (size: number) => void;
 }) {
   return (
@@ -23,14 +23,14 @@ export function SheetToolbar({
           if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
             return;
           event.preventDefault();
+          const modes = ["lyrics", "tabs", "vocal"] as const;
+          const offset = event.key === "ArrowLeft" ? -1 : 1;
           const next =
             event.key === "Home"
-              ? "lyrics"
+              ? modes[0]
               : event.key === "End"
-                ? "tabs"
-                : tab === "lyrics"
-                  ? "tabs"
-                  : "lyrics";
+                ? modes[2]
+                : modes[(modes.indexOf(tab) + offset + 3) % 3];
           onTabChange(next);
           document.getElementById(`song-tab-${next}`)?.focus();
         }}
@@ -57,6 +57,17 @@ export function SheetToolbar({
         >
           Табулатуры <span>{partsCount}</span>
         </button>
+        <button
+          role="tab"
+          id="song-tab-vocal"
+          aria-controls="song-panel-vocal"
+          aria-selected={tab === "vocal"}
+          tabIndex={tab === "vocal" ? 0 : -1}
+          onClick={() => onTabChange("vocal")}
+          className={tab === "vocal" ? "active" : ""}
+        >
+          Вокальный тренажёр
+        </button>
       </div>
       <div className="sheet-tools">
         {tab === "lyrics" && (
@@ -80,13 +91,15 @@ export function SheetToolbar({
             </button>
           </>
         )}
-        <button
-          className="btn-icon print-button"
-          aria-label="Распечатать песню"
-          onClick={() => window.print()}
-        >
-          <Printer size={16} />
-        </button>
+        {tab !== "vocal" && (
+          <button
+            className="btn-icon print-button"
+            aria-label="Распечатать песню"
+            onClick={() => window.print()}
+          >
+            <Printer size={16} />
+          </button>
+        )}
       </div>
     </div>
   );

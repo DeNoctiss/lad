@@ -64,6 +64,7 @@ export function SongEditor({
             ],
             favorite: song?.favorite ?? false,
             parts: song?.parts ?? [],
+            vocal: song?.vocal,
             defaultVoicings,
             updatedAt: new Date().toISOString(),
           });

@@ -1,3 +1,5 @@
+import type { VocalProject } from "./vocal/model";
+import { validateVocalProject } from "./vocal/model";
 import type { TabScore } from "./tabTypes";
 import { kindForInstrument, validateScore } from "./tablature";
 
@@ -32,6 +34,7 @@ export type Song = {
   /** Maps chord name → chord id for the default voicing shown on the song page. */
   defaultVoicings?: Record<string, string>;
   parts: TabPart[];
+  vocal?: VocalProject;
   updatedAt: string;
 };
 export type Chord = {
@@ -45,6 +48,7 @@ export type Chord = {
   barres?: number[];
 };
 export type Library = {
+  vocalDraft?: VocalProject;
   version: 1;
   bands: Band[];
   songs: Song[];
@@ -111,6 +115,7 @@ export function validateLibrary(value: unknown): Library {
     !Array.isArray(value.chords)
   )
     throw new Error("Неверный формат резервной копии");
+  if (value.vocalDraft !== undefined) validateVocalProject(value.vocalDraft);
   for (const band of value.bands) {
     if (
       !isObject(band) ||
@@ -165,6 +170,7 @@ export function validateLibrary(value: unknown): Library {
       if (part.score !== undefined)
         validateScore(part.score, kindForInstrument(part.instrument as string));
     }
+    if (song.vocal !== undefined) validateVocalProject(song.vocal);
     if (!uniqueIds(song.parts)) throw new Error("Повторяющиеся партии");
   }
   for (const chord of value.chords) {

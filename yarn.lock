@@ -1090,6 +1090,11 @@ smplr@^1.0.0:
   resolved "https://registry.yarnpkg.com/smplr/-/smplr-1.1.0.tgz#ec7a0b39a6a4238f09463ab39d1ea2dd4402a135"
   integrity sha512-VW2FeDdSgBU3cg9pofUYvXB1Nb0iMXurbAnUlpgWfOklw/3JGP5vEjKdq7qGaEwL8rzQTMjdDu64AqpR2ul1bQ==
 
+soundtouchjs@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/soundtouchjs/-/soundtouchjs-0.3.0.tgz#8d65e641b3939843b9b6729d2603d804530fe0f2"
+  integrity sha512-P/+SwnIE4BLrMbYK8aB8+GfXRfLv3+BV8HFMrEqOuF0F9BsI3sKEN1T+kY/JqiVURcCQgr50BC8D/uVzE/GozQ==
+
 source-map-js@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.2.2.tgz#79fb88d97535a21cb27162cb05d211b67acea4ab"

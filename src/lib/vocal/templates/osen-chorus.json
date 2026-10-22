@@ -1,0 +1,383 @@
+{
+  "version": 1,
+  "bpm": 135,
+  "meter": {
+    "beats": 4,
+    "unit": 4
+  },
+  "length": 68,
+  "notes": [
+    {
+      "id": "osen-chorus-1",
+      "midi": 66,
+      "start": 0.435459,
+      "duration": 0.731429
+    },
+    {
+      "id": "osen-chorus-2",
+      "midi": 64,
+      "start": 1.166888,
+      "duration": 1.097143
+    },
+    {
+      "id": "osen-chorus-3",
+      "midi": 62,
+      "start": 2.264031,
+      "duration": 1.306122
+    },
+    {
+      "id": "osen-chorus-4",
+      "midi": 66,
+      "start": 4.040357,
+      "duration": 0.992653
+    },
+    {
+      "id": "osen-chorus-5",
+      "midi": 64,
+      "start": 5.03301,
+      "duration": 0.626939
+    },
+    {
+      "id": "osen-chorus-6",
+      "midi": 62,
+      "start": 5.659949,
+      "duration": 0.888163
+    },
+    {
+      "id": "osen-chorus-7",
+      "midi": 66,
+      "start": 7.122806,
+      "duration": 0.522449
+    },
+    {
+      "id": "osen-chorus-8",
+      "midi": 64,
+      "start": 7.645255,
+      "duration": 0.522449
+    },
+    {
+      "id": "osen-chorus-9",
+      "midi": 66,
+      "start": 8.167704,
+      "duration": 0.470204
+    },
+    {
+      "id": "osen-chorus-10",
+      "midi": 64,
+      "start": 8.637908,
+      "duration": 0.522449
+    },
+    {
+      "id": "osen-chorus-11",
+      "midi": 66,
+      "start": 9.160357,
+      "duration": 0.783673
+    },
+    {
+      "id": "osen-chorus-12",
+      "midi": 64,
+      "start": 9.944031,
+      "duration": 0.261224
+    },
+    {
+      "id": "osen-chorus-13",
+      "midi": 62,
+      "start": 10.205255,
+      "duration": 1.358367
+    },
+    {
+      "id": "osen-chorus-14",
+      "midi": 64,
+      "start": 11.563622,
+      "duration": 0.20898
+    },
+    {
+      "id": "osen-chorus-15",
+      "midi": 66,
+      "start": 12.138316,
+      "duration": 0.365714
+    },
+    {
+      "id": "osen-chorus-16",
+      "midi": 64,
+      "start": 12.504031,
+      "duration": 0.835918
+    },
+    {
+      "id": "osen-chorus-17",
+      "midi": 66,
+      "start": 14.019133,
+      "duration": 0.679184
+    },
+    {
+      "id": "osen-chorus-18",
+      "midi": 66,
+      "start": 15.011786,
+      "duration": 1.462857
+    },
+    {
+      "id": "osen-chorus-19",
+      "midi": 66,
+      "start": 16.944847,
+      "duration": 0.888163
+    },
+    {
+      "id": "osen-chorus-20",
+      "midi": 64,
+      "start": 18.094235,
+      "duration": 0.470204
+    },
+    {
+      "id": "osen-chorus-21",
+      "midi": 64,
+      "start": 18.877908,
+      "duration": 0.783673
+    },
+    {
+      "id": "osen-chorus-22",
+      "midi": 64,
+      "start": 20.027296,
+      "duration": 0.20898
+    },
+    {
+      "id": "osen-chorus-23",
+      "midi": 62,
+      "start": 20.236276,
+      "duration": 1.671837
+    },
+    {
+      "id": "osen-chorus-24",
+      "midi": 64,
+      "start": 21.908112,
+      "duration": 1.784388
+    },
+    {
+      "id": "osen-chorus-25",
+      "midi": 66,
+      "start": 24.165,
+      "duration": 1.9125
+    },
+    {
+      "id": "osen-chorus-26",
+      "midi": 64,
+      "start": 26.923622,
+      "duration": 1.044898
+    },
+    {
+      "id": "osen-chorus-27",
+      "midi": 62,
+      "start": 28.28199,
+      "duration": 0.940408
+    },
+    {
+      "id": "osen-chorus-28",
+      "midi": 64,
+      "start": 29.797092,
+      "duration": 0.20898
+    },
+    {
+      "id": "osen-chorus-29",
+      "midi": 66,
+      "start": 30.006071,
+      "duration": 1.828571
+    },
+    {
+      "id": "osen-chorus-30",
+      "midi": 64,
+      "start": 32.148112,
+      "duration": 0.313469
+    },
+    {
+      "id": "osen-chorus-31",
+      "midi": 66,
+      "start": 32.461582,
+      "duration": 0.679184
+    },
+    {
+      "id": "osen-chorus-32",
+      "midi": 64,
+      "start": 33.2975,
+      "duration": 0.626939
+    },
+    {
+      "id": "osen-chorus-33",
+      "midi": 62,
+      "start": 34.394643,
+      "duration": 0.888163
+    },
+    {
+      "id": "osen-chorus-34",
+      "midi": 66,
+      "start": 36.06648,
+      "duration": 0.313469
+    },
+    {
+      "id": "osen-chorus-35",
+      "midi": 66,
+      "start": 36.693418,
+      "duration": 0.365714
+    },
+    {
+      "id": "osen-chorus-36",
+      "midi": 64,
+      "start": 37.059133,
+      "duration": 0.261224
+    },
+    {
+      "id": "osen-chorus-37",
+      "midi": 62,
+      "start": 37.686071,
+      "duration": 0.835918
+    },
+    {
+      "id": "osen-chorus-38",
+      "midi": 66,
+      "start": 39.044439,
+      "duration": 0.783673
+    },
+    {
+      "id": "osen-chorus-39",
+      "midi": 64,
+      "start": 39.828112,
+      "duration": 0.20898
+    },
+    {
+      "id": "osen-chorus-40",
+      "midi": 64,
+      "start": 40.559541,
+      "duration": 0.574694
+    },
+    {
+      "id": "osen-chorus-41",
+      "midi": 66,
+      "start": 41.290969,
+      "duration": 0.783673
+    },
+    {
+      "id": "osen-chorus-42",
+      "midi": 62,
+      "start": 42.388112,
+      "duration": 1.044898
+    },
+    {
+      "id": "osen-chorus-43",
+      "midi": 67,
+      "start": 43.485255,
+      "duration": 0.313469
+    },
+    {
+      "id": "osen-chorus-44",
+      "midi": 69,
+      "start": 43.955459,
+      "duration": 0.417959
+    },
+    {
+      "id": "osen-chorus-45",
+      "midi": 66,
+      "start": 44.477908,
+      "duration": 0.470204
+    },
+    {
+      "id": "osen-chorus-46",
+      "midi": 67,
+      "start": 44.948112,
+      "duration": 0.783673
+    },
+    {
+      "id": "osen-chorus-47",
+      "midi": 66,
+      "start": 45.88852,
+      "duration": 3.918367
+    },
+    {
+      "id": "osen-chorus-48",
+      "midi": 64,
+      "start": 50.851786,
+      "duration": 0.835918
+    },
+    {
+      "id": "osen-chorus-49",
+      "midi": 62,
+      "start": 52.210153,
+      "duration": 1.253878
+    },
+    {
+      "id": "osen-chorus-50",
+      "midi": 64,
+      "start": 53.98648,
+      "duration": 1.933061
+    },
+    {
+      "id": "osen-chorus-51",
+      "midi": 66,
+      "start": 55.919541,
+      "duration": 0.522449
+    },
+    {
+      "id": "osen-chorus-52",
+      "midi": 64,
+      "start": 56.598724,
+      "duration": 0.417959
+    },
+    {
+      "id": "osen-chorus-53",
+      "midi": 66,
+      "start": 57.016684,
+      "duration": 1.044898
+    },
+    {
+      "id": "osen-chorus-54",
+      "midi": 64,
+      "start": 58.061582,
+      "duration": 1.776327
+    },
+    {
+      "id": "osen-chorus-55",
+      "midi": 62,
+      "start": 60.046888,
+      "duration": 1.253878
+    },
+    {
+      "id": "osen-chorus-56",
+      "midi": 66,
+      "start": 61.56199,
+      "duration": 3.186939
+    },
+    {
+      "id": "osen-chorus-57",
+      "midi": 66,
+      "start": 65.323622,
+      "duration": 0.888163
+    },
+    {
+      "id": "osen-chorus-58",
+      "midi": 64,
+      "start": 66.211786,
+      "duration": 0.20898
+    }
+  ],
+  "source": "Wildways, TRITIA — Осень · припев 0:57.45–1:27.15 · рабочая транскрипция записи, 135 BPM оценочно",
+  "settings": {
+    "speed": 1,
+    "transpose": 0,
+    "referenceVolume": 0.55,
+    "acapellaVolume": 0.65,
+    "backingVolume": 0.55,
+    "monitorVolume": 0,
+    "metronome": false,
+    "countIn": true,
+    "tolerance": 50,
+    "latencyMs": 100,
+    "loop": true,
+    "loopStart": 0,
+    "loopEnd": 66.825
+  },
+  "audio": {
+    "acapella": {
+      "name": "audio [vocals] (1).mp3",
+      "duration": 178.456598,
+      "originalBpm": 135,
+      "offset": -129.2625
+    }
+  }
+}

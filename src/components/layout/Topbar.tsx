@@ -51,6 +51,11 @@ export function Topbar({
             label: "Избранное",
             active: navSection === "favorites",
           },
+          {
+            id: "vocal",
+            label: "Вокальный тренажёр",
+            active: navSection === "vocal",
+          },
           { id: "chords", label: "Аккорды", active: navSection === "chords" },
         ].map((item) => (
           <button

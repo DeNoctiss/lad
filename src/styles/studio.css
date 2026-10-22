@@ -1372,3 +1372,118 @@ button:disabled {
     overflow: visible !important;
   }
 }
+
+/* Entry points for the vocal studio also remain usable before its lazy bundle loads. */
+.vocal-demo-shelf {
+  margin-bottom: 28px;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(115deg, var(--accent-soft), var(--surface) 70%);
+}
+.vocal-demo-header h2 {
+  font-size: clamp(24px, 2vw, 30px);
+  margin: 8px 0;
+}
+.vocal-demo-header p {
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.6;
+}
+.vocal-demo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--accent);
+}
+.vocal-demo-exercises {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+.vocal-demo-exercises .btn {
+  padding: 12px 15px;
+  flex-wrap: wrap;
+  font-size: 15px;
+}
+.vocal-demo-exercises .btn span {
+  border-left: 1px solid var(--line);
+  margin-left: 3px;
+  padding-left: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.vocal-demo-shelf details {
+  margin-top: 22px;
+  font-size: 14px;
+}
+.vocal-demo-shelf summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+.vocal-demo-shelf details > p {
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 900px;
+}
+.vocal-demo-songs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.vocal-demo-songs article {
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.vocal-demo-songs h3 {
+  margin: 5px 0 16px;
+  font-size: 19px;
+}
+.vocal-demo-songs small {
+  color: var(--muted);
+  font-size: 14px;
+}
+.vocal-demo-songs a {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 14px;
+  color: var(--accent);
+  font-size: 14px;
+}
+@media (max-width: 760px) {
+  .vocal-demo-shelf {
+    padding: 19px;
+  }
+  .vocal-demo-songs {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Expand inside the existing hero; keep the primary action accessible. */
+.hero-features {
+  max-width: 760px;
+  font-size: 16px;
+  line-height: 1.65;
+  margin-top: 16px;
+}
+.hero-features summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+}
+.hero-features ul {
+  padding-left: 22px;
+}
+.hero-features li {
+  margin: 8px 0;
+}
+.hero-features p {
+  max-width: none;
+}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import type { Band, Chord, Song, TabPart } from "../lib/model";
 import { extractChords } from "../lib/model";
 import { PartEditor } from "../components/editors/PartEditor";
@@ -8,6 +8,12 @@ import { ChordSidebar } from "../components/song/ChordSidebar";
 import { SongHeader } from "../components/song/SongHeader";
 import { SheetToolbar } from "../components/song/SheetToolbar";
 import { BackLink } from "../components/ui/BackLink";
+
+const VocalTrainer = lazy(() =>
+  import("../components/vocal/VocalTrainer").then((m) => ({
+    default: m.VocalTrainer,
+  })),
+);
 
 export function SongView({
   song,
@@ -24,7 +30,12 @@ export function SongView({
   onEdit: () => void;
   navigate: (route: string) => void;
 }) {
-  const [tab, setTab] = useState<"lyrics" | "tabs">("lyrics");
+  const [tab, setTab] = useState<"lyrics" | "tabs" | "vocal">(
+    song.id.startsWith("lad-vocal-study-") || (song.vocal && !song.parts.length)
+      ? "vocal"
+      : "lyrics",
+  );
+  const [vocalVisited, setVocalVisited] = useState(tab === "vocal");
   const [fontSize, setFontSize] = useState(18);
   const [partEditor, setPartEditor] = useState<TabPart | "new" | null>(null);
   const [activePartId, setActivePartId] = useState<string | null>(
@@ -60,12 +71,15 @@ export function SongView({
           tab={tab}
           partsCount={song.parts.length}
           fontSize={fontSize}
-          onTabChange={setTab}
+          onTabChange={(next) => {
+            if (next === "vocal") setVocalVisited(true);
+            setTab(next);
+          }}
           onFontSizeChange={setFontSize}
         />
       </div>
       <div
-        className={`song-layout ${tab === "tabs" ? "song-layout-tabs" : "song-layout-lyrics"}`}
+        className={`song-layout ${tab === "vocal" ? "song-layout-vocal" : tab === "tabs" ? "song-layout-tabs" : "song-layout-lyrics"}`}
       >
         <section
           className="song-sheet"
@@ -73,13 +87,35 @@ export function SongView({
           role="tabpanel"
           aria-labelledby={`song-tab-${tab}`}
         >
-          {tab === "lyrics" ? (
+          {tab === "lyrics" && (
             <LyricsView
               lyrics={song.lyrics}
               fontSize={fontSize}
               onEdit={onEdit}
             />
-          ) : (
+          )}
+          {vocalVisited && (
+            <div hidden={tab !== "vocal"}>
+              <Suspense
+                fallback={
+                  <p className="vocal-loading">Загружаю вокальный тренажёр…</p>
+                }
+              >
+                <VocalTrainer
+                  active={tab === "vocal"}
+                  song={song}
+                  onChange={(vocal) =>
+                    onUpdate({
+                      ...song,
+                      vocal,
+                      updatedAt: new Date().toISOString(),
+                    })
+                  }
+                />
+              </Suspense>
+            </div>
+          )}
+          {tab === "tabs" && (
             <PartsPanel
               song={song}
               onUpdate={onUpdate}
