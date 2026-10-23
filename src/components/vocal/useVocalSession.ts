@@ -1,3 +1,4 @@
+import type { TranscriptionEngine } from "../../lib/vocal/neuralPostprocess";
 import { useEffect, useRef, useState } from "react";
 import type {
   VocalProject,
@@ -279,6 +280,7 @@ export function useVocalSession(
     file: File,
     transcribe: boolean,
     range: PitchRange = "auto",
+    engine: TranscriptionEngine = "classic",
   ): Promise<{ audio: LoadedAudio; transcription?: Transcription } | null> {
     cancel();
     setError("");
@@ -298,13 +300,19 @@ export function useVocalSession(
       let transcription: Transcription | undefined;
       if (transcribe) {
         setBusy("Распознаю ноты: 0%");
-        const samples = await analysisSamples(buffer);
+        const neural = engine === "basic-pitch";
+        const sampleRate = neural ? 22050 : 11025;
+        const samples = await analysisSamples(buffer, sampleRate);
         if (!alive.current || op !== operation.current) return null;
         const task = audioJob<Transcription>(
           {
             task: "transcribe",
             samples,
-            sampleRate: 11025,
+            sampleRate,
+            assetBase: new URL(
+              import.meta.env.BASE_URL + "models/",
+              document.baseURI,
+            ).href,
             bpm: project.bpm,
             range,
           },
@@ -313,6 +321,7 @@ export function useVocalSession(
             if (alive.current && op === operation.current)
               setBusy("Распознаю ноты: " + Math.round(value * 100) + "%");
           },
+          neural,
         );
         job.current = task;
         transcription = await task.promise;

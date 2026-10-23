@@ -1,3 +1,4 @@
+import type { TranscriptionEngine } from "../../lib/vocal/neuralPostprocess";
 import { plural } from "../../lib/plural";
 import { Modal } from "../ui/Modal";
 import { TranscriptionDialog } from "./TranscriptionDialog";
@@ -269,12 +270,19 @@ export function VocalTrainer({
     file: File,
     transcribe = false,
     range: PitchRange = "auto",
+    engine: TranscriptionEngine = "classic",
   ) {
     ++importId.current;
     setReadingFile("");
     setNotice(null);
     setShiftIssue(null);
-    const result = await session.loadAudio(kind, file, transcribe, range);
+    const result = await session.loadAudio(
+      kind,
+      file,
+      transcribe,
+      range,
+      engine,
+    );
     if (!result) return;
     const latest = projectRef.current,
       previous = latest.audio?.[kind];
@@ -301,7 +309,7 @@ export function VocalTrainer({
         next = {
           ...next,
           notes: result.transcription.notes,
-          source: "Распознано из акапеллы · " + file.name,
+          source: `Распознано из акапеллы · ${engine === "basic-pitch" ? "Basic Pitch" : "классический"} · ${file.name}`,
           settings: {
             ...next.settings,
             speed: 1,
@@ -943,10 +951,10 @@ export function VocalTrainer({
           file={acapellaFile}
           replacing={!!project.notes.length}
           onClose={() => setAcapellaFile(null)}
-          onStart={(range) => {
+          onStart={(range, engine) => {
             const file = acapellaFile;
             setAcapellaFile(null);
-            void loadAudio("acapella", file, true, range);
+            void loadAudio("acapella", file, true, range, engine);
           }}
         />
       )}

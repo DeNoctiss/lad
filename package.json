@@ -12,6 +12,10 @@
     "format": "prettier --write src index.html vite.config.ts playwright.config.ts tsconfig.json package.json e2e"
   },
   "dependencies": {
+    "@spotify/basic-pitch": "1.0.1",
+    "@tensorflow/tfjs": "3.21.0",
+    "@tensorflow/tfjs-backend-wasm": "3.21.0",
+    "@tensorflow/tfjs-core": "3.21.0",
     "lucide-react": "0.577.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",

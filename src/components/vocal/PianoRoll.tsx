@@ -1,5 +1,12 @@
+import {
+  ROLL_GRIDS,
+  dragVocalNote,
+  noteGeometry,
+  sameVocalNote,
+} from "../../lib/vocal/rollEditing";
+import type { NoteDragAction } from "../../lib/vocal/rollEditing";
 import { midiToFrequency } from "../../lib/vocal/pitch";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import {
   MousePointer2,
@@ -30,7 +37,8 @@ const ROW = 24,
   LOW = 9;
 type Tool = "select" | "draw" | "erase";
 type Gesture = {
-  type: "draw" | "move" | "resize";
+  type: "draw" | NoteDragAction;
+  pointerId: number;
   x: number;
   y: number;
   note: VocalNote;
@@ -83,9 +91,22 @@ export function PianoRoll({
   const scroll = useRef<HTMLDivElement>(null),
     gestureRef = useRef<Gesture | null>(null);
   const grid = Math.min(selectedGrid, project.length);
+  const gridOption = ROLL_GRIDS.find((g) => g.step === selectedGrid)!;
+  const patternId = useId().replace(/:/g, "");
+  const [hoverAction, setHoverAction] = useState<NoteDragAction | null>(null);
   const ppb = 48 * zoom,
     width = Math.max(720, project.length * ppb),
     height = (HIGH - LOW + 1) * ROW;
+  const showSubdivisions = grid * ppb >= 5;
+  const measureBeats = barLength(project);
+  const rulerStride = Math.max(
+    1,
+    2 ** Math.ceil(Math.log2(40 / (measureBeats * ppb))),
+  );
+  const barStride = Math.max(
+    1,
+    2 ** Math.ceil(Math.log2(8 / (measureBeats * ppb))),
+  );
   const zoomAnchor = useRef<{ beat: number; x: number } | null>(null);
   const changeZoom = (value: number, pointerX?: number) => {
     const el = scroll.current,
@@ -206,7 +227,7 @@ export function PianoRoll({
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
   const down = (e: ReactPointerEvent<SVGSVGElement>) => {
-    if (locked || e.button !== 0) return;
+    if (locked || e.button !== 0 || gestureRef.current) return;
     e.preventDefault();
     e.currentTarget.focus({ preventScroll: true });
     const p = point(e),
@@ -221,12 +242,12 @@ export function PianoRoll({
     if (target) {
       setSelected(target.id);
       onPreview(target.midi + project.settings.transpose);
-      const resize =
-        p.x >=
-        (target.start + target.duration) * ppb -
-          Math.min(12, (target.duration * ppb) / 3);
+      const action = (e.target as Element)
+        .closest("[data-note-action]")
+        ?.getAttribute("data-note-action") as NoteDragAction | undefined;
       setDrag({
-        type: resize ? "resize" : "move",
+        type: action ?? "move",
+        pointerId: e.pointerId,
         x: p.x,
         y: p.y,
         note: target,
@@ -249,7 +270,14 @@ export function PianoRoll({
         duration: grid,
       };
       setSelected(n.id);
-      setDrag({ type: "draw", x: p.x, y: p.y, note: n, current: n });
+      setDrag({
+        type: "draw",
+        pointerId: e.pointerId,
+        x: p.x,
+        y: p.y,
+        note: n,
+        current: n,
+      });
       onPreview(n.midi + project.settings.transpose);
     } else {
       setSelected(null);
@@ -260,50 +288,69 @@ export function PianoRoll({
   };
   const move = (e: ReactPointerEvent<SVGSVGElement>) => {
     const g = gestureRef.current;
-    if (!g) return;
+    if (!g) {
+      const action = (e.target as Element)
+        .closest("[data-note-action]")
+        ?.getAttribute("data-note-action") as NoteDragAction | undefined;
+      setHoverAction(!locked && tool !== "erase" ? (action ?? null) : null);
+      return;
+    }
+    if (e.pointerId !== g.pointerId) return;
     const p = point(e),
-      delta = Math.round((p.x - g.x) / ppb / grid) * grid;
+      dx = p.x - g.x,
+      dy = p.y - g.y;
+    if (
+      g.type !== "draw" &&
+      Math.abs(dx) < 3 &&
+      (g.type !== "move" || Math.abs(dy) < 3)
+    ) {
+      setDrag({ ...g, current: g.note });
+      return;
+    }
     const current =
-      g.type === "move"
+      g.type === "draw"
         ? {
             ...g.note,
-            start: clamp(
-              g.note.start + delta,
-              0,
-              project.length - g.note.duration,
-            ),
-            midi: clamp(g.note.midi - Math.round((p.y - g.y) / ROW), 21, 108),
-          }
-        : {
-            ...g.note,
             duration: clamp(
-              g.type === "draw"
-                ? Math.ceil((p.x / ppb - g.note.start) / grid) * grid
-                : g.note.duration + delta,
+              Math.ceil((p.x / ppb - g.note.start) / grid) * grid,
               grid,
               project.length - g.note.start,
             ),
-          };
+          }
+        : dragVocalNote(
+            g.note,
+            g.type,
+            Math.abs(dx) < 3 ? 0 : dx / ppb,
+            -Math.round(dy / ROW),
+            grid,
+            project.length,
+          );
     setDrag({ ...g, current });
   };
-  const finish = () => {
+  const finish = (e: ReactPointerEvent<SVGSVGElement>) => {
     const g = gestureRef.current;
-    if (g) onNotes(placeNote(project.notes, g.current));
+    if (!g || e.pointerId !== g.pointerId) return;
+    if (g.type === "draw" || !sameVocalNote(g.note, g.current))
+      onNotes(placeNote(project.notes, g.current));
     setDrag(null);
+    if (e.currentTarget.hasPointerCapture(e.pointerId))
+      e.currentTarget.releasePointerCapture(e.pointerId);
   };
-  const updateNote = (n: VocalNote) =>
-    onNotes(
-      placeNote(project.notes, {
-        ...n,
-        midi: clamp(Math.round(n.midi), 21, 108),
-        start: clamp(n.start, 0, project.length - grid),
-        duration: clamp(
-          n.duration,
-          grid,
-          project.length - clamp(n.start, 0, project.length - grid),
-        ),
-      }),
+  const updateNote = (n: VocalNote) => {
+    const start = clamp(
+      n.start,
+      0,
+      project.length - (n.duration === note?.duration ? n.duration : 1 / 64),
     );
+    const next = {
+      ...n,
+      midi: clamp(Math.round(n.midi), 21, 108),
+      start,
+      duration: clamp(n.duration, 1 / 64, project.length - start),
+    };
+    if (!note || !sameVocalNote(note, next))
+      onNotes(placeNote(project.notes, next));
+  };
   const path = (points: PitchPoint[], transpose: number) => {
     let d = "",
       previous = -1;
@@ -379,16 +426,17 @@ export function PianoRoll({
           </button>
         </div>
         <label className="vocal-inline-label">
-          Сетка{" "}
+          Шаг сетки{" "}
           <select
             aria-label="Шаг сетки"
-            value={grid}
+            value={selectedGrid}
             onChange={(e) => setGrid(Number(e.target.value))}
           >
-            <option value={1}>1/4</option>
-            <option value={0.5}>1/8</option>
-            <option value={0.25}>1/16</option>
-            <option value={1 / 3}>Триоль</option>
+            {ROLL_GRIDS.map((g) => (
+              <option key={g.step} value={g.step}>
+                {g.label}
+              </option>
+            ))}
           </select>
         </label>
         <div className="vocal-tool-group">
@@ -437,6 +485,34 @@ export function PianoRoll({
           </span>
         </div>
       )}
+      <div className="vocal-grid-help">
+        <span>
+          <strong>{gridOption.label}</strong> · {gridOption.description}.
+          Привязка при рисовании и перетаскивании; уже записанные ноты не
+          меняются.
+        </span>
+        {!showSubdivisions && (
+          <span className="vocal-grid-zoom-hint">
+            Мелкие деления скрыты на этом масштабе. Увеличьте масштаб, чтобы
+            увидеть выбранный шаг; привязка сохраняется.
+          </span>
+        )}
+        {!training && (
+          <span className="vocal-drag-hint">
+            {locked
+              ? "Для редактирования остановите воспроизведение."
+              : tool === "erase"
+                ? "Ластик: нажмите на ноту, чтобы удалить её."
+                : (gesture?.type ?? hoverAction) === "resize-start"
+                  ? "Левый край: меняется начало и длина. Конец ноты остаётся на месте."
+                  : (gesture?.type ?? hoverAction) === "resize-end"
+                    ? "Правый край: меняется конец и длина. Начало ноты остаётся на месте."
+                    : (gesture?.type ?? hoverAction) === "move"
+                      ? "Середина: перемещение по времени и высоте с сохранением длины."
+                      : "Оба края — длина ноты. Середина — перемещение. Esc — отменить перетаскивание."}
+          </span>
+        )}
+      </div>
       <div className="vocal-waveform" aria-label="Форма волны акапеллы">
         <span className="vocal-wave-label">Аудио</span>
         {audio ? (
@@ -484,18 +560,20 @@ export function PianoRoll({
           <div className="vocal-ruler" style={{ width: width + 64 }}>
             <span className="vocal-ruler-corner">Такт</span>
             {Array.from(
-              { length: Math.ceil(project.length / barLength(project)) },
+              {
+                length: Math.ceil(project.length / measureBeats / rulerStride),
+              },
               (_, i) => (
                 <button
                   key={i}
                   style={{
-                    left: 64 + i * barLength(project) * ppb,
-                    width: barLength(project) * ppb,
+                    left: 64 + i * rulerStride * measureBeats * ppb,
+                    width: rulerStride * measureBeats * ppb,
                   }}
-                  onClick={() => onSeek(i * barLength(project))}
-                  aria-label={"Перейти к такту " + (i + 1)}
+                  onClick={() => onSeek(i * rulerStride * measureBeats)}
+                  aria-label={"Перейти к такту " + (i * rulerStride + 1)}
                 >
-                  {i + 1}
+                  {i * rulerStride + 1}
                 </button>
               ),
             )}
@@ -517,6 +595,9 @@ export function PianoRoll({
           </div>
           <svg
             className="vocal-roll-svg"
+            data-tool={tool}
+            data-locked={locked}
+            data-drag={gesture?.type ?? ""}
             style={{ left: 64, top: TOP }}
             width={width}
             height={height}
@@ -527,8 +608,22 @@ export function PianoRoll({
             onPointerMove={move}
             onPointerUp={finish}
             onPointerCancel={() => setDrag(null)}
+            onLostPointerCapture={() => setDrag(null)}
+            onPointerLeave={() => {
+              if (!gestureRef.current) setHoverAction(null);
+            }}
             onKeyDown={(e) => {
               if (locked) return;
+              if (gestureRef.current) {
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  const id = gestureRef.current.pointerId;
+                  setDrag(null);
+                  if (e.currentTarget.hasPointerCapture(id))
+                    e.currentTarget.releasePointerCapture(id);
+                }
+                return;
+              }
               if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
                 e.preventDefault();
                 e.shiftKey ? onRedo() : onUndo();
@@ -575,20 +670,55 @@ export function PianoRoll({
                 className={black(HIGH - i) ? "vocal-row black" : "vocal-row"}
               />
             ))}
-            {Array.from({ length: Math.ceil(project.length) + 1 }, (_, i) => (
-              <line
-                key={i}
-                x1={i * ppb}
-                x2={i * ppb}
-                y1={0}
-                y2={height}
-                className={
-                  i % barLength(project) === 0
-                    ? "vocal-grid-bar"
-                    : "vocal-grid-beat"
-                }
+            <defs>
+              <pattern
+                id={patternId + "-step"}
+                width={grid * ppb}
+                height={height}
+                patternUnits="userSpaceOnUse"
+              >
+                <path d={`M0 0V${height}`} className="vocal-grid-subdivision" />
+              </pattern>
+              <pattern
+                id={patternId + "-beat"}
+                width={ppb}
+                height={height}
+                patternUnits="userSpaceOnUse"
+              >
+                <path d={`M0 0V${height}`} className="vocal-grid-beat" />
+              </pattern>
+              <pattern
+                id={patternId + "-bar"}
+                width={measureBeats * barStride * ppb}
+                height={height}
+                patternUnits="userSpaceOnUse"
+              >
+                <path d={`M0 0V${height}`} className="vocal-grid-bar" />
+              </pattern>
+            </defs>
+            {showSubdivisions && (
+              <rect
+                width={width}
+                height={height}
+                fill={`url(#${patternId}-step)`}
+                className="vocal-grid-layer"
+                data-grid-step={grid}
               />
-            ))}
+            )}
+            {ppb >= 10 && (
+              <rect
+                width={width}
+                height={height}
+                fill={`url(#${patternId}-beat)`}
+                className="vocal-grid-layer"
+              />
+            )}
+            <rect
+              width={width}
+              height={height}
+              fill={`url(#${patternId}-bar)`}
+              className="vocal-grid-layer"
+            />
             {project.settings.loop && (
               <rect
                 x={project.settings.loopStart * ppb}
@@ -600,33 +730,63 @@ export function PianoRoll({
                 className="vocal-loop-shade"
               />
             )}
-            {visibleNotes.map((n) => (
-              <g
-                key={n.id}
-                data-vocal-note={n.id}
-                className={"vocal-note " + (n.id === selected ? "active" : "")}
-              >
-                <title>
-                  {noteName(n.midi + project.settings.transpose)} · доля{" "}
-                  {n.start + 1} · длительность {n.duration}
-                </title>
-                <rect
-                  x={n.start * ppb + 1}
-                  y={(HIGH - n.midi - project.settings.transpose) * ROW + 2}
-                  width={Math.max(4, n.duration * ppb - 2)}
-                  height={ROW - 4}
-                  rx={4}
-                />
-                {n.duration * ppb > 40 && (
-                  <text
-                    x={n.start * ppb + 7}
-                    y={(HIGH - n.midi - project.settings.transpose) * ROW + 17}
+            {visibleNotes.map((n) => {
+              const shape = noteGeometry(n, ppb),
+                y = (HIGH - n.midi - project.settings.transpose) * ROW + 2;
+              const region = (x: number) =>
+                `M${x} ${y}h${shape.handle}v${ROW - 4}h${-shape.handle}Z`;
+              return (
+                <g
+                  key={n.id}
+                  data-vocal-note={n.id}
+                  className={
+                    "vocal-note " + (n.id === selected ? "active" : "")
+                  }
+                >
+                  <rect
+                    className="vocal-note-body"
+                    data-note-action="move"
+                    x={shape.x}
+                    y={y}
+                    width={shape.width}
+                    height={ROW - 4}
+                    rx={4}
                   >
-                    {noteName(n.midi + project.settings.transpose)}
-                  </text>
-                )}
-              </g>
-            ))}
+                    <title>
+                      {noteName(n.midi + project.settings.transpose)} ·{" "}
+                      {locked
+                        ? `доля ${n.start + 1}, длительность ${n.duration}`
+                        : "середина: переместить по времени и высоте"}
+                    </title>
+                  </rect>
+                  {shape.width > 48 && (
+                    <text x={shape.x + shape.handle + 3} y={y + 15}>
+                      {noteName(n.midi + project.settings.transpose)}
+                    </text>
+                  )}
+                  <path
+                    d={region(shape.x)}
+                    className="vocal-note-edge"
+                    data-note-action="resize-start"
+                  >
+                    <title>Левый край: изменить начало и длину ноты</title>
+                  </path>
+                  <path
+                    d={region(shape.x + shape.width - shape.handle)}
+                    className="vocal-note-edge"
+                    data-note-action="resize-end"
+                  >
+                    <title>Правый край: изменить конец и длину ноты</title>
+                  </path>
+                  {shape.width >= 14 && (
+                    <path
+                      className="vocal-note-grips"
+                      d={`M${shape.x + shape.handle / 2} ${y + 5}v${ROW - 14}M${shape.x + shape.width - shape.handle / 2} ${y + 5}v${ROW - 14}`}
+                    />
+                  )}
+                </g>
+              );
+            })}
             <path
               d={path(detected, project.settings.transpose)}
               className="vocal-detected-trace"
@@ -681,7 +841,7 @@ export function PianoRoll({
                 type="number"
                 aria-label="Начало выбранной ноты"
                 min={0}
-                max={project.length - grid}
+                max={project.length - note.duration}
                 step={grid}
                 value={+note.start.toFixed(3)}
                 disabled={locked}
@@ -695,7 +855,7 @@ export function PianoRoll({
               <input
                 type="number"
                 aria-label="Длительность выбранной ноты"
-                min={grid}
+                min={1 / 64}
                 max={project.length - note.start}
                 step={grid}
                 value={+note.duration.toFixed(3)}
@@ -720,7 +880,7 @@ export function PianoRoll({
           <span className="vocal-muted">
             {training
               ? "Голубые блоки — эталон. Зелёная линия — ваш голос. Для занятия наденьте наушники."
-              : "Карандаш — добавить · край ноты — длительность · стрелки — сдвиг · Delete — удалить"}
+              : "Карандаш — добавить · оба края — длительность · середина — перенос · стрелки — сдвиг · Delete — удалить"}
           </span>
         )}
       </div>

@@ -3,10 +3,15 @@ export function audioJob<T>(
   data: unknown,
   transfer: Transferable[] = [],
   onProgress?: (value: number) => void,
+  neural = false,
 ) {
-  const worker = new Worker(new URL("./audio.worker.ts", import.meta.url), {
-    type: "module",
-  });
+  const worker = neural
+    ? new Worker(new URL("./neural.worker.ts", import.meta.url), {
+        type: "module",
+      })
+    : new Worker(new URL("./audio.worker.ts", import.meta.url), {
+        type: "module",
+      });
   let rejectJob: (e: Error) => void = () => {};
   const promise = new Promise<T>((resolve, reject) => {
     rejectJob = reject;
@@ -50,11 +55,11 @@ export async function decodeFile(
   if (buffer.duration < 0.1) throw new Error("Аудиофайл слишком короткий");
   return buffer;
 }
-export async function analysisSamples(buffer: AudioBuffer) {
+export async function analysisSamples(buffer: AudioBuffer, sampleRate = 11025) {
   const context = new OfflineAudioContext(
     1,
-    Math.ceil(buffer.duration * 11025),
-    11025,
+    Math.ceil(buffer.duration * sampleRate),
+    sampleRate,
   );
   const source = context.createBufferSource();
   source.buffer = buffer;

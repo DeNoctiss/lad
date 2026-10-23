@@ -161,6 +161,7 @@ test("waveform and acapella recognition use real decoded PCM in the worker", asy
   await page
     .getByLabel("Распознать акапеллу", { exact: true })
     .setInputFiles({ name: "a3.wav", mimeType: "audio/wav", buffer: wav(220) });
+  await page.getByLabel("Алгоритм распознавания").selectOption("classic");
   await page
     .getByRole("button", { name: "Распознать ноты", exact: true })
     .click();

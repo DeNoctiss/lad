@@ -1261,3 +1261,107 @@
 .vocal-shift-actions .btn {
   white-space: normal;
 }
+
+/* Note editing: explicit handles and a grid that matches snapping. */
+.vocal-inline-label select {
+  max-width: 205px;
+}
+.vocal-grid-help {
+  display: grid;
+  gap: 5px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.vocal-grid-help strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.vocal-drag-hint {
+  color: var(--ink);
+  min-height: 3em;
+}
+.vocal-grid-zoom-hint {
+  color: var(--vocal-accent);
+}
+.vocal-grid-layer {
+  pointer-events: none;
+}
+.vocal-grid-subdivision {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  opacity: 0.28;
+}
+.vocal-grid-beat {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  opacity: 0.75;
+}
+.vocal-grid-bar {
+  stroke: var(--muted);
+  stroke-width: 1.3;
+  opacity: 0.75;
+}
+.vocal-note-body {
+  cursor: grab;
+}
+.vocal-note-edge {
+  fill: transparent;
+  stroke: none;
+  cursor: ew-resize;
+}
+.vocal-note-edge:hover {
+  fill: var(--vocal-accent);
+  fill-opacity: 0.24;
+}
+.vocal-note-grips {
+  stroke: var(--vocal-note-ink);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0;
+  pointer-events: none;
+}
+.vocal-note:hover .vocal-note-body {
+  stroke: var(--vocal-accent);
+}
+.vocal-note:hover .vocal-note-grips,
+.vocal-note.active .vocal-note-grips {
+  opacity: 0.8;
+}
+.vocal-roll-svg[data-tool="draw"] {
+  cursor: crosshair;
+}
+.vocal-roll-svg[data-tool="erase"],
+.vocal-roll-svg[data-tool="erase"] .vocal-note * {
+  cursor: crosshair;
+}
+.vocal-roll-svg[data-drag="move"],
+.vocal-roll-svg[data-drag="move"] * {
+  cursor: grabbing;
+}
+.vocal-roll-svg[data-drag="resize-start"],
+.vocal-roll-svg[data-drag="resize-start"] *,
+.vocal-roll-svg[data-drag="resize-end"],
+.vocal-roll-svg[data-drag="resize-end"] * {
+  cursor: ew-resize;
+}
+.vocal-roll-svg[data-locked="true"],
+.vocal-roll-svg[data-locked="true"] .vocal-note * {
+  cursor: default;
+}
+.vocal-roll-svg[data-locked="true"] .vocal-note-grips {
+  opacity: 0;
+}
+.vocal-roll-svg[data-locked="true"] .vocal-note-edge {
+  fill: transparent;
+  pointer-events: none;
+}
+@media (max-width: 640px) {
+  .vocal-drag-hint {
+    min-height: 6em;
+  }
+}

@@ -1,0 +1,9 @@
+Basic Pitch model: Spotify AB, https://github.com/spotify/basic-pitch-ts
+Source package @spotify/basic-pitch 1.0.1; Apache License 2.0.
+Model files copied without modifications.
+TensorFlow.js WASM: The TensorFlow Authors, https://github.com/tensorflow/tfjs
+Source package @tensorflow/tfjs-backend-wasm 3.21.0; Apache License 2.0.
+WASM files copied without modifications.
+License text: basic-pitch/LICENSE and wasm/LICENSE.
+Application inference follows Spotify window framing and timing constants,
+with adapted per-window allocation, disposal and cancellable worker lifecycle.
