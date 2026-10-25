@@ -56,7 +56,11 @@ export function Topbar({
             label: "Вокальный тренажёр",
             active: navSection === "vocal",
           },
-          { id: "chords", label: "Аккорды", active: navSection === "chords" },
+          {
+            id: "solfege",
+            label: "Сольфеджио",
+            active: navSection === "solfege",
+          },
         ].map((item) => (
           <button
             key={item.id}

@@ -13,33 +13,12 @@ import {
 import { useEffect, useRef } from "react";
 import type { Band, Song } from "../../lib/model";
 
-function ClockIcon() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" />
-      <path
-        d="M12 7v5l3.2 2"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 export function Sidebar({
   isOpen,
   navSection,
   bands,
   songs,
   favoritesCount,
-  recent,
   navigate,
   onImport,
   onClose,
@@ -49,7 +28,6 @@ export function Sidebar({
   bands: Band[];
   songs: Song[];
   favoritesCount: number;
-  recent: Song[];
   navigate: (route: string) => void;
   onImport: () => void;
   onClose: () => void;
@@ -69,7 +47,6 @@ export function Sidebar({
       previous?.focus();
     };
   }, [isOpen]);
-  const bandOf = (song: Song) => bands.find((band) => band.id === song.bandId);
   return (
     <aside
       ref={drawer}
@@ -145,6 +122,8 @@ export function Sidebar({
             count: favoritesCount,
           },
           { id: "vocal", icon: Mic, label: "Вокальный тренажёр", count: null },
+          { id: "solfege", icon: Music2, label: "Сольфеджио", count: null },
+          { id: "theory", icon: Music2, label: "Теория музыки", count: null },
           { id: "chords", icon: Guitar, label: "Аккорды", count: null },
           { id: "caged", icon: LayoutGrid, label: "CAGED", count: null },
           { id: "fretboard", icon: Music2, label: "Гриф", count: null },
@@ -162,26 +141,6 @@ export function Sidebar({
           </button>
         ))}
       </nav>
-      <div className="sidebar-divider" />
-      <div className="sidebar-label recent-label">
-        НЕДАВНО ОБНОВЛЕНЫ
-        <ClockIcon />
-      </div>
-      <div className="recent-songs">
-        {recent.map((song) => (
-          <button key={song.id} onClick={() => navigate(`song/${song.id}`)}>
-            <span
-              className={`recent-icon cover-${bandOf(song)?.color ?? "sage"}`}
-            >
-              <Music2 size={15} />
-            </span>
-            <span>
-              <strong>{song.title}</strong>
-              <small>{bandOf(song)?.name}</small>
-            </span>
-          </button>
-        ))}
-      </div>
       <div className="sidebar-bottom">
         <div className="local-card">
           <span className="local-dot" />

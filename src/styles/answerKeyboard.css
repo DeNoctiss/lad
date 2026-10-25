@@ -1,0 +1,52 @@
+.ak-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 18px 0;
+}
+.ak-keyboard {
+  position: relative;
+  width: 630px;
+  height: 180px;
+}
+.ak-key {
+  position: absolute !important;
+  top: 0;
+  border: 1px solid #647681 !important;
+  border-radius: 0 0 6px 6px !important;
+  padding: 0 !important;
+  display: block !important;
+}
+.ak-key.white {
+  height: 175px;
+  background: #fafbfc !important;
+  color: #20333c !important;
+}
+.ak-key.black {
+  height: 110px;
+  background: #23353d !important;
+  color: #fff !important;
+  z-index: 2;
+}
+.ak-key span {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  font-size: 14px;
+  writing-mode: vertical-rl;
+  margin: auto;
+}
+.ak-key.selected {
+  background: #eac370 !important;
+  color: #182c32 !important;
+}
+.ak-key.expected {
+  box-shadow: inset 0 -8px #318779;
+}
+.ak-key:disabled {
+  opacity: 1;
+}
+.ak-key:focus-visible {
+  outline: 3px solid #358eb7;
+  z-index: 3;
+}

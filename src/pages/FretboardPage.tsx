@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { usePracticeSetting } from "../lib/guitar/settings";
 import { BackLink } from "../components/ui/BackLink";
 import { ScaleTab } from "../components/fretboard/ScaleTab";
 import { ChordIdentifierTab } from "../components/fretboard/ChordIdentifierTab";
 import { KeyIdentifierTab } from "../components/fretboard/KeyIdentifierTab";
 import "../styles/fretboard.css";
 
-type TabId = "scales" | "chords" | "keys";
+import { GuitarLab } from "../components/guitar/GuitarLab";
+type TabId = "scales" | "chords" | "keys" | "practice";
 
 const TABS: { id: TabId; label: string }[] = [
+  { id: "practice", label: "Гитарная практика" },
   { id: "scales", label: "Гаммы" },
   { id: "chords", label: "Определитель аккордов" },
   { id: "keys", label: "Определитель тональности" },
@@ -15,10 +17,12 @@ const TABS: { id: TabId; label: string }[] = [
 
 export function FretboardPage({
   navigate,
+  onSaveLick,
 }: {
   navigate: (route: string) => void;
+  onSaveLick?: (title: string, content: string) => void;
 }) {
-  const [tab, setTab] = useState<TabId>("scales");
+  const [tab, setTab] = usePracticeSetting("pageTab");
 
   return (
     <section className="fretboard-page" aria-label="Гриф гитары">
@@ -47,9 +51,18 @@ export function FretboardPage({
           </button>
         ))}
       </div>
-      {tab === "scales" && <ScaleTab />}
-      {tab === "chords" && <ChordIdentifierTab />}
-      {tab === "keys" && <KeyIdentifierTab />}
+      <div hidden={tab !== "practice"}>
+        <GuitarLab active={tab === "practice"} onSaveLick={onSaveLick} />
+      </div>
+      <div hidden={tab !== "scales"}>
+        <ScaleTab />
+      </div>
+      <div hidden={tab !== "chords"}>
+        <ChordIdentifierTab />
+      </div>
+      <div hidden={tab !== "keys"}>
+        <KeyIdentifierTab />
+      </div>
     </section>
   );
 }

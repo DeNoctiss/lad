@@ -9,6 +9,7 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       "soundtouchjs",
+      "smplr",
       "@spotify/basic-pitch",
       "@tensorflow/tfjs",
       "@tensorflow/tfjs-backend-wasm",

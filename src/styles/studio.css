@@ -1487,3 +1487,16 @@ button:disabled {
 .hero-features p {
   max-width: none;
 }
+
+/* The growing navigation has its own accessible scroll; recent songs were removed. */
+.sidebar {
+  overflow-y: auto;
+}
+.sidebar > nav {
+  flex-shrink: 0;
+}
+.sidebar .sidebar-bottom {
+  position: static;
+  flex-shrink: 0;
+  margin-top: 18px;
+}

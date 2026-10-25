@@ -1,3 +1,5 @@
+import { Soundfont } from "smplr";
+import { soundFile } from "../partSounds";
 import { midiToFrequency } from "./pitch";
 import type { VocalProject, VocalSettings } from "./model";
 import { barLength } from "./model";
@@ -5,6 +7,9 @@ import { audioJob } from "./jobs";
 export type TrackKind = "acapella" | "backing";
 /** Web Audio owns the clock, React only displays it. No timers advance song time. */
 export class VocalTransport {
+  private piano: Soundfont | null = null;
+  private pianoLoading: Promise<Soundfont> | null = null;
+  private previewGeneration = 0;
   private ctx: AudioContext | null = null;
   private buses: Record<string, GainNode> = {};
   private nodes = new Set<AudioScheduledSourceNode>();
@@ -38,6 +43,28 @@ export class VocalTransport {
     }
     return this.ctx;
   }
+  private loadPiano(): Promise<Soundfont> {
+    if (this.pianoLoading) return this.pianoLoading;
+    const context = this.context;
+    const instrument = new Soundfont(context, {
+      instrumentUrl: `${import.meta.env.BASE_URL}soundfonts/${soundFile("piano", "grand")}`,
+      destination: this.buses.reference,
+    });
+    const pending = instrument.load
+      .then(() => {
+        if (this.ctx === context) this.piano = instrument;
+        return instrument;
+      })
+      .catch((cause: unknown) => {
+        if (this.pianoLoading === pending) this.pianoLoading = null;
+        throw new Error(
+          "Не удалось загрузить пианино. Проверьте файлы soundfonts и повторите воспроизведение.",
+          { cause },
+        );
+      });
+    this.pianoLoading = pending;
+    return pending;
+  }
   setAudio(kind: TrackKind, buffer?: AudioBuffer) {
     this.pause();
     if (buffer) this.originals[kind] = buffer;
@@ -60,6 +87,9 @@ export class VocalTransport {
     const generation = ++this.generation,
       context = this.context;
     await context.resume();
+    await this.loadPiano();
+    if (generation !== this.generation)
+      throw new DOMException("Отменено", "AbortError");
     for (const kind of ["acapella", "backing"] as const) {
       const original = this.originals[kind],
         meta = project.audio?.[kind];
@@ -147,6 +177,10 @@ export class VocalTransport {
     bus: string,
     amplitude = 0.16,
   ) {
+    if (bus === "reference") {
+      this.piano?.start({ note: midi, time, duration, velocity: 76 });
+      return;
+    }
     const ctx = this.context,
       osc = ctx.createOscillator(),
       envelope = ctx.createGain();
@@ -170,10 +204,20 @@ export class VocalTransport {
       envelope.disconnect();
     };
   }
-  preview(midi: number) {
-    void this.context.resume();
-    this.buses.reference.gain.value = 0.6;
-    this.tone(midi, this.context.currentTime + 0.01, 0.35, "reference");
+  async preview(midi: number) {
+    const generation = this.generation;
+    const previewGeneration = ++this.previewGeneration;
+    const context = this.context;
+    await context.resume();
+    await this.loadPiano();
+    if (
+      generation !== this.generation ||
+      previewGeneration !== this.previewGeneration ||
+      this.ctx !== context
+    )
+      return;
+    if (!this.playing) this.buses.reference.gain.value = 0.6;
+    this.tone(midi, context.currentTime + 0.01, 0.35, "reference");
   }
   private scheduleAudio() {
     const p = this.project!,
@@ -276,6 +320,8 @@ export class VocalTransport {
     return this.playing && !!this.ctx && this.ctx.currentTime < this.originTime;
   }
   private stopNodes() {
+    this.previewGeneration++;
+    this.piano?.stop();
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
     for (const n of this.nodes) {
@@ -305,6 +351,8 @@ export class VocalTransport {
     this.pause();
     if (this.ctx) void this.ctx.close();
     this.ctx = null;
+    this.piano = null;
+    this.pianoLoading = null;
     this.originals = {};
     this.ready = {};
   }

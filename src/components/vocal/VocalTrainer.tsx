@@ -722,7 +722,16 @@ export function VocalTrainer({
               }
             }}
             onPreview={(n) => {
-              if (!locked) session.transport.preview(n);
+              if (!locked)
+                void session.transport
+                  .preview(n)
+                  .catch((error: unknown) =>
+                    session.setError(
+                      error instanceof Error
+                        ? error.message
+                        : "Не удалось проиграть ноту",
+                    ),
+                  );
             }}
           />
           <div className="vocal-transport">

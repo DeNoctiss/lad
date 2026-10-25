@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { degree } from "../../lib/guitar/model";
 import {
   NOTE_NAMES,
   NUM_FRETS,
@@ -39,6 +41,15 @@ export function FretboardView({
   onTuningChange,
   rootNote,
 }: FretboardViewProps) {
+  const [labelMode, setLabelMode] = useState("notes");
+  const [reference, setReference] = useState(0);
+  const root = rootNote ?? reference;
+  const dotLabel = (note: number) =>
+    labelMode === "degrees"
+      ? degree(note, root)
+      : labelMode === "both"
+        ? `${noteName(note)} · ${degree(note, root)}`
+        : noteName(note);
   // Display strings from high e (top) to low E (bottom)
   const displayStrings = [5, 4, 3, 2, 1, 0];
   const clickable = onPositionClick !== undefined;
@@ -61,13 +72,41 @@ export function FretboardView({
         tabIndex={clickable ? 0 : -1}
         aria-label={label}
       >
-        {showNoteNames && (isHighlighted || isSelected) ? noteName(note) : ""}
+        {showNoteNames && (isHighlighted || isSelected) ? dotLabel(note) : ""}
       </button>
     );
   }
 
   return (
-    <div className="fretboard-wrapper">
+    <div className="fretboard-wrapper" data-label-mode={labelMode}>
+      <div className="fretboard-controls">
+        <label>
+          Подписи{" "}
+          <select
+            value={labelMode}
+            onChange={(e) => setLabelMode(e.target.value)}
+          >
+            <option value="notes">Ноты</option>
+            <option value="degrees">Ступени</option>
+            <option value="both">Ноты + ступени</option>
+          </select>
+        </label>
+        {rootNote == null && (
+          <label>
+            Ступени относительно{" "}
+            <select
+              value={reference}
+              onChange={(e) => setReference(+e.target.value)}
+            >
+              {NOTE_NAMES.map((n, i) => (
+                <option value={i} key={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
       <div className="fretboard-scroll">
         <div className="fretboard">
           {/* Fret markers row (above the strings) */}
@@ -154,7 +193,7 @@ export function FretboardView({
                       aria-label={`Струна ${6 - stringIdx}, открытая, нота ${noteName(openNote)}`}
                     >
                       {showNoteNames && (isOpenHighlighted || isOpenSelected)
-                        ? noteName(openNote)
+                        ? dotLabel(openNote)
                         : ""}
                     </button>
                   )}

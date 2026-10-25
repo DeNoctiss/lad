@@ -1,0 +1,22 @@
+Instrument samples used by the guitar practice module
+
+The module reuses the sample files already distributed with this application.
+No Hooktheory audio assets are included.
+
+Clean electric guitar: Musyng Kite General MIDI SoundFont,
+pre-rendered MIDI.js SoundFonts distribution by Benjamin Gleitzman.
+Source: https://github.com/gleitz/midi-js-soundfonts
+Bank: MusyngKite / electric_guitar_clean
+License listed by the distributor: Creative Commons Attribution-ShareAlike 3.0
+https://creativecommons.org/licenses/by-sa/3.0/
+
+Grand piano: FluidR3 GM (Fluid SoundFont), Frank Wen and contributors,
+pre-rendered MIDI.js SoundFonts distribution by Benjamin Gleitzman.
+Source: https://github.com/gleitz/midi-js-soundfonts
+Bank: FluidR3_GM / acoustic_grand_piano
+License listed by the distributor: Creative Commons Attribution 3.0
+https://creativecommons.org/licenses/by/3.0/
+
+Sample files are reused without changes by this update. Runtime pitch curves,
+gain envelopes and scheduling are implemented in src/lib/guitar/audio.ts.
+The third-party sample licenses are distinct from the application source code.

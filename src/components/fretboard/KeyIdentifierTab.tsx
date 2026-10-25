@@ -1,3 +1,4 @@
+import { matchPercent, compareNoteMatches } from "../../lib/noteMatching";
 import { useMemo, useState } from "react";
 import {
   SCALE_TYPES,
@@ -32,6 +33,7 @@ export function KeyIdentifierTab() {
     Map<string, number>
   >(new Map());
   const [showNames, setShowNames] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   const selectedNotes = useMemo(
     () => [...new Set(selectedPositions.values())],
@@ -44,7 +46,7 @@ export function KeyIdentifierTab() {
     for (let root = 0; root < 12; root++) {
       for (const scale of SCALE_TYPES) {
         const result = matchCount(selectedNotes, root, scale.intervals);
-        if (result.matches === 0) continue;
+        if (result.matches === 0 || result.extra.length > 0) continue;
         results.push({
           root,
           scaleName: scale.name,
@@ -57,23 +59,25 @@ export function KeyIdentifierTab() {
         });
       }
     }
-    // Sort: most matches, then fewest extra, then fewer scale tones
-    results.sort((a, b) => {
-      if (b.matches !== a.matches) return b.matches - a.matches;
-      if (a.extra.length !== b.extra.length)
-        return a.extra.length - b.extra.length;
-      return a.intervals.length - b.intervals.length;
-    });
-    return results.slice(0, 30);
+    results.sort((a, b) =>
+      compareNoteMatches(
+        { ...a, total: a.scaleTones.length },
+        { ...b, total: b.scaleTones.length },
+      ),
+    );
+    return results.slice(0, 20);
   }, [selectedNotes]);
 
   const handleTuningPreset = (name: string) => {
+    setExpanded(false);
     setTuningPreset(name);
     const preset = TUNINGS.find((t) => t.name === name);
     if (preset) setTuning([...preset.notes]);
+    setSelectedPositions(new Map());
   };
 
   const handlePositionClick = (stringIdx: number, fret: number) => {
+    setExpanded(false);
     const key = `${stringIdx}-${fret}`;
     setSelectedPositions((prev) => {
       const next = new Map(prev);
@@ -96,7 +100,10 @@ export function KeyIdentifierTab() {
         {selectedPositions.size > 0 && (
           <button
             className="btn btn-small"
-            onClick={() => setSelectedPositions(new Map())}
+            onClick={() => {
+              setSelectedPositions(new Map());
+              setExpanded(false);
+            }}
           >
             Очистить
           </button>
@@ -120,10 +127,20 @@ export function KeyIdentifierTab() {
       />
       {matches.length > 0 ? (
         <div className="fretboard-results">
-          <h3>Подходящие тональности</h3>
+          <h3>Подходящие тональности и гаммы</h3>
+          <p>
+            Процент — сколько нот гаммы выбрано из её полного состава. Например,
+            4 из 7 — 57%. Это не вероятность тональности: параллельные мажор и
+            минор имеют одинаковые ноты.
+          </p>
+          {matches.length > 5 && (
+            <button className="btn" onClick={() => setExpanded(!expanded)}>
+              {expanded ? "Показать топ-5" : "Показать больше вариантов"}
+            </button>
+          )}
           <div className="key-match-list">
-            {matches.map((m, idx) => {
-              const pct = Math.round((m.matches / m.scaleTones.length) * 100);
+            {matches.slice(0, expanded ? 20 : 5).map((m, idx) => {
+              const pct = matchPercent(m.matches, m.scaleTones.length);
               const isPerfect = m.extra.length === 0 && m.missing.length === 0;
               const isClose =
                 !isPerfect && m.extra.length === 0 && m.missing.length <= 2;
@@ -147,6 +164,7 @@ export function KeyIdentifierTab() {
                       {isPerfect ? " ✓" : isClose ? " ≈" : ""}
                     </span>
                   </div>
+                  <p>Вне гаммы: {m.extra.map(noteName).join(", ") || "нет"}</p>
                   <div className="key-match-notes">
                     {m.scaleTones.map((n) => (
                       <span
@@ -166,7 +184,11 @@ export function KeyIdentifierTab() {
         </div>
       ) : (
         <div className="fretboard-empty">
-          <p>Выберите ноты на грифе, чтобы определить тональность.</p>
+          <p>
+            {selectedNotes.length
+              ? "В каталоге нет гаммы, содержащей все выбранные ноты. Измените набор нот."
+              : "Выберите ноты на грифе, чтобы определить тональность."}
+          </p>
         </div>
       )}
     </div>

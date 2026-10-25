@@ -1,3 +1,5 @@
+import { TheoryPage } from "../pages/TheoryPage";
+import { SolfegePage } from "../pages/SolfegePage";
 import { VocalPage } from "../pages/VocalPage";
 import { osenTemplate } from "../lib/vocal/osenTemplate";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -111,9 +113,6 @@ export default function App() {
     ? library.bands.find((band) => band.id === currentSong.bandId)
     : undefined;
   const favorites = library.songs.filter((song) => song.favorite);
-  const recent = [...library.songs]
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-    .slice(0, 3);
   const normalizedQuery = query.trim().toLocaleLowerCase("ru");
   const matchingBands = library.bands.filter((band) =>
     band.name.toLocaleLowerCase("ru").includes(normalizedQuery),
@@ -285,34 +284,40 @@ export default function App() {
   };
   const openImport = () => importRef.current?.click();
 
-  const navSection =
-    route === "vocal"
-      ? "vocal"
-      : route === "chords" || chordDetailName
-        ? "chords"
-        : route === "caged"
-          ? "caged"
-          : route === "fretboard"
-            ? "fretboard"
-            : route === "favorites"
-              ? "favorites"
-              : route === "songs" || currentSong
-                ? "songs"
-                : "bands";
-  const pageTitle =
-    route === "vocal"
-      ? "Вокальный тренажёр"
-      : navSection === "chords"
-        ? "Библиотека аккордов"
-        : navSection === "caged"
-          ? "Система CAGED"
-          : navSection === "fretboard"
-            ? "Гриф гитары"
-            : navSection === "favorites"
-              ? "Избранное"
-              : navSection === "songs"
-                ? "Все песни"
-                : "Мои группы";
+  const navSection = route.startsWith("theory")
+    ? "theory"
+    : route.startsWith("solfege")
+      ? "solfege"
+      : route === "vocal"
+        ? "vocal"
+        : route === "chords" || chordDetailName
+          ? "chords"
+          : route === "caged"
+            ? "caged"
+            : route === "fretboard"
+              ? "fretboard"
+              : route === "favorites"
+                ? "favorites"
+                : route === "songs" || currentSong
+                  ? "songs"
+                  : "bands";
+  const pageTitle = route.startsWith("theory")
+    ? "Теория музыки"
+    : route.startsWith("solfege")
+      ? "Сольфеджио"
+      : route === "vocal"
+        ? "Вокальный тренажёр"
+        : navSection === "chords"
+          ? "Библиотека аккордов"
+          : navSection === "caged"
+            ? "Система CAGED"
+            : navSection === "fretboard"
+              ? "Гриф гитары"
+              : navSection === "favorites"
+                ? "Избранное"
+                : navSection === "songs"
+                  ? "Все песни"
+                  : "Мои группы";
 
   const songListEmpty = (
     <EmptyState
@@ -356,7 +361,6 @@ export default function App() {
         bands={library.bands}
         songs={library.songs}
         favoritesCount={favorites.length}
-        recent={recent}
         navigate={navigate}
         onImport={openImport}
         onClose={() => setSidebarOpen(false)}
@@ -394,6 +398,14 @@ export default function App() {
               onToggleFavorite={toggleFavorite}
               navigate={navigate}
               empty={songListEmpty}
+            />
+          ) : route.startsWith("theory") ? (
+            <TheoryPage topic={route.split("/")[1]} navigate={navigate} />
+          ) : route.startsWith("solfege") ? (
+            <SolfegePage
+              key={route}
+              initialKind={route.split("/")[1]}
+              navigate={navigate}
             />
           ) : route === "vocal" ? (
             <VocalPage
@@ -442,7 +454,65 @@ export default function App() {
           ) : isCaged ? (
             <CagedSystem navigate={navigate} />
           ) : isFretboard ? (
-            <FretboardPage navigate={navigate} />
+            <FretboardPage
+              navigate={navigate}
+              onSaveLick={(title, content) => {
+                if (loaded.error) {
+                  setNotice(
+                    "Сначала восстановите библиотеку: автоматическое сохранение отключено.",
+                  );
+                  return;
+                }
+                const id = crypto.randomUUID();
+                setLibrary((value) => {
+                  const existing = value.bands.find(
+                    (b) => b.id === "guitar-practice",
+                  );
+                  return {
+                    ...value,
+                    bands: existing
+                      ? value.bands
+                      : [
+                          ...value.bands,
+                          {
+                            id: "guitar-practice",
+                            name: "Гитарная практика",
+                            genre: "Учебные фразы",
+                            color: "#326c70",
+                            initials: "ГП",
+                          },
+                        ],
+                    songs: [
+                      ...value.songs,
+                      {
+                        id,
+                        bandId: "guitar-practice",
+                        title,
+                        key: "",
+                        bpm: 80,
+                        capo: 0,
+                        favorite: false,
+                        lyrics:
+                          "Авторский учебный лик. Текстовый разбор движений; интерактивное исполнение доступно в разделе «Гриф».",
+                        chords: [],
+                        parts: [
+                          {
+                            id: crypto.randomUUID(),
+                            name: "Разбор лика",
+                            instrument: "Гитара",
+                            tuning: "E A D G B e",
+                            content,
+                            format: "text",
+                          },
+                        ],
+                        updatedAt: new Date().toISOString(),
+                      },
+                    ],
+                  };
+                });
+                setNotice("Разбор лика сохранён в группе «Гитарная практика»");
+              }}
+            />
           ) : route === "help" ? (
             <HelpPage
               navigate={navigate}

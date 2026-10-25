@@ -1,3 +1,4 @@
+import { matchPercent, compareNoteMatches } from "../../lib/noteMatching";
 import { useMemo, useState } from "react";
 import { TUNINGS, STANDARD_TUNING, noteName, noteAt } from "../../lib/scales";
 import { CHORD_TYPES, chordName } from "../../lib/chordDatabase";
@@ -26,6 +27,7 @@ export function ChordIdentifierTab() {
     Map<string, number>
   >(new Map());
   const [showNames, setShowNames] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   const selectedNotes = useMemo(
     () => [...new Set(selectedPositions.values())],
@@ -43,6 +45,7 @@ export function ChordIdentifierTab() {
         const matches = [...selectedSet].filter((n) => chordSet.has(n)).length;
         if (matches === 0) continue;
         const extra = [...selectedSet].filter((n) => !chordSet.has(n));
+        if (extra.length > 0) continue;
         const missing = [...chordSet].filter((n) => !selectedSet.has(n));
         results.push({
           name: chordName(root, type.suffix),
@@ -56,23 +59,25 @@ export function ChordIdentifierTab() {
         });
       }
     }
-    // Sort: most matches first, then fewest extra notes, then fewer tones
-    results.sort((a, b) => {
-      if (b.matches !== a.matches) return b.matches - a.matches;
-      if (a.extra.length !== b.extra.length)
-        return a.extra.length - b.extra.length;
-      return a.intervals.length - b.intervals.length;
-    });
-    return results.slice(0, 40);
+    results.sort((a, b) =>
+      compareNoteMatches(
+        { ...a, total: a.chordTones.length },
+        { ...b, total: b.chordTones.length },
+      ),
+    );
+    return results.slice(0, 20);
   }, [selectedNotes]);
 
   const handleTuningPreset = (name: string) => {
+    setExpanded(false);
     setTuningPreset(name);
     const preset = TUNINGS.find((t) => t.name === name);
     if (preset) setTuning([...preset.notes]);
+    setSelectedPositions(new Map());
   };
 
   const handlePositionClick = (stringIdx: number, fret: number) => {
+    setExpanded(false);
     const key = `${stringIdx}-${fret}`;
     setSelectedPositions((prev) => {
       const next = new Map(prev);
@@ -100,7 +105,10 @@ export function ChordIdentifierTab() {
         {selectedPositions.size > 0 && (
           <button
             className="btn btn-small"
-            onClick={() => setSelectedPositions(new Map())}
+            onClick={() => {
+              setSelectedPositions(new Map());
+              setExpanded(false);
+            }}
           >
             Очистить
           </button>
@@ -125,9 +133,18 @@ export function ChordIdentifierTab() {
       {matches.length > 0 ? (
         <div className="fretboard-results">
           <h3>Подходящие аккорды</h3>
+          <p>
+            Процент — сколько нот аккорда выбрано из его полного состава.
+            Показаны только аккорды, содержащие все выбранные ноты.
+          </p>
+          {matches.length > 5 && (
+            <button className="btn" onClick={() => setExpanded(!expanded)}>
+              {expanded ? "Показать топ-5" : "Показать больше вариантов"}
+            </button>
+          )}
           <div className="chord-match-list">
-            {matches.map((m) => {
-              const pct = Math.round((m.matches / m.chordTones.length) * 100);
+            {matches.slice(0, expanded ? 20 : 5).map((m) => {
+              const pct = matchPercent(m.matches, m.chordTones.length);
               const isPerfect = m.extra.length === 0 && m.missing.length === 0;
               const isClose =
                 !isPerfect && m.extra.length === 0 && m.missing.length <= 2;
@@ -149,6 +166,9 @@ export function ChordIdentifierTab() {
                       {isPerfect ? " ✓" : isClose ? " ≈" : ""}
                     </span>
                   </div>
+                  <p>
+                    Вне аккорда: {m.extra.map(noteName).join(", ") || "нет"}
+                  </p>
                   <div className="chord-match-notes">
                     {m.chordTones.map((n) => (
                       <span
@@ -168,7 +188,11 @@ export function ChordIdentifierTab() {
         </div>
       ) : (
         <div className="fretboard-empty">
-          <p>Выберите ноты на грифе, чтобы увидеть подходящие аккорды.</p>
+          <p>
+            {selectedNotes.length
+              ? "В каталоге нет аккорда, содержащего все выбранные ноты. Измените набор нот."
+              : "Выберите ноты на грифе, чтобы увидеть подходящие аккорды."}
+          </p>
         </div>
       )}
     </div>
