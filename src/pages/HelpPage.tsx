@@ -1,3 +1,4 @@
+import { Disclosure } from "../components/ui/Disclosure";
 import { BackLink } from "../components/ui/BackLink";
 import { GuideSteps } from "../components/help/GuideSteps";
 import { FeatureGrid } from "../components/help/FeatureGrid";
@@ -27,8 +28,8 @@ export function HelpPage({
           <h1>Как это работает</h1>
           <p className="chord-page-description">
             Лад — локальный блокнот песен, аккордов и табулатур. Он работает
-            прямо в браузере: без регистрации, сервера и интернета после первой
-            загрузки.
+            прямо в браузере, без регистрации. Для загрузки приложения и звуков
+            нужен доступ к файлам сайта.
           </p>
         </div>
       </div>
@@ -36,14 +37,16 @@ export function HelpPage({
       <SectionTitle>С чего начать</SectionTitle>
       <GuideSteps />
 
-      <SectionTitle>Что умеет сайт</SectionTitle>
-      <FeatureGrid />
+      <Disclosure title="Что умеет сайт">
+        <FeatureGrid />
+      </Disclosure>
 
       <SectionTitle>Где хранятся данные и как их не потерять</SectionTitle>
       <StorageSection onExport={onExport} onImport={onImport} />
 
-      <SectionTitle>Полезные мелочи</SectionTitle>
-      <Tips />
+      <Disclosure title="Полезные мелочи">
+        <Tips />
+      </Disclosure>
 
       <GuideFooter navigate={navigate} />
     </section>

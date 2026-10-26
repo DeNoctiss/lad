@@ -22,6 +22,7 @@ export function AnimatedNeck({
   animate = true,
   playing = false,
   width = 800,
+  practicePitch = null,
 }: {
   positions: Position[];
   root: number;
@@ -36,6 +37,7 @@ export function AnimatedNeck({
   animate?: boolean;
   playing?: boolean;
   width: number;
+  practicePitch?: number | null;
 }) {
   const id = useId().replace(/:/g, ""),
     min = 0,
@@ -50,7 +52,11 @@ export function AnimatedNeck({
     start = notes?.slice(0, active).reduce((a, n) => a + n.beats, 0) ?? 0,
     fraction = n ? (beat - start) / n.beats : 0,
     delta =
-      n && animate ? expression(n, fraction, ((beat - start) * 60) / tempo) : 0;
+      n && practicePitch !== null
+        ? practicePitch - OPEN[n.string] - n.fret
+        : n && animate
+          ? expression(n, fraction, ((beat - start) * 60) / tempo)
+          : 0;
   const horizontal = n && ["slide", "hammer", "pull"].includes(n.technique),
     bend = n && ["bend", "release", "prebend", "vibrato"].includes(n.technique),
     dir = n && n.string < 3 ? 1 : -1;
@@ -234,7 +240,10 @@ export function AnimatedNeck({
               className="gl-playhead"
             />
             <text x={dotX} y={dotY + 5} textAnchor="middle">
-              {horizontal && fraction >= (n.technique === "slide" ? 0.8 : 0.48)
+              {horizontal &&
+              (practicePitch !== null
+                ? delta !== 0
+                : fraction >= (n.technique === "slide" ? 0.8 : 0.48))
                 ? n.target
                 : n.fret}
             </text>

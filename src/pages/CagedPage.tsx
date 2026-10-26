@@ -1,3 +1,4 @@
+import { Disclosure } from "../components/ui/Disclosure";
 import { BackLink } from "../components/ui/BackLink";
 import type { Chord } from "../lib/model";
 import { CAGED_MAJOR_SHAPES, CAGED_MINOR_SHAPES } from "../lib/chordDatabase";
@@ -51,26 +52,28 @@ export function CagedSystem({
           </p>
         </div>
       </div>
-      <div className="caged-intro">
-        <p>
-          Название системы складывается из пяти базовых мажорных аккордов:{" "}
-          <strong>C</strong>, <strong>A</strong>, <strong>G</strong>,{" "}
-          <strong>E</strong>, <strong>D</strong>. Каждый из них — это отдельная
-          «форма» на грифе. Если взять любую форму и сдвинуть её на <em>N</em>{" "}
-          ладов вверх, получится новый аккорд, корень которого на <em>N</em>{" "}
-          полутонов выше.
-        </p>
-        <p>
-          Например, <strong>E-форма</strong> на 1-м ладу даёт F, на 3-м — G, на
-          5-м — A. <strong>A-форма</strong> на 3-м ладу даёт C — это
-          классическое баррэ <code>x35553</code>.
-        </p>
-        <p>
-          Открытые струны при перемещении превращаются в баррэ: указательный
-          палец зажимает все струны на нужном ладу, а остальные пальцы берут
-          форму поверх баррэ.
-        </p>
-      </div>
+      <Disclosure title="Как устроена система CAGED">
+        <div className="caged-intro">
+          <p>
+            Название системы складывается из пяти базовых мажорных аккордов:{" "}
+            <strong>C</strong>, <strong>A</strong>, <strong>G</strong>,{" "}
+            <strong>E</strong>, <strong>D</strong>. Каждый из них — это
+            отдельная «форма» на грифе. Если взять любую форму и сдвинуть её на{" "}
+            <em>N</em> ладов вверх, получится новый аккорд, корень которого на{" "}
+            <em>N</em> полутонов выше.
+          </p>
+          <p>
+            Например, <strong>E-форма</strong> на 1-м ладу даёт F, на 3-м — G,
+            на 5-м — A. <strong>A-форма</strong> на 3-м ладу даёт C — это
+            классическое баррэ <code>x35553</code>.
+          </p>
+          <p>
+            Открытые струны при перемещении превращаются в баррэ: указательный
+            палец зажимает все струны на нужном ладу, а остальные пальцы берут
+            форму поверх баррэ.
+          </p>
+        </div>
+      </Disclosure>
       <h2 className="subheading caged-section-title">Мажорные формы</h2>
       <div className="caged-grid">
         {CAGED_MAJOR_SHAPES.map((shape) => (

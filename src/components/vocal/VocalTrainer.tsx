@@ -1,3 +1,4 @@
+import { Disclosure } from "../ui/Disclosure";
 import type { TranscriptionEngine } from "../../lib/vocal/neuralPostprocess";
 import { plural } from "../../lib/plural";
 import { Modal } from "../ui/Modal";
@@ -383,7 +384,7 @@ export function VocalTrainer({
               setMode("editor");
             }}
           >
-            Редактор
+            Подготовить партию
           </button>
           <button
             className={mode === "training" ? "active" : ""}
@@ -393,7 +394,7 @@ export function VocalTrainer({
               setMode("training");
             }}
           >
-            Тренировка
+            Тренироваться
           </button>
         </div>
         <div className="vocal-project-actions">
@@ -441,7 +442,7 @@ export function VocalTrainer({
             ноты; «Транспонирование» меняет и ноты, и аудио при воспроизведении.
           </li>
           <li>
-            <strong>Спойте фрагмент.</strong> Перейдите в «Тренировку», наденьте
+            <strong>Спойте фрагмент.</strong> Нажмите «Тренироваться», наденьте
             наушники, включите микрофон и воспроизведение. Сравнивайте зелёную
             линию голоса с нотами; для повторения используйте петлю.
           </li>
@@ -458,53 +459,60 @@ export function VocalTrainer({
           снова. Микрофон и импорт обрабатываются на устройстве.
         </p>
       </details>
-      <div className="vocal-sources" aria-label="Создать вокальную партию">
-        {[
-          {
-            icon: FileMusic,
-            title: "MIDI",
-            text: "Импорт нот из MIDI-файла",
-            action: () => midiInput.current?.click(),
-          },
-          {
-            icon: AudioLines,
-            title: "Акапелла",
-            text: "Распознать ноты из записи",
-            action: () => audioInput.current?.click(),
-          },
-          {
-            icon: Guitar,
-            title: "Из табулатуры",
-            text: "Взять партию этой песни",
-            action: () => setSource("tab"),
-          },
-          {
-            icon: PlusCircle,
-            title: "Создать вручную",
-            text: "Чистая сетка для мелодии",
-            action: () => {
-              confirmReplace(() => {
-                session.clearDetected();
-                replace(createVocalProject(song.bpm));
-              });
-            },
-          },
-        ].map(({ icon: Icon, title, text, action }) => (
-          <button
-            className="vocal-source-card"
-            key={title}
-            disabled={locked}
-            onClick={action}
-          >
-            <span>
-              <Icon size={27} />
-            </span>
-            <div>
-              <strong>{title}</strong>
-              <small>{text}</small>
-            </div>
-          </button>
-        ))}
+      <div hidden={mode === "training"}>
+        <Disclosure
+          title="Импорт и создание партии"
+          defaultOpen={!project.notes.length}
+        >
+          <div className="vocal-sources" aria-label="Создать вокальную партию">
+            {[
+              {
+                icon: FileMusic,
+                title: "MIDI",
+                text: "Импорт нот из MIDI-файла",
+                action: () => midiInput.current?.click(),
+              },
+              {
+                icon: AudioLines,
+                title: "Акапелла",
+                text: "Распознать ноты из записи",
+                action: () => audioInput.current?.click(),
+              },
+              {
+                icon: Guitar,
+                title: "Из табулатуры",
+                text: "Взять партию этой песни",
+                action: () => setSource("tab"),
+              },
+              {
+                icon: PlusCircle,
+                title: "Создать вручную",
+                text: "Чистая сетка для мелодии",
+                action: () => {
+                  confirmReplace(() => {
+                    session.clearDetected();
+                    replace(createVocalProject(song.bpm));
+                  });
+                },
+              },
+            ].map(({ icon: Icon, title, text, action }) => (
+              <button
+                className="vocal-source-card"
+                key={title}
+                disabled={locked}
+                onClick={action}
+              >
+                <span>
+                  <Icon size={27} />
+                </span>
+                <div>
+                  <strong>{title}</strong>
+                  <small>{text}</small>
+                </div>
+              </button>
+            ))}
+          </div>
+        </Disclosure>
       </div>
       <input
         hidden
@@ -614,126 +622,80 @@ export function VocalTrainer({
       <div
         className={"vocal-workspace " + (mode === "training" ? "training" : "")}
       >
-        <VocalControls
-          project={project}
-          session={session}
-          onSettings={updateSettings}
-          onBpm={(bpm) => {
-            try {
-              const next = regridProject(project, bpm);
-              session.seek((session.position * bpm) / project.bpm, next.length);
-              session.clearDetected();
-              setHistory({ undo: [], redo: [] });
-              commit(next);
-              return true;
-            } catch (e) {
-              session.setError(
-                e instanceof Error ? e.message : "Не удалось изменить сетку",
-              );
-              return false;
-            }
-          }}
-          onTranscribe={() => {
-            const file = session.audio.acapella?.file;
-            if (file) setAcapellaFile(file);
-          }}
-          onLength={(length) => {
-            const min = Math.max(
-              0,
-              ...project.notes.map((n) => n.start + n.duration),
-            );
-            if (length < min) {
-              session.setError(
-                "Сначала удалите или перенесите ноты за новой границей проекта.",
-              );
-              return;
-            }
-            setHistory({ undo: [], redo: [] });
-            commit({
-              ...project,
-              length,
-              settings: {
-                ...project.settings,
-                loopStart: Math.min(project.settings.loopStart, length - 0.25),
-                loopEnd: Math.min(project.settings.loopEnd, length),
-              },
-            });
-          }}
-          onAudio={(kind, file) => void loadAudio(kind, file)}
-          onRemoveAudio={(kind) => {
-            session.removeAudio(kind);
-            commit({
-              ...project,
-              audio: { ...project.audio, [kind]: undefined },
-            });
-          }}
-          onOffset={(kind, offset) => {
-            const meta = project.audio?.[kind];
-            if (meta)
-              commit({
-                ...project,
-                audio: { ...project.audio, [kind]: { ...meta, offset } },
-              });
-          }}
-        />
-        <div className="vocal-main">
-          <PianoRoll
+        <Disclosure
+          title="Настройки · звук, темп и микрофон"
+          className="vocal-settings-panel"
+        >
+          <VocalControls
             project={project}
-            revision={revision}
-            focusNote={focusNote}
-            onNotes={changeNotes}
-            onUndo={undo}
-            onRedo={redo}
-            canUndo={!!history.undo.length}
-            canRedo={!!history.redo.length}
-            position={session.position}
-            playing={locked}
-            training={mode === "training"}
-            trace={session.trace}
-            detected={session.detected}
-            audio={
-              session.audio.acapella
-                ? {
-                    ...session.audio.acapella,
-                    meta:
-                      project.audio?.acapella ?? session.audio.acapella.meta,
-                  }
-                : undefined
-            }
-            onSeek={session.seek}
-            onOctave={(semitones) => {
-              const blocked = project.notes.filter(
-                (n) =>
-                  n.midi + semitones < MIN_MIDI ||
-                  n.midi + semitones > MAX_MIDI,
-              );
-              if (blocked.length) {
-                setShiftIssue({ semitones, notes: blocked });
-                return;
-              }
+            session={session}
+            onSettings={updateSettings}
+            onBpm={(bpm) => {
               try {
-                changeNotes(shiftNotes(project.notes, semitones));
+                const next = regridProject(project, bpm);
+                session.seek(
+                  (session.position * bpm) / project.bpm,
+                  next.length,
+                );
                 session.clearDetected();
-                session.setError("");
+                setHistory({ undo: [], redo: [] });
+                commit(next);
+                return true;
               } catch (e) {
                 session.setError(
-                  e instanceof Error ? e.message : "Не удалось сдвинуть ноты",
+                  e instanceof Error ? e.message : "Не удалось изменить сетку",
                 );
+                return false;
               }
             }}
-            onPreview={(n) => {
-              if (!locked)
-                void session.transport
-                  .preview(n)
-                  .catch((error: unknown) =>
-                    session.setError(
-                      error instanceof Error
-                        ? error.message
-                        : "Не удалось проиграть ноту",
-                    ),
-                  );
+            onTranscribe={() => {
+              const file = session.audio.acapella?.file;
+              if (file) setAcapellaFile(file);
+            }}
+            onLength={(length) => {
+              const min = Math.max(
+                0,
+                ...project.notes.map((n) => n.start + n.duration),
+              );
+              if (length < min) {
+                session.setError(
+                  "Сначала удалите или перенесите ноты за новой границей проекта.",
+                );
+                return;
+              }
+              setHistory({ undo: [], redo: [] });
+              commit({
+                ...project,
+                length,
+                settings: {
+                  ...project.settings,
+                  loopStart: Math.min(
+                    project.settings.loopStart,
+                    length - 0.25,
+                  ),
+                  loopEnd: Math.min(project.settings.loopEnd, length),
+                },
+              });
+            }}
+            onAudio={(kind, file) => void loadAudio(kind, file)}
+            onRemoveAudio={(kind) => {
+              session.removeAudio(kind);
+              commit({
+                ...project,
+                audio: { ...project.audio, [kind]: undefined },
+              });
+            }}
+            onOffset={(kind, offset) => {
+              const meta = project.audio?.[kind];
+              if (meta)
+                commit({
+                  ...project,
+                  audio: { ...project.audio, [kind]: { ...meta, offset } },
+                });
             }}
           />
+        </Disclosure>
+        <div className="vocal-main">
           <div className="vocal-transport">
             <button
               className="btn-icon"
@@ -801,10 +763,67 @@ export function VocalTrainer({
                 onClick={() => void session.toggleMic()}
               >
                 <Mic size={17} />
-                {session.micOn ? "Микрофон включён" : "Включить микрофон"}
+                {session.micOn ? "Выключить микрофон" : "Включить микрофон"}
               </button>
             )}
           </div>
+          <PianoRoll
+            project={project}
+            revision={revision}
+            focusNote={focusNote}
+            onNotes={changeNotes}
+            onUndo={undo}
+            onRedo={redo}
+            canUndo={!!history.undo.length}
+            canRedo={!!history.redo.length}
+            position={session.position}
+            playing={locked}
+            training={mode === "training"}
+            trace={session.trace}
+            detected={session.detected}
+            audio={
+              session.audio.acapella
+                ? {
+                    ...session.audio.acapella,
+                    meta:
+                      project.audio?.acapella ?? session.audio.acapella.meta,
+                  }
+                : undefined
+            }
+            onSeek={session.seek}
+            onOctave={(semitones) => {
+              const blocked = project.notes.filter(
+                (n) =>
+                  n.midi + semitones < MIN_MIDI ||
+                  n.midi + semitones > MAX_MIDI,
+              );
+              if (blocked.length) {
+                setShiftIssue({ semitones, notes: blocked });
+                return;
+              }
+              try {
+                changeNotes(shiftNotes(project.notes, semitones));
+                session.clearDetected();
+                session.setError("");
+              } catch (e) {
+                session.setError(
+                  e instanceof Error ? e.message : "Не удалось сдвинуть ноты",
+                );
+              }
+            }}
+            onPreview={(n) => {
+              if (!locked)
+                void session.transport
+                  .preview(n)
+                  .catch((error: unknown) =>
+                    session.setError(
+                      error instanceof Error
+                        ? error.message
+                        : "Не удалось проиграть ноту",
+                    ),
+                  );
+            }}
+          />
           {project.settings.loop && (
             <div className="vocal-loop-controls">
               <Repeat2 size={17} />

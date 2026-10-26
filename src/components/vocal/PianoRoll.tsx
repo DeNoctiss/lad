@@ -388,6 +388,7 @@ export function PianoRoll({
           className="vocal-tool-group"
           role="group"
           aria-label="Инструменты редактора"
+          hidden={training}
         >
           {(
             [
@@ -425,7 +426,7 @@ export function PianoRoll({
             <Redo2 size={18} />
           </button>
         </div>
-        <label className="vocal-inline-label">
+        <label className="vocal-inline-label" hidden={training}>
           Шаг сетки{" "}
           <select
             aria-label="Шаг сетки"
@@ -485,7 +486,7 @@ export function PianoRoll({
           </span>
         </div>
       )}
-      <div className="vocal-grid-help">
+      <div className="vocal-grid-help" hidden={training}>
         <span>
           <strong>{gridOption.label}</strong> · {gridOption.description}.
           Привязка при рисовании и перетаскивании; уже записанные ноты не

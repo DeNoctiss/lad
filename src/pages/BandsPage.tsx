@@ -1,3 +1,4 @@
+import { Disclosure } from "../components/ui/Disclosure";
 import { Disc3, LayoutGrid, List, Plus, SlidersHorizontal } from "lucide-react";
 import type { Band, Song } from "../lib/model";
 import { plural } from "../lib/plural";
@@ -50,17 +51,19 @@ export function BandsPage({
         </button>
       </div>
       <div className="library-toolbar">
-        <div className="filter-chips" aria-label="Фильтр по жанру">
-          {genres.map((item) => (
-            <button
-              key={item}
-              className={genre === item ? "selected" : ""}
-              onClick={() => onGenreChange(item)}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
+        <Disclosure title={`Жанр · ${genre}`} className="catalog-filters">
+          <div className="filter-chips" aria-label="Фильтр по жанру">
+            {genres.map((item) => (
+              <button
+                key={item}
+                className={genre === item ? "selected" : ""}
+                onClick={() => onGenreChange(item)}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </Disclosure>
         <div className="view-controls">
           <label className="sort-control">
             <SlidersHorizontal size={14} />

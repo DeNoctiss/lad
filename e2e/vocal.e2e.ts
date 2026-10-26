@@ -11,6 +11,7 @@ const open = async (page: Page) => {
     page.getByRole("tab", { name: "Вокальный тренажёр", exact: true }),
   ).toHaveAttribute("aria-selected", "true");
   await expect(page.locator(".vocal-note")).toHaveCount(14);
+  await page.locator(".vocal-settings-panel > summary").click();
 };
 const stored = (page: Page) =>
   page.evaluate(
@@ -78,6 +79,8 @@ test("draw, resize and erase a note using the actual piano roll", async ({
 }) => {
   await open(page);
   page.on("dialog", (d) => d.accept());
+  await page.getByText("Импорт и создание партии", { exact: true }).click();
+  await page.getByText("Импорт и создание партии", { exact: true }).click();
   await page.getByRole("button", { name: /Создать вручную/ }).click();
   await page
     .getByRole("button", { name: "Заменить ноты", exact: true })
@@ -224,6 +227,7 @@ test("waveform and acapella recognition use real decoded PCM in the worker", asy
     }),
   ).toBeVisible();
   await page.reload();
+  await page.locator(".vocal-settings-panel > summary").click();
   await expect(
     page.getByText("a3.wav · загрузите повторно", { exact: true }),
   ).toBeVisible();
@@ -248,7 +252,9 @@ test("microphone analysis shows a test tone and releases tracks on song tab chan
     });
   });
   await open(page);
-  await page.getByRole("button", { name: "Тренировка", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Тренироваться", exact: true })
+    .click();
   await page
     .locator(".vocal-controls")
     .getByRole("button", { name: "Включить микрофон", exact: true })
@@ -306,7 +312,9 @@ for (const viewport of [
   }) => {
     await page.setViewportSize(viewport);
     await open(page);
-    await page.getByRole("button", { name: "Тренировка", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Тренироваться", exact: true })
+      .click();
     const dimensions = await page.evaluate(() => ({
       page: document.documentElement.scrollWidth,
       width: innerWidth,
@@ -324,7 +332,7 @@ for (const viewport of [
     expect(dimensions.small).toBe(0);
     const roll = await page.locator(".vocal-roll-scroll").boundingBox();
     const transport = await page.locator(".vocal-transport").boundingBox();
-    expect(transport!.y).toBeGreaterThan(roll!.y + roll!.height);
+    expect(transport!.y + transport!.height).toBeLessThanOrEqual(roll!.y + 1);
     await page.getByRole("button", { name: "Включить тёмную тему" }).click();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),

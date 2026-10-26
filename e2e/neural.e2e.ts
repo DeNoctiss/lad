@@ -35,13 +35,11 @@ function toneWav() {
   return b;
 }
 async function choose(page: Page) {
-  await page
-    .getByLabel("Распознать акапеллу", { exact: true })
-    .setInputFiles({
-      name: "octaves.wav",
-      mimeType: "audio/wav",
-      buffer: toneWav(),
-    });
+  await page.getByLabel("Распознать акапеллу", { exact: true }).setInputFiles({
+    name: "octaves.wav",
+    mimeType: "audio/wav",
+    buffer: toneWav(),
+  });
   await expect(page.getByLabel("Алгоритм распознавания")).toHaveValue(
     "basic-pitch",
   );

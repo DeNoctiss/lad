@@ -12,10 +12,11 @@ export function detectPitch(
   input: Float32Array,
   sampleRate: number,
   gate = 0.008,
+  range = { minFrequency: 65, maxFrequency: 1100 },
 ): Pitch {
   const half = Math.floor(input.length / 2),
-    maxTau = Math.min(half - 1, Math.ceil(sampleRate / 65)),
-    minTau = Math.max(2, Math.floor(sampleRate / 1100));
+    maxTau = Math.min(half - 1, Math.ceil(sampleRate / range.minFrequency)),
+    minTau = Math.max(2, Math.floor(sampleRate / range.maxFrequency));
   let rms = 0,
     mean = 0;
   for (const v of input) mean += v;

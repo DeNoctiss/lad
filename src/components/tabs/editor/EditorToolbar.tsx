@@ -95,6 +95,24 @@ export function EditorToolbar(p: Props) {
       role="group"
       aria-label="Инструменты выбранной ноты"
     >
+      <div className="editor-dock-status">
+        <span>
+          <strong>Такт {p.measure + 1}</strong> ·{" "}
+          {stringed ? `струна ${p.lane}` : p.lane} ·{" "}
+          {p.event
+            ? p.event.notes.length
+              ? "нота / созвучие"
+              : "пауза"
+            : "новая нота"}
+        </span>
+        <span>
+          {stringed
+            ? "Клик → лад 0–24 · Enter → дальше"
+            : p.kind === "piano"
+              ? "Клавиши → созвучие · Далее → новая позиция"
+              : "Клик по клетке → добавить / убрать удар"}
+        </span>
+      </div>
       <div className="editor-tool-row editor-primary-tools">
         <div className="editor-tool-group editor-history">
           <button
@@ -194,7 +212,7 @@ export function EditorToolbar(p: Props) {
             aria-expanded={expanded}
             onClick={() => setExpanded(!expanded)}
           >
-            Ещё <ChevronDown size={16} />
+            Приёмы и параметры <ChevronDown size={16} />
           </button>
         </div>
         <button
@@ -330,24 +348,6 @@ export function EditorToolbar(p: Props) {
           </div>
         </div>
       )}
-      <div className="editor-dock-status">
-        <span>
-          <strong>Такт {p.measure + 1}</strong> ·{" "}
-          {stringed ? `струна ${p.lane}` : p.lane} ·{" "}
-          {p.event
-            ? p.event.notes.length
-              ? "нота / созвучие"
-              : "пауза"
-            : "новая нота"}
-        </span>
-        <span>
-          {stringed
-            ? "Клик → лад 0–24 · Enter → дальше"
-            : p.kind === "piano"
-              ? "Клавиши → созвучие · Далее → новая позиция"
-              : "Клик по клетке → добавить / убрать удар"}
-        </span>
-      </div>
     </div>
   );
 }

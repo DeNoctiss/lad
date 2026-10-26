@@ -10,7 +10,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import type { Band, Song } from "../../lib/model";
 
 export function Sidebar({
@@ -123,22 +123,35 @@ export function Sidebar({
           },
           { id: "vocal", icon: Mic, label: "Вокальный тренажёр", count: null },
           { id: "solfege", icon: Music2, label: "Сольфеджио", count: null },
+          {
+            id: "fretboard",
+            icon: Music2,
+            label: "Гриф и гитара",
+            count: null,
+          },
           { id: "theory", icon: Music2, label: "Теория музыки", count: null },
           { id: "chords", icon: Guitar, label: "Аккорды", count: null },
           { id: "caged", icon: LayoutGrid, label: "CAGED", count: null },
-          { id: "fretboard", icon: Music2, label: "Гриф", count: null },
         ].map((item) => (
-          <button
-            key={item.id}
-            className={`nav-item ${navSection === item.id ? "active" : ""}`}
-            onClick={() => navigate(item.id)}
-          >
-            <item.icon size={19} strokeWidth={1.7} />
-            <span>{item.label}</span>
-            {item.count !== null && (
-              <span className="nav-count">{item.count}</span>
+          <Fragment key={item.id}>
+            {item.id === "vocal" && (
+              <div className="sidebar-label">ПРАКТИКА</div>
             )}
-          </button>
+            {item.id === "theory" && (
+              <div className="sidebar-label">СПРАВОЧНИКИ</div>
+            )}
+            <button
+              key={item.id}
+              className={`nav-item ${navSection === item.id ? "active" : ""}`}
+              onClick={() => navigate(item.id)}
+            >
+              <item.icon size={19} strokeWidth={1.7} />
+              <span>{item.label}</span>
+              {item.count !== null && (
+                <span className="nav-count">{item.count}</span>
+              )}
+            </button>
+          </Fragment>
         ))}
       </nav>
       <div className="sidebar-bottom">

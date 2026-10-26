@@ -1,3 +1,4 @@
+import { Disclosure } from "../components/ui/Disclosure";
 import { useId, useMemo, useState } from "react";
 import {
   ArrowUpRight,
@@ -97,35 +98,40 @@ export function ChordLibrary({
             </button>
           )}
         </div>
-        <div className="chord-filter-label">
-          <SlidersHorizontal size={16} aria-hidden="true" />
-          Основной тон
-        </div>
-        <div
-          className="chord-root-filters"
-          role="group"
-          aria-label="Фильтр по основному тону"
+        <Disclosure
+          title={`Основной тон · ${root === null ? "Все" : roots[root]}`}
+          className="catalog-filters"
         >
-          <button
-            className={`chord-root${root === null ? " chord-root-active" : ""}`}
-            type="button"
-            aria-pressed={root === null}
-            onClick={() => setRoot(null)}
+          <div className="chord-filter-label">
+            <SlidersHorizontal size={16} aria-hidden="true" />
+            Основной тон
+          </div>
+          <div
+            className="chord-root-filters"
+            role="group"
+            aria-label="Фильтр по основному тону"
           >
-            Все
-          </button>
-          {roots.map((label, index) => (
             <button
-              className={`chord-root${root === index ? " chord-root-active" : ""}`}
+              className={`chord-root${root === null ? " chord-root-active" : ""}`}
               type="button"
-              key={label}
-              aria-pressed={root === index}
-              onClick={() => setRoot(index)}
+              aria-pressed={root === null}
+              onClick={() => setRoot(null)}
             >
-              {label}
+              Все
             </button>
-          ))}
-        </div>
+            {roots.map((label, index) => (
+              <button
+                className={`chord-root${root === index ? " chord-root-active" : ""}`}
+                type="button"
+                key={label}
+                aria-pressed={root === index}
+                onClick={() => setRoot(index)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </Disclosure>
       </div>
       <div className="chord-results-bar">
         <p role="status">

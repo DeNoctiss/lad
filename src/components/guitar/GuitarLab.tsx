@@ -1,3 +1,5 @@
+import { Disclosure } from "../ui/Disclosure";
+import { LickPractice } from "./LickPractice";
 import { usePracticeSetting } from "../../lib/guitar/settings";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NOTE_NAMES } from "../../lib/scales";
@@ -21,6 +23,9 @@ export function GuitarLab({
   onSaveLick?: (title: string, content: string) => void;
   active?: boolean;
 }) {
+  const [practice, setPractice] = useState(false);
+  const [practicePitch, setPracticePitch] = useState<number | null>(null);
+  const [editDurations, setEditDurations] = useState(false);
   const [mode, setMode] = usePracticeSetting("mode"),
     [root, setRoot] = usePracticeSetting("root"),
     [major, setMajor] = usePracticeSetting("major"),
@@ -168,6 +173,7 @@ export function GuitarLab({
   }
   function change(fn: () => void) {
     stop(true);
+    setPracticePitch(null);
     fn();
   }
   const positions = all
@@ -203,65 +209,69 @@ export function GuitarLab({
           </button>
         ))}
       </div>
-      <div className="gl-controls">
-        <label>
-          Тоника
-          <select
-            aria-label="Тоника"
-            value={root}
-            onChange={(e) => change(() => setRoot(+e.target.value))}
-          >
-            {NOTE_NAMES.map((n, i) => (
-              <option value={i} key={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Подписи
-          <select
-            aria-label="Подписи"
-            value={labels}
-            onChange={(e) => setLabels(e.target.value)}
-          >
-            <option value="both">Ноты + ступени</option>
-            <option value="notes">Ноты</option>
-            <option value="degrees">Ступени</option>
-            {mode === "boxes" && (
-              <option value="fingers">Пальцы · вариант</option>
-            )}
-          </select>
-        </label>
-        {mode !== "licks" && (
+      <Disclosure
+        title={`Тональность · ${NOTE_NAMES[root]} ${mode !== "licks" && major ? "мажор" : "минор"} · настройки`}
+      >
+        <div className="gl-controls">
           <label>
-            Пентатоника
+            Тоника
             <select
-              value={String(major)}
-              onChange={(e) =>
-                change(() => setMajor(e.target.value === "true"))
-              }
+              aria-label="Тоника"
+              value={root}
+              onChange={(e) => change(() => setRoot(+e.target.value))}
             >
-              <option value="false">Минорная</option>
-              <option value="true">Мажорная</option>
+              {NOTE_NAMES.map((n, i) => (
+                <option value={i} key={n}>
+                  {n}
+                </option>
+              ))}
             </select>
           </label>
-        )}
-        {mode !== "boxes" && (
           <label>
-            Темп, BPM
-            <input
-              aria-label="Темп гитарной практики"
-              type="number"
-              min="40"
-              max="160"
-              value={bpm}
-              onChange={(e) => change(() => setBpm(e.target.value))}
-              onBlur={() => setBpm(String(tempo))}
-            />
+            Подписи
+            <select
+              aria-label="Подписи"
+              value={labels}
+              onChange={(e) => setLabels(e.target.value)}
+            >
+              <option value="both">Ноты + ступени</option>
+              <option value="notes">Ноты</option>
+              <option value="degrees">Ступени</option>
+              {mode === "boxes" && (
+                <option value="fingers">Пальцы · вариант</option>
+              )}
+            </select>
           </label>
-        )}
-      </div>
+          {mode !== "licks" && (
+            <label>
+              Пентатоника
+              <select
+                value={String(major)}
+                onChange={(e) =>
+                  change(() => setMajor(e.target.value === "true"))
+                }
+              >
+                <option value="false">Минорная</option>
+                <option value="true">Мажорная</option>
+              </select>
+            </label>
+          )}
+          {mode !== "boxes" && (
+            <label>
+              Темп, BPM
+              <input
+                aria-label="Темп гитарной практики"
+                type="number"
+                min="40"
+                max="160"
+                value={bpm}
+                onChange={(e) => change(() => setBpm(e.target.value))}
+                onBlur={() => setBpm(String(tempo))}
+              />
+            </label>
+          )}
+        </div>
+      </Disclosure>
       {mode === "boxes" && (
         <>
           <div className="gl-tabs">
@@ -299,13 +309,6 @@ export function GuitarLab({
               Блюзовая нота {major ? "♭3" : "♭5"}
             </label>
           </div>
-          <p>
-            Полный гриф: открытые струны и 24 лада. На узком экране
-            прокручивайте его по горизонтали. Стандартный строй E–A–D–G–B–E.
-            Формы сдвигаются вместе с тоникой. Золотым выделена тоника. Номер
-            бокса — аппликатура, не ступень. Пальцы: один из вариантов, с
-            подготовкой указательного пальца на каждой струне.
-          </p>
         </>
       )}
       {mode === "licks" && (
@@ -328,24 +331,27 @@ export function GuitarLab({
             {lick.goal} · {NOTE_NAMES[root]} минор. Все лики — авторские учебные
             примеры.
           </p>
-          <div className="gl-controls">
-            <label>
-              <input
-                type="checkbox"
-                checked={animate}
-                onChange={(e) => setAnimate(e.target.checked)}
-              />
-              Анимация движений
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={backing}
-                onChange={(e) => change(() => setBacking(e.target.checked))}
-              />
-              Аккомпанемент выбранной прогрессии
-            </label>
-          </div>
+          <Disclosure title="Анимация и аккомпанемент">
+            {" "}
+            <div className="gl-controls">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={animate}
+                  onChange={(e) => setAnimate(e.target.checked)}
+                />
+                Анимация движений
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={backing}
+                  onChange={(e) => change(() => setBacking(e.target.checked))}
+                />
+                Аккомпанемент выбранной прогрессии
+              </label>
+            </div>
+          </Disclosure>{" "}
           {backing && (
             <p>
               {prog.degrees}: {chords.map((c) => c.name).join(" → ")}. Выбрать
@@ -357,40 +363,43 @@ export function GuitarLab({
       )}
       {mode === "progressions" && (
         <>
-          <div className="gl-tabs">
-            {["Все", "Поп", "Рок", "Джаз", "Блюз"].map((g) => (
-              <button
-                key={g}
-                aria-pressed={genre === g}
-                onClick={() => setGenre(g)}
-              >
-                {g}
-              </button>
-            ))}
-          </div>
-          <div className="gl-catalog">
-            {PROGRESSIONS.map(
-              (p, i) =>
-                (genre === "Все" || genre === p.genre) && (
-                  <button
-                    key={i}
-                    aria-pressed={progression === i}
-                    onClick={() =>
-                      change(() => {
-                        setProgression(i);
-                        setDurations([]);
-                        setMajor(!p.minor);
-                      })
-                    }
-                  >
-                    <strong>{p.degrees}</strong>
-                    <span>
-                      {p.genre} · {p.source}
-                    </span>
-                  </button>
-                ),
-            )}
-          </div>
+          <Disclosure title={`Выбрать прогрессию · ${prog.degrees}`}>
+            {" "}
+            <div className="gl-tabs">
+              {["Все", "Поп", "Рок", "Джаз", "Блюз"].map((g) => (
+                <button
+                  key={g}
+                  aria-pressed={genre === g}
+                  onClick={() => setGenre(g)}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
+            <div className="gl-catalog">
+              {PROGRESSIONS.map(
+                (p, i) =>
+                  (genre === "Все" || genre === p.genre) && (
+                    <button
+                      key={i}
+                      aria-pressed={progression === i}
+                      onClick={() =>
+                        change(() => {
+                          setProgression(i);
+                          setDurations([]);
+                          setMajor(!p.minor);
+                        })
+                      }
+                    >
+                      <strong>{p.degrees}</strong>
+                      <span>
+                        {p.genre} · {p.source}
+                      </span>
+                    </button>
+                  ),
+              )}
+            </div>
+          </Disclosure>{" "}
           <p>
             Выбрано: <strong>{prog.degrees}</strong> ·{" "}
             {prog.minor ? "минор" : "мажор"}. Длительность каждого блока можно
@@ -407,11 +416,17 @@ export function GuitarLab({
               Источник ↗
             </a>
           </p>
+          <button
+            aria-pressed={editDurations}
+            onClick={() => setEditDurations(!editDurations)}
+          >
+            Длительности аккордов
+          </button>
           <div className="gl-chords">
             {chords.map((c, i) => (
               <span className={currentChordIndex === i ? "active" : ""} key={i}>
                 {c.name}
-                <label className="gl-duration">
+                <label className="gl-duration" hidden={!editDurations}>
                   Доли
                   <select
                     aria-label={`Длительность аккорда ${i + 1}`}
@@ -442,7 +457,30 @@ export function GuitarLab({
           </p>
         </>
       )}
-      {mode !== "boxes" && (
+      {mode === "licks" && (
+        <div className="gl-tabs" aria-label="Режим лика">
+          <button
+            aria-pressed={!practice}
+            onClick={() => {
+              stop(true);
+              setPractice(false);
+              setPracticePitch(null);
+            }}
+          >
+            Послушать
+          </button>
+          <button
+            aria-pressed={practice}
+            onClick={() => {
+              stop(true);
+              setPractice(true);
+            }}
+          >
+            Сыграть по шагам
+          </button>
+        </div>
+      )}
+      {mode !== "boxes" && !(mode === "licks" && practice) && (
         <div className="gl-transport">
           <button
             disabled={loading}
@@ -507,7 +545,31 @@ export function GuitarLab({
         animate={animate}
         playing={playing}
         width={width}
+        practicePitch={practice && mode === "licks" ? practicePitch : null}
       />
+      {mode === "boxes" && (
+        <Disclosure title="Как читать боксы">
+          {" "}
+          <p>
+            Полный гриф: открытые струны и 24 лада. На узком экране
+            прокручивайте его по горизонтали. Стандартный строй E–A–D–G–B–E.
+            Формы сдвигаются вместе с тоникой. Золотым выделена тоника. Номер
+            бокса — аппликатура, не ступень. Пальцы: один из вариантов, с
+            подготовкой указательного пальца на каждой струне.
+          </p>
+        </Disclosure>
+      )}
+      {mode === "licks" && practice && (
+        <LickPractice
+          key={`${lick.id}-${root}`}
+          notes={notes}
+          active={isActive}
+          onNote={(index, midi) => {
+            setBeat(notes.slice(0, index).reduce((sum, n) => sum + n.beats, 0));
+            setPracticePitch(midi);
+          }}
+        />
+      )}
       {mode === "licks" && (
         <>
           <h3>Табулатура · нажмите ноту для разбора</h3>
@@ -517,6 +579,8 @@ export function GuitarLab({
             width={width}
             onSelect={(b) => {
               stop();
+              setPractice(false);
+              setPracticePitch(null);
               setBeat(b);
             }}
           />
@@ -537,11 +601,14 @@ export function GuitarLab({
               Сохранить текстовый разбор в блокнот
             </button>
           )}
-          <p>
-            Пунктир — следующая позиция. Сплошная стрелка — приём. Кружок
-            обозначает звучащую позицию, не один и тот же палец. Звук — учебная
-            имитация на локальных сэмплах.
-          </p>
+          <Disclosure title="Обозначения и приёмы">
+            {" "}
+            <p>
+              Пунктир — следующая позиция. Сплошная стрелка — приём. Кружок
+              обозначает звучащую позицию, не один и тот же палец. Звук —
+              учебная имитация на локальных сэмплах.
+            </p>
+          </Disclosure>
         </>
       )}
     </div>

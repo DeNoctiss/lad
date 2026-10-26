@@ -1,11 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
 async function choose(page: Page, name: string) {
-  const toggle = page.locator(".sf-picker-toggle");
   if (
-    (await toggle.isVisible()) &&
-    (await toggle.getAttribute("aria-expanded")) === "false"
+    !(await page
+      .locator(".sf-exercise-picker")
+      .evaluate((el) => (el as HTMLDetailsElement).open))
   )
-    await toggle.click();
+    await page.locator(".sf-exercise-picker > summary").click();
   await page
     .getByRole("navigation", { name: "Виды упражнений" })
     .getByRole("button", { name: new RegExp("^" + name) })
@@ -111,6 +111,7 @@ test("dictations support ordered input, two bars and rests", async ({
   for (let i = 0; i < 4; i++) await quarter.click();
   await page.getByRole("button", { name: "Проверить ответ" }).click();
   await expect(page.getByText("Верно!", { exact: true })).toBeVisible();
+  await page.getByText(/^Параметры · уровень/).click();
   await page
     .getByRole("group", { name: "Сложность" })
     .getByRole("button", { name: "3 · Вызов" })
@@ -263,6 +264,7 @@ test("saved and imported progress remains compatible and malformed data is prote
     localStorage.setItem("lad-solfege-v1", "original-corrupt"),
   );
   await page.reload();
+  await page.getByRole("button", { name: "Практика", exact: true }).click();
   await page
     .getByRole("button", { name: "Показать ответ и разобрать" })
     .click();
@@ -276,7 +278,7 @@ test("intonation keeps octave controls and stops the microphone on departure", a
 }) => {
   await context.grantPermissions(["microphone"]);
   await page.addScriptTag({
-    content: `window.__tracks=[];const old=navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);navigator.mediaDevices.getUserMedia=async(...a)=>{const s=await old(...a);window.__tracks.push(...s.getTracks());return s;};`,
+    content: `window.__tracks=[];navigator.mediaDevices.getUserMedia=async()=>{const c=new AudioContext();await c.resume();const d=c.createMediaStreamDestination();const o=c.createOscillator();const g=c.createGain();g.gain.value=.1;o.connect(g).connect(d);o.start();window.__tracks.push(...d.stream.getTracks());return d.stream;};`,
   });
   await page.getByRole("button", { name: "Интонация", exact: true }).click();
   await expect(page.locator(".sf-pitch-display > strong")).toHaveText("C3");

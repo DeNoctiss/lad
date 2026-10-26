@@ -20,7 +20,9 @@ export function ExercisePanel({
   play,
   stop,
   record,
+  audioState = "idle",
 }: {
+  audioState?: string;
   kind: ExerciseKind;
   level: number;
   mode: "learn" | "practice";
@@ -83,11 +85,17 @@ export function ExercisePanel({
       </div>
       <h2>{q.prompt}</h2>
       {q.staff && <Staff notes={q.staff} />}
-      {mode === "learn" && <div className="sf-callout">{q.hint}</div>}
+      {mode === "learn" && (
+        <details className="sf-callout">
+          <summary>Подсказка к заданию</summary>
+          <p>{q.hint}</p>
+        </details>
+      )}
       <div className="sf-row">
         {q.notes.length > 0 && (
           <button
             className="sf-primary"
+            disabled={audioState === "loading"}
             onClick={async () => {
               const token = ++request.current;
               const started = await play(
@@ -98,7 +106,22 @@ export function ExercisePanel({
               if (token === request.current && started) setHeard(true);
             }}
           >
-            ▶ {heard ? "Послушать ещё раз" : "Слушать задание"}
+            ▶{" "}
+            {audioState === "loading"
+              ? "Загружаю звук…"
+              : heard
+                ? "Послушать ещё раз"
+                : "Слушать задание"}
+          </button>
+        )}
+        {(audioState === "playing" || audioState === "loading") && (
+          <button
+            onClick={() => {
+              request.current++;
+              stop();
+            }}
+          >
+            Остановить звук
           </button>
         )}
         {q.tonic !== undefined && (

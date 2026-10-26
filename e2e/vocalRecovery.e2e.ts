@@ -7,6 +7,7 @@ const stored = (page: Page) =>
 const standalone = async (page: Page) => {
   await page.goto("/#vocal");
   await expect(page.locator(".vocal-studio")).toBeVisible();
+  await page.locator(".vocal-settings-panel > summary").click();
 };
 function wav(hz: number) {
   const sr = 22050,

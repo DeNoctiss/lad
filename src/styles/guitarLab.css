@@ -184,5 +184,28 @@
 [data-theme="dark"] .gl-lab button[aria-pressed="true"] {
   background: #306d70;
 }
-.gl-duration{display:flex;gap:6px;align-items:center;font-size:14px;margin-top:8px}.gl-duration select{padding:4px 8px;font-size:14px}.gl-chords .active select{color:var(--ink);background:var(--surface)}
-.gl-nut{stroke:#607b73;stroke-width:5}.gl-full-neck{scrollbar-gutter:stable}.fretboard-page [hidden]{display:none!important}
+.gl-duration {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 14px;
+  margin-top: 8px;
+}
+.gl-duration select {
+  padding: 4px 8px;
+  font-size: 14px;
+}
+.gl-chords .active select {
+  color: var(--ink);
+  background: var(--surface);
+}
+.gl-nut {
+  stroke: #607b73;
+  stroke-width: 5;
+}
+.gl-full-neck {
+  scrollbar-gutter: stable;
+}
+.fretboard-page [hidden] {
+  display: none !important;
+}

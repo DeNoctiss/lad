@@ -1,3 +1,5 @@
+import { Disclosure } from "../components/ui/Disclosure";
+import { usePreference } from "../lib/usePreference";
 import { useEffect, useRef, useState } from "react";
 import { CircleDot, Ear, Mic, TrendingUp, Square } from "lucide-react";
 import { SolfegeAudio } from "../lib/solfege/audio";
@@ -38,12 +40,26 @@ export function SolfegePage({
   initialKind?: string;
   navigate: (route: string) => void;
 }) {
-  const [tab, setTab] = useState<Tab>("practice"),
-    [kind, setKind] = useState<ExerciseKind>(
+  const [tab, setTab] = usePreference<Tab>("solfege-tab", "practice", [
+      "practice",
+      "circle",
+      "sing",
+      "progress",
+    ]),
+    [kind, setKind] = usePreference<ExerciseKind>(
+      "solfege-kind",
       KINDS.find((k) => k.id === initialKind)?.id ?? "intervals",
+      KINDS.map((k) => k.id),
     ),
-    [level, setLevel] = useState(1),
+    [level, setLevel] = usePreference<number>("solfege-level", 1, [1, 2, 3]),
     [mode, setMode] = useState<"learn" | "practice">("learn");
+  useEffect(() => {
+    const next = KINDS.find((k) => k.id === initialKind);
+    if (next) {
+      setKind(next.id);
+      setTab("practice");
+    }
+  }, [initialKind]);
   const [loaded] = useState(readProgress),
     [progress, setProgress] = useState(loaded.value),
     [blocked, setBlocked] = useState(!!loaded.error);
@@ -185,32 +201,37 @@ export function SolfegePage({
           </button>
         ))}
       </nav>
-      <div className="sf-audio-bar">
-        <label>
-          Темп, BPM{" "}
-          <input
-            aria-label="Темп сольфеджио"
-            type="number"
-            min="40"
-            max="160"
-            value={bpm}
-            onChange={(e) => setBpm(e.target.value)}
-            onBlur={() =>
-              setBpm(String(Math.max(40, Math.min(160, Number(bpm) || 80))))
-            }
-          />
-        </label>
-        <button onClick={() => audio.stop()}>
-          <Square size={15} /> Остановить звук
-        </button>
-        <span className="sf-muted">
-          {audioState === "loading"
-            ? "Загружаем рояль…"
-            : audioState === "playing"
-              ? "Звучит рояль"
-              : "Рояль · тот же звук, что в табулатурах"}
-        </span>
-      </div>
+      {tab !== "practice" && (
+        <Disclosure title="Темп и звук">
+          {" "}
+          <div className="sf-audio-bar">
+            <label>
+              Темп, BPM{" "}
+              <input
+                aria-label="Темп сольфеджио"
+                type="number"
+                min="40"
+                max="160"
+                value={bpm}
+                onChange={(e) => setBpm(e.target.value)}
+                onBlur={() =>
+                  setBpm(String(Math.max(40, Math.min(160, Number(bpm) || 80))))
+                }
+              />
+            </label>
+            <button onClick={() => audio.stop()}>
+              <Square size={15} /> Остановить звук
+            </button>
+            <span className="sf-muted">
+              {audioState === "loading"
+                ? "Загружаем рояль…"
+                : audioState === "playing"
+                  ? "Звучит рояль"
+                  : "Рояль · тот же звук, что в табулатурах"}
+            </span>
+          </div>
+        </Disclosure>
+      )}
       {error && (
         <div role="alert" className="sf-error">
           {error}
@@ -219,16 +240,14 @@ export function SolfegePage({
       {notice && <p role="status">{notice}</p>}
       {tab === "practice" && (
         <div className="sf-practice-layout">
-          <aside className="sf-exercise-picker">
-            <button
-              className="sf-picker-toggle"
-              aria-expanded={pickerOpen}
-              aria-controls="sf-kind-list"
-              onClick={() => setPickerOpen((v) => !v)}
-            >
-              {KINDS.find((k) => k.id === kind)?.title} · Сменить{" "}
-              {pickerOpen ? "▴" : "▾"}
-            </button>
+          <details
+            className="sf-exercise-picker workspace-disclosure"
+            open={pickerOpen}
+            onToggle={(e) => setPickerOpen(e.currentTarget.open)}
+          >
+            <summary>
+              {KINDS.find((k) => k.id === kind)?.title} · Сменить упражнение
+            </summary>
             <h2>Что тренируем</h2>
             <p className="sf-muted">
               14 видов · новые задания при каждом повторе
@@ -255,8 +274,8 @@ export function SolfegePage({
                 </section>
               ))}
             </nav>
-          </aside>
-          <div className="sf-practice-main">
+          </details>
+          <Disclosure title={`Параметры · уровень ${level} · ${bpm || 80} BPM`}>
             <div className="sf-session-settings">
               <div>
                 <span className="sf-muted">Сложность</span>
@@ -290,8 +309,39 @@ export function SolfegePage({
                 Подсказки
               </label>
             </div>
+            <div className="sf-audio-bar">
+              <label>
+                Темп, BPM{" "}
+                <input
+                  aria-label="Темп сольфеджио"
+                  type="number"
+                  min="40"
+                  max="160"
+                  value={bpm}
+                  onChange={(e) => setBpm(e.target.value)}
+                  onBlur={() =>
+                    setBpm(
+                      String(Math.max(40, Math.min(160, Number(bpm) || 80))),
+                    )
+                  }
+                />
+              </label>
+              <button onClick={() => audio.stop()}>
+                <Square size={15} /> Остановить звук
+              </button>
+              <span className="sf-muted">
+                {audioState === "loading"
+                  ? "Загружаем рояль…"
+                  : audioState === "playing"
+                    ? "Звучит рояль"
+                    : "Рояль · тот же звук, что в табулатурах"}
+              </span>
+            </div>
+          </Disclosure>
+          <div className="sf-practice-main">
             <ExercisePanel
               key={`${kind}-${level}`}
+              audioState={audioState}
               kind={kind}
               level={level}
               mode={mode}

@@ -8,9 +8,7 @@ export function Hero({ onNewSong }: { onNewSong: () => void }) {
           <span />
           ВАШ ЛИЧНЫЙ ПЕСЕННИК
         </span>
-        <h1>
-          Ваша музыка. <em>В одном месте.</em>
-        </h1>
+        <h1>Библиотека музыки</h1>
         <p>
           Сохраняйте песни, записывайте партии и возвращайтесь к любимым
           мелодиям.
@@ -44,7 +42,7 @@ export function Hero({ onNewSong }: { onNewSong: () => void }) {
       </div>
       <button className="btn btn-primary" onClick={onNewSong}>
         <Plus size={18} />
-        Записать новую песню
+        Добавить песню
       </button>
     </section>
   );

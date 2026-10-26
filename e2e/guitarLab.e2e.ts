@@ -5,6 +5,15 @@ test("all techniques load local samples, transpose, pause and save", async ({
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/#fretboard");
+  if (!(await page.locator(".gl-lab > details").first().getAttribute("open"))) {
+    if (
+      !(await page
+        .locator(".gl-lab > details")
+        .first()
+        .evaluate((el) => (el as HTMLDetailsElement).open))
+    )
+      await page.locator(".gl-lab > details > summary").first().click();
+  }
   await page.getByLabel("Тоника", { exact: true }).selectOption("11");
   await page
     .getByRole("button", { name: "Лики и движения", exact: true })
@@ -34,10 +43,14 @@ test("all techniques load local samples, transpose, pause and save", async ({
     )
     .toBe(true);
   await page.getByRole("button", { name: "Прогрессии", exact: true }).click();
+  await page.getByText(/^Выбрать прогрессию ·/).click();
   await expect(page.locator(".gl-catalog button")).toHaveCount(21);
   await page.getByRole("button", { name: "Блюз", exact: true }).click();
   await page.locator(".gl-catalog button").click();
   await expect(page.locator(".gl-chords>span")).toHaveCount(12);
+  await page
+    .getByRole("button", { name: "Длительности аккордов", exact: true })
+    .click();
   await page
     .getByLabel("Длительность аккорда 1", { exact: true })
     .selectOption("2");
@@ -74,6 +87,15 @@ test("key matches sorted by shown percent with top5 and expand20", async ({
   page,
 }) => {
   await page.goto("/#fretboard");
+  if (!(await page.locator(".gl-lab > details").first().getAttribute("open"))) {
+    if (
+      !(await page
+        .locator(".gl-lab > details")
+        .first()
+        .evaluate((el) => (el as HTMLDetailsElement).open))
+    )
+      await page.locator(".gl-lab > details > summary").first().click();
+  }
   await page
     .getByRole("tab", { name: "Определитель тональности", exact: true })
     .click();
@@ -98,6 +120,17 @@ test("practice fits desktop and phone, light and dark", async ({ page }) => {
         theme,
       );
       await page.goto("/#fretboard");
+      if (
+        !(await page.locator(".gl-lab > details").first().getAttribute("open"))
+      ) {
+        if (
+          !(await page
+            .locator(".gl-lab > details")
+            .first()
+            .evaluate((el) => (el as HTMLDetailsElement).open))
+        )
+          await page.locator(".gl-lab > details > summary").first().click();
+      }
       await page.reload();
       await page
         .getByRole("button", { name: "Лики и движения", exact: true })

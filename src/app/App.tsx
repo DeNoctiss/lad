@@ -347,7 +347,7 @@ export default function App() {
   );
 
   return (
-    <div className="app-shell">
+    <div className="app-shell workspace-refresh">
       {sidebarOpen && (
         <button
           className="sidebar-scrim"

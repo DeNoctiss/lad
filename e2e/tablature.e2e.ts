@@ -245,7 +245,9 @@ test("direct guitar entry supports chords, effects, dead notes, undo and persist
     })
     .click();
   await surface.press("5");
-  await dialog.getByRole("button", { name: "Ещё", exact: true }).click();
+  await dialog
+    .getByRole("button", { name: "Приёмы и параметры", exact: true })
+    .click();
   await dialog
     .getByRole("combobox", { name: "Связь со следующей нотой", exact: true })
     .selectOption("h");
@@ -316,7 +318,9 @@ test("drum grid enters empty cells directly and preserves simultaneous hits", as
       exact: true,
     })
     .click();
-  await dialog.getByRole("button", { name: "Ещё", exact: true }).click();
+  await dialog
+    .getByRole("button", { name: "Приёмы и параметры", exact: true })
+    .click();
   await dialog
     .getByRole("button", { name: "Открытый хай-хэт", exact: true })
     .click();
@@ -350,7 +354,9 @@ test("duration dots and triplets, bar copying, wrapping rows and meter validatio
   const dialog = await newPart(page, "Размер и длительности");
   await dialog.getByRole("button", { name: "С точкой", exact: true }).click();
   await dialog.getByRole("button", { name: "Пауза", exact: true }).click();
-  await dialog.getByRole("button", { name: "Ещё", exact: true }).click();
+  await dialog
+    .getByRole("button", { name: "Приёмы и параметры", exact: true })
+    .click();
   await dialog.getByRole("button", { name: "Триоль", exact: true }).click();
   await expect(
     dialog.getByRole("button", { name: "С точкой", exact: true }),

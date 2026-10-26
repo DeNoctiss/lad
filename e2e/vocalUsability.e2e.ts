@@ -7,6 +7,7 @@ const draft = (page: Page) =>
 const open = async (page: Page) => {
   await page.goto("/#vocal");
   await expect(page.locator(".vocal-studio")).toBeVisible();
+  await page.locator(".vocal-settings-panel > summary").click();
 };
 const generatedMidi = (pitch = 69) => {
   const t = [0, 0x90, pitch, 100, 0x83, 0x60, 0x80, pitch, 0, 0, 0xff, 0x2f, 0];
@@ -188,7 +189,7 @@ for (const width of [1920, 1366, 1024, 390])
       .getByRole("tab", { name: "Вокальный тренажёр", exact: true })
       .click();
     await expect(page.locator(".vocal-studio")).toBeVisible();
-    for (const mode of ["Редактор", "Тренировка"]) {
+    for (const mode of ["Подготовить партию", "Тренироваться"]) {
       await page.getByRole("button", { name: mode, exact: true }).click();
       const outer = await page.locator(".song-layout-vocal").boundingBox(),
         inner = await page.locator(".song-sheet").boundingBox();

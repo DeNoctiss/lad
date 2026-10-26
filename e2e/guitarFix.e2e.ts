@@ -3,6 +3,15 @@ test("settings survive idle, notices, page tabs, navigation and reload", async (
   page,
 }) => {
   await page.goto("/#fretboard");
+  if (!(await page.locator(".gl-lab > details").first().getAttribute("open"))) {
+    if (
+      !(await page
+        .locator(".gl-lab > details")
+        .first()
+        .evaluate((el) => (el as HTMLDetailsElement).open))
+    )
+      await page.locator(".gl-lab > details > summary").first().click();
+  }
   await page.getByLabel("Тоника", { exact: true }).selectOption("11");
   await page.getByRole("button", { name: "Бокс 4", exact: true }).click();
   await page.getByLabel("Подписи", { exact: true }).selectOption("fingers");
@@ -27,6 +36,15 @@ test("settings survive idle, notices, page tabs, navigation and reload", async (
   );
   await page.goto("/#chords");
   await page.goto("/#fretboard");
+  if (!(await page.locator(".gl-lab > details").first().getAttribute("open"))) {
+    if (
+      !(await page
+        .locator(".gl-lab > details")
+        .first()
+        .evaluate((el) => (el as HTMLDetailsElement).open))
+    )
+      await page.locator(".gl-lab > details > summary").first().click();
+  }
   await expect(page.getByLabel("Тоника", { exact: true })).toHaveValue("11");
   await expect(page.getByLabel("Учебная фраза", { exact: true })).toHaveValue(
     "6",
@@ -41,6 +59,15 @@ test("full neck has frets zero through 24; all-notes fingers are numeric", async
   page,
 }) => {
   await page.goto("/#fretboard");
+  if (!(await page.locator(".gl-lab > details").first().getAttribute("open"))) {
+    if (
+      !(await page
+        .locator(".gl-lab > details")
+        .first()
+        .evaluate((el) => (el as HTMLDetailsElement).open))
+    )
+      await page.locator(".gl-lab > details > summary").first().click();
+  }
   await page.getByRole("button", { name: "Весь гриф", exact: true }).click();
   await page.getByLabel("Подписи", { exact: true }).selectOption("fingers");
   const neck = page.getByRole("img", {
@@ -67,6 +94,15 @@ test("finished playback holds last note and hidden tab pauses without changing c
   page,
 }) => {
   await page.goto("/#fretboard");
+  if (!(await page.locator(".gl-lab > details").first().getAttribute("open"))) {
+    if (
+      !(await page
+        .locator(".gl-lab > details")
+        .first()
+        .evaluate((el) => (el as HTMLDetailsElement).open))
+    )
+      await page.locator(".gl-lab > details > summary").first().click();
+  }
   await page
     .getByRole("button", { name: "Лики и движения", exact: true })
     .click();

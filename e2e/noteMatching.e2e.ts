@@ -53,11 +53,13 @@ test("all selected notes are required in both candidate lists", async ({
           name: new RegExp(`^Струна 1, лад ${fret}, нота `),
         })
         .click();
-    if(prefix === "chord") {
+    if (prefix === "chord") {
       await expect(items).toHaveCount(0);
-      await expect(panel.locator(".fretboard-empty")).toContainText("В каталоге нет");
+      await expect(panel.locator(".fretboard-empty")).toContainText(
+        "В каталоге нет",
+      );
     } else {
-      for(const item of await items.all()) {
+      for (const item of await items.all()) {
         await expect(item.locator(".note-chip-match")).toHaveCount(12);
         await expect(item).toContainText("100% (12/12)");
       }

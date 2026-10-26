@@ -298,14 +298,34 @@ export function VocalControls({
           <button
             className="btn"
             disabled={locked}
-            onClick={() => session.transport.preview(57)}
+            onClick={() =>
+              void session.transport
+                .preview(57)
+                .catch((e: unknown) =>
+                  session.setError(
+                    e instanceof Error
+                      ? e.message
+                      : "Не удалось проиграть ноту",
+                  ),
+                )
+            }
           >
             A3 · 220 Гц
           </button>
           <button
             className="btn"
             disabled={locked}
-            onClick={() => session.transport.preview(69)}
+            onClick={() =>
+              void session.transport
+                .preview(69)
+                .catch((e: unknown) =>
+                  session.setError(
+                    e instanceof Error
+                      ? e.message
+                      : "Не удалось проиграть ноту",
+                  ),
+                )
+            }
           >
             A4 · 440 Гц
           </button>
